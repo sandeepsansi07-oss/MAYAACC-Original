@@ -1495,7 +1495,7 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
   function kindOf(){return groupKind($('mlgUnder')?.value||'');}
   function isParty(){return kindOf()==='party';}
   function syncPartySections(){applyLedgerConfig();}
-  function applyLedgerConfig(){const c=getFormConfig(),k=kindOf(),party=k==='party',root=$('mayaacc-ledger-overlay');if(!root)return;const map={nickname:c.nickname,address:c.address,partyContact:c.partyContact,aadhaar:c.aadhaar,tax:c.tax,bank:c.bank,credit:c.credit,whatsapp:c.whatsapp,notes:c.notes};Object.entries(map).forEach(([key,on])=>{root.querySelectorAll('[data-config="'+key+'"]').forEach(e=>{e.style.display=on?'':'none'})});root.querySelectorAll('[data-party-section]').forEach(e=>{const sec=e.dataset.partySection;let show=false;if(party)show=sec==='contact'?true:sec==='address'?c.address:sec==='tax'?c.tax:sec==='bank'?c.bank:sec==='credit'?c.credit:true;else if(k==='bank')show=sec==='bank';e.style.display=show?'block':'none';if(k==='bank'&&sec==='bank')e.querySelectorAll('[data-config="bank"]').forEach(f=>f.style.display='');});const g=root.querySelector('[data-kind-section="gst"]');if(g){g.style.display=k==='gst'?'block':'none';const yes=$('mlgGstApplicable')&&$('mlgGstApplicable').value==='yes';g.querySelectorAll('.mlg-gst-detail').forEach(e=>e.style.display=yes?'':'none');}root.querySelectorAll('[data-config-section="notes"]').forEach(e=>e.style.display=c.notes?'':'none');if($('mlgAadhaar'))$('mlgAadhaar').parentElement.style.display=(party&&c.aadhaar)?'':'none';if($('mlgStatus'))$('mlgStatus').textContent='Changes are applied immediately to this Ledger screen.';}
+  function applyLedgerConfig(){const c=getFormConfig(),k=kindOf(),party=k==='party',root=$('mayaacc-ledger-overlay');if(!root)return;const map={nickname:c.nickname,address:c.address,partyContact:c.partyContact,aadhaar:c.aadhaar,tax:c.tax,bank:c.bank,credit:c.credit,whatsapp:c.whatsapp,notes:c.notes};Object.entries(map).forEach(([key,on])=>{root.querySelectorAll('[data-config="'+key+'"]').forEach(e=>{e.style.display=on?'':'none'})});root.querySelectorAll('[data-party-section]').forEach(e=>{const sec=e.dataset.partySection;let show=false;if(party)show=sec==='contact'?true:sec==='address'?c.address:sec==='tax'?c.tax:sec==='bank'?c.bank:sec==='credit'?c.credit:true;else if(k==='bank')show=sec==='bank';e.style.display=show?'block':'none';if(k==='bank'&&sec==='bank')e.querySelectorAll('[data-config="bank"]').forEach(f=>f.style.display='');});const g=root.querySelector('[data-kind-section="gst"]');if(g){g.style.display=k==='gst'?'block':'none';const yes=$('mlgGstApplicable')&&$('mlgGstApplicable').value==='yes';g.querySelectorAll('.mlg-gst-detail').forEach(e=>e.style.display=yes?'':'none');}root.querySelectorAll('[data-config-section="notes"]').forEach(e=>e.style.display=c.notes?'':'none');if($('mlgAadhaar'))$('mlgAadhaar').parentElement.style.display=(party&&c.aadhaar)?'':'none';if($('mlgcStatus'))$('mlgcStatus').textContent='Changes are applied immediately to this Ledger screen.';}
   function syncCfgChecks(){const c=getConfig();['nickname','address','partyContact','aadhaar','tax','bank','credit','whatsapp','notes','requireUnder','confirmSave','printEmpty','fullAadhaar'].forEach(k=>{const el=document.getElementById('mlgc'+k.charAt(0).toUpperCase()+k.slice(1));if(el)el.checked=!!c[k]})}
   function getFormConfig(){const c=getConfig();['nickname','address','partyContact','aadhaar','tax','bank','credit','whatsapp','notes','requireUnder','confirmSave','printEmpty','fullAadhaar'].forEach(k=>{const el=document.getElementById('mlgc'+k.charAt(0).toUpperCase()+k.slice(1));if(el)c[k]=el.checked});return c;}
   function populateLists(){if($('mlgState')){$('mlgState').innerHTML='<option value="">Select State / UT</option>'+['Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat','Haryana','Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh','Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab','Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh','Uttarakhand','West Bengal','Andaman and Nicobar Islands','Chandigarh','Dadra and Nagar Haveli and Daman and Diu','Delhi','Jammu and Kashmir','Ladakh','Lakshadweep','Puducherry'].map(x=>'<option>'+esc(x)+'</option>').join('')}}
@@ -2342,7 +2342,7 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
     'mayaacc-unit-overlay':'#muName,#muAlias,#muSymbol,#muFormal,#muDecimals,#muType,#muFactor,#muBaseUnit',
     'mayaacc-godown-overlay':'#mgdName,#mgdAlias,#mgdUnder,#mgdAddress,#mgdCity,#mgdState,#mgdCountry,#mgdPin,#mgdContact,#mgdPhone,#mgdEmail,#mgdCapacity,#mgdCapacityUnit,#mgdPrimary,#mgdNegative,#mgdNotes',
     'mayaacc-cost-centre-overlay':'#mccName,#mccAlias,#mccUnder,#mccCategory,#mccNotes,#mccActive,#mccAllocate',
-    'mayaacc-voucher-type-overlay':'#mvtName,#mvtAlias,#mvtCategory,#mvtBase,#mvtNumberingEnabled,#mvtNumbering,#mvtStartNo,#mvtPrefix,#mvtSeparator,#mvtPadding,#mvtYearPosition,#mvtAnnualReset,#mvtDateMode,#mvtPrintTitle,#mvtNarration,#mvtParty,#mvtInventory,#mvtActive,#mvtNotes',
+    'mayaacc-voucher-type-overlay':'#mvtName,#mvtAlias,#mvtCategory,#mvtBase,#mvtNumberingEnabled,#mvtNumbering,#mvtStartNo,#mvtPrefix,#mvtSuffix,#mvtSeparator,#mvtPadding,#mvtYearPosition,#mvtAnnualReset,#mvtDateMode,#mvtPrintTitle,#mvtNarration,#mvtParty,#mvtInventory,#mvtActive,#mvtNotes',
     'mayaacc-tax-gst-overlay':'#mtgName,#mtgAlias,#mtgNature,#mtgRate,#mtgBase,#mtgRegistration,#mtgRcm,#mtgRound,#mtgActive,#mtgPrint,#mtgNotes,#mtgInputCredit,#mtgShowInvoice,#mtgAutoCalc,#mtgConfirmSave'
   };
   function activeOverlay(){for(const id of Object.keys(fieldGroups))if(shown(id))return id;return null;}
@@ -3985,6 +3985,7 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
           <div class="mvt-field mvt-numbering-field"><label for="mvtNumbering">Numbering Method</label><select id="mvtNumbering"><option value="Automatic">Automatic</option><option value="Manual">Manual</option><option value="Automatic with Override">Automatic with Override</option></select></div>
           <div class="mvt-field mvt-numbering-field"><label for="mvtStartNo">Starting Serial No.</label><input id="mvtStartNo" type="number" min="1" value="1"></div>
           <div class="mvt-field mvt-numbering-field"><label for="mvtPrefix">Prefix</label><input id="mvtPrefix" maxlength="20" placeholder="e.g. MB/"></div>
+          <div class="mvt-field mvt-numbering-field"><label for="mvtSuffix">Suffix</label><input id="mvtSuffix" maxlength="20" placeholder="e.g. /A"></div>
           <div class="mvt-field mvt-numbering-field"><label for="mvtSeparator">Separator</label><input id="mvtSeparator" maxlength="3" value="/" placeholder="/"></div>
           <div class="mvt-field mvt-numbering-field"><label for="mvtPadding">Serial Digits</label><select id="mvtPadding"><option value="1">1</option><option value="2" selected>2 — 01</option><option value="3">3 — 001</option><option value="4">4 — 0001</option><option value="5">5 — 00001</option><option value="6">6 — 000001</option></select></div>
           <div class="mvt-field mvt-numbering-field"><label for="mvtYearPosition">Financial Year</label><select id="mvtYearPosition"><option value="suffix">After serial — MB/01/2026-27</option><option value="prefix">Before serial — 2026-27/MB/01</option><option value="none">Do not include FY</option></select></div>
@@ -4043,11 +4044,11 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
   function getCfg(){try{return {...defaults,...JSON.parse(localStorage.getItem(cfgBase+companyId())||'{}')}}catch{return {...defaults}}}
   function saveCfg(v){localStorage.setItem(cfgBase+companyId(),JSON.stringify(v))}
   function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-  function capture(){return{name:$('mvtName').value.trim(),alias:$('mvtAlias').value.trim(),category:$('mvtCategory').value,base:$('mvtBase').value,numberingEnabled:$('mvtNumberingEnabled').value,numbering:$('mvtNumbering').value,startNo:Math.max(1,Number($('mvtStartNo').value)||1),dateMode:$('mvtDateMode').value,prefix:$('mvtPrefix').value.trim(),separator:$('mvtSeparator').value,padding:Number($('mvtPadding').value)||2,yearPosition:$('mvtYearPosition').value,annualReset:$('mvtAnnualReset').value,printTitle:$('mvtPrintTitle').value.trim(),narration:$('mvtNarration').value,party:$('mvtParty').value,inventory:$('mvtInventory').value,active:$('mvtActive').value,notes:$('mvtNotes').value.trim()}}
-  function fill(o){$('mvtName').value=o?.name||'';$('mvtAlias').value=o?.alias||'';$('mvtCategory').value=o?.category||'Accounting';$('mvtBase').value=o?.base||'None';$('mvtNumberingEnabled').value=o?.numberingEnabled||'Yes';$('mvtNumbering').value=o?.numbering||'Automatic';$('mvtStartNo').value=o?.startNo||1;$('mvtDateMode').value=o?.dateMode||'Current FY';$('mvtPrefix').value=o?.prefix||'';$('mvtSeparator').value=o?.separator??'/';$('mvtPadding').value=o?.padding||2;$('mvtYearPosition').value=o?.yearPosition||'suffix';$('mvtAnnualReset').value=o?.annualReset||'Yes';$('mvtPrintTitle').value=o?.printTitle||'';$('mvtNarration').value=o?.narration||'Optional';$('mvtParty').value=o?.party||'Allowed';$('mvtInventory').value=o?.inventory||'Not Required';$('mvtActive').value=o?.active||'Active';$('mvtNotes').value=o?.notes||'';applyNumberingVisibility();updateSummary()}
+  function capture(){return{name:$('mvtName').value.trim(),alias:$('mvtAlias').value.trim(),category:$('mvtCategory').value,base:$('mvtBase').value,numberingEnabled:$('mvtNumberingEnabled').value,numbering:$('mvtNumbering').value,startNo:Math.max(1,Number($('mvtStartNo').value)||1),dateMode:$('mvtDateMode').value,prefix:$('mvtPrefix').value.trim(),suffix:$('mvtSuffix').value.trim(),separator:$('mvtSeparator').value,padding:Number($('mvtPadding').value)||2,yearPosition:$('mvtYearPosition').value,annualReset:$('mvtAnnualReset').value,printTitle:$('mvtPrintTitle').value.trim(),narration:$('mvtNarration').value,party:$('mvtParty').value,inventory:$('mvtInventory').value,active:$('mvtActive').value,notes:$('mvtNotes').value.trim()}}
+  function fill(o){$('mvtName').value=o?.name||'';$('mvtAlias').value=o?.alias||'';$('mvtCategory').value=o?.category||'Accounting';$('mvtBase').value=o?.base||'None';$('mvtNumberingEnabled').value=o?.numberingEnabled||'Yes';$('mvtNumbering').value=o?.numbering||'Automatic';$('mvtStartNo').value=o?.startNo||1;$('mvtDateMode').value=o?.dateMode||'Current FY';$('mvtPrefix').value=o?.prefix||'';$('mvtSuffix').value=o?.suffix||'';$('mvtSeparator').value=o?.separator??'/';$('mvtPadding').value=o?.padding||2;$('mvtYearPosition').value=o?.yearPosition||'suffix';$('mvtAnnualReset').value=o?.annualReset||'Yes';$('mvtPrintTitle').value=o?.printTitle||'';$('mvtNarration').value=o?.narration||'Optional';$('mvtParty').value=o?.party||'Allowed';$('mvtInventory').value=o?.inventory||'Not Required';$('mvtActive').value=o?.active||'Active';$('mvtNotes').value=o?.notes||'';applyNumberingVisibility();updateSummary()}
   function applyConfig(){const c=getCfg();const map=[['mvtAlias','alias'],['mvtBase','base'],['mvtNotes','notes']];map.forEach(([id,k])=>{const el=$(id)?.closest('.mvt-field');if(el)el.style.display=c[k]?'':'none'});applyNumberingVisibility();const ps=[$('mvtPrefix'),$('mvtSuffix')];ps.forEach(x=>{const f=x?.closest('.mvt-field');if(f)f.style.display=c.prefixSuffix?'':'none'})}
   function financialYear(){const c=typeof getCompanies==='function'?getCompanies().find(x=>x.id===companyId()):null;const s=c?.fyStart;let y=s?new Date(s+'T00:00:00').getFullYear():new Date().getFullYear();const now=new Date();if(!s&&now.getMonth()<3)y--;return String(y)+'-'+String((y+1)%100).padStart(2,'0')}
-  function formatExample(){const serial=String(Math.max(1,Number($('mvtStartNo').value)||1)).padStart(Number($('mvtPadding').value)||2,'0'),pre=$('mvtPrefix').value||'',sep=$('mvtSeparator').value??'/',fy=financialYear(),pos=$('mvtYearPosition').value;if(pos==='suffix')return pre+serial+sep+fy;if(pos==='prefix')return fy+sep+pre+serial;return pre+serial}
+  function formatExample(){const serial=String(Math.max(1,Number($('mvtStartNo').value)||1)).padStart(Number($('mvtPadding').value)||2,'0'),pre=$('mvtPrefix').value||'',suf=$('mvtSuffix').value||'',sep=$('mvtSeparator').value??'/',fy=financialYear(),pos=$('mvtYearPosition').value;if(pos==='suffix')return pre+serial+sep+fy+suf;if(pos==='prefix')return fy+sep+pre+serial+suf;return pre+serial+suf}
   function applyNumberingVisibility(){const on=$('mvtNumberingEnabled')?.value==='Yes';document.querySelectorAll('.mvt-numbering-field').forEach(el=>el.style.display=on?'':'none');if($('mvtFormatPreview'))$('mvtFormatPreview').textContent=on?formatExample():'Numbering not required';}
   function updateSummary(){const o=capture();$('mvtSummary').innerHTML='<div class="mvt-summary-row"><span>Name</span><strong>'+esc(o.name||'—')+'</strong></div><div class="mvt-summary-row"><span>Category</span><strong>'+esc(o.category)+'</strong></div><div class="mvt-summary-row"><span>Numbering</span><strong>'+esc(o.numbering)+' from '+esc(o.startNo)+'</strong></div><div class="mvt-summary-row"><span>Inventory</span><strong>'+esc(o.inventory)+'</strong></div><div class="mvt-summary-row"><span>Status</span><strong>'+esc(o.active)+'</strong></div>'}
   function clear(){fill({});dirty=false}
@@ -4065,7 +4066,7 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
   function open(){if(typeof closeCreateMaster==='function')closeCreateMaster();configClose();$('mayaacc-voucher-type-overlay').style.display='block';$('mayaacc-voucher-type-overlay').setAttribute('aria-hidden','false');$('mvtConfirm').style.display='none';clear();applyConfig();setTimeout(()=>$('mvtName').focus(),20)}
   function close(){configClose();$('mvtConfirm').style.display='none';$('mayaacc-voucher-type-overlay').style.display='none';$('mayaacc-voucher-type-overlay').setAttribute('aria-hidden','true');dirty=false;if(window.__mayaaccVoucherTypeReturnToCreate===true){window.__mayaaccVoucherTypeReturnToCreate=false;setTimeout(()=>window.openCreateMaster?.(),0)}}
   function key(e){if(!shown('mayaacc-voucher-type-overlay'))return;const k=String(e.key||'').toLowerCase(),tag=(e.target?.tagName||'').toLowerCase();if(shown('mayaacc-voucher-type-config')){if(e.key==='Escape'||e.key==='F12'){e.preventDefault();e.stopImmediatePropagation();configClose();return}if(e.ctrlKey&&!e.altKey&&!e.metaKey&&k==='s'){e.preventDefault();e.stopImmediatePropagation();saveConfig();return}if(e.key==='ArrowDown'||e.key==='ArrowUp'){const rs=configRows();if(!rs.length)return;e.preventDefault();e.stopImmediatePropagation();cfgIndex=(cfgIndex<0?(e.key==='ArrowDown'?0:rs.length-1):(cfgIndex+(e.key==='ArrowDown'?1:-1)+rs.length)%rs.length);paintConfig();return}if(e.key==='Enter'){const rs=configRows();if(!rs.length)return;e.preventDefault();e.stopImmediatePropagation();if(cfgIndex<0)cfgIndex=0;const el=rs[cfgIndex],cb=el.querySelector('input[type="checkbox"]');if(cb){cb.checked=!cb.checked;cb.dispatchEvent(new Event('change',{bubbles:true}))}else el.click();paintConfig();return}return}const conf=$('mvtConfirm');if(conf&&getComputedStyle(conf).display!=='none'){if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();conf.style.display='none';return}if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();commit();return}return}if(e.key==='F12'){e.preventDefault();e.stopImmediatePropagation();configOpen();return}if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();close();return}if(e.ctrlKey&&!e.altKey&&!e.metaKey&&k==='s'){e.preventDefault();e.stopImmediatePropagation();ask('save');return}if(e.key==='Enter'){const next={mvtName:'mvtAlias',mvtAlias:'mvtCategory',mvtCategory:'mvtBase',mvtBase:'mvtNumberingEnabled',mvtNumberingEnabled:'mvtNumbering',mvtNumbering:'mvtStartNo',mvtStartNo:'mvtPrefix',mvtPrefix:'mvtSeparator',mvtSeparator:'mvtPadding',mvtPadding:'mvtYearPosition',mvtYearPosition:'mvtAnnualReset',mvtAnnualReset:'mvtDateMode',mvtDateMode:'mvtPrintTitle',mvtPrintTitle:'mvtNarration',mvtNarration:'mvtParty',mvtParty:'mvtInventory',mvtInventory:'mvtActive',mvtActive:'mvtNotes'}[document.activeElement?.id];if(next&&$(next)&&$(next).closest('.mvt-field')?.style.display!=='none'){e.preventDefault();e.stopImmediatePropagation();$(next).focus();return}}}
-  document.addEventListener('input',e=>{if(e.target?.id?.startsWith('mvt')){dirty=true;updateSummary()}});document.addEventListener('change',e=>{if(e.target?.id?.startsWith('mvt')){dirty=true;if(['mvtNumberingEnabled','mvtPrefix','mvtSeparator','mvtPadding','mvtYearPosition','mvtAnnualReset','mvtStartNo'].includes(e.target.id))applyNumberingVisibility();updateSummary()}});document.addEventListener('mousedown',e=>{if(e.target===$('mayaacc-voucher-type-overlay'))close()});document.addEventListener('click',e=>{const row=e.target.closest('#mayaacc-voucher-type-config .mvtc-option,#mayaacc-voucher-type-config .mvtc-footer button');if(row&&shown('mayaacc-voucher-type-config')){const rs=configRows(),i=rs.indexOf(row);if(i>=0){cfgIndex=i;paintConfig()}}});document.addEventListener('keydown',key,true);
+  document.addEventListener('input',e=>{if(e.target?.id?.startsWith('mvt')){dirty=true;updateSummary()}});document.addEventListener('change',e=>{if(e.target?.id?.startsWith('mvt')){dirty=true;if(['mvtNumberingEnabled','mvtPrefix','mvtSuffix','mvtSeparator','mvtPadding','mvtYearPosition','mvtAnnualReset','mvtStartNo'].includes(e.target.id))applyNumberingVisibility();updateSummary()}});document.addEventListener('mousedown',e=>{if(e.target===$('mayaacc-voucher-type-overlay'))close()});document.addEventListener('click',e=>{const row=e.target.closest('#mayaacc-voucher-type-config .mvtc-option,#mayaacc-voucher-type-config .mvtc-footer button');if(row&&shown('mayaacc-voucher-type-config')){const rs=configRows(),i=rs.indexOf(row);if(i>=0){cfgIndex=i;paintConfig()}}});document.addEventListener('keydown',key,true);
   window.mayaOpenVoucherType=open;window.mayaCloseVoucherType=close;window.mayaSaveVoucherType=ask;window.mayaConfirmVoucherTypeSave=commit;window.mayaCloseVoucherTypeConfirm=()=>{$('mvtConfirm').style.display='none'};window.mayaOpenVoucherTypeConfig=configOpen;window.mayaCloseVoucherTypeConfig=configClose;window.mayaSaveVoucherTypeConfig=saveConfig;window.mayaResetVoucherTypeConfig=resetConfig;window.mayaVoucherTypeChangeCompany=changeCompany;window.mayaPrintVoucherType=printVoucherType;
   const old=window.createMasterAction;window.createMasterAction=function(name){if(name==='Voucher Type'){window.__mayaaccVoucherTypeReturnToCreate=true;open();return}return typeof old==='function'?old.apply(this,arguments):undefined};
 })();
@@ -5120,7 +5121,7 @@ body.maya-alter-stock-open #mayaacc-stock-overlay{z-index:110000!important}
     const list=read(VT_KEY(c),[]);let changed=false;
     STD_VT.forEach(sv=>{
       if(list.some(x=>x&&norm(x.name)===norm(sv.name)))return;
-      list.push({id:'STD-'+sv.name.replace(/\s+/g,'-'),name:sv.name,alias:sv.abbr,category:sv.category,base:'None',numberingEnabled:'Yes',numbering:'Automatic',startNo:1,prefix:'',separator:'/',padding:'1',yearPosition:'none',annualReset:'No',dateMode:'Current FY',printTitle:sv.name,narration:'Optional',party:'Allowed',inventory:sv.category==='Inventory'?'Optional':'Not Required',active:'Active',
+      list.push({id:'STD-'+sv.name.replace(/\s+/g,'-'),name:sv.name,alias:sv.abbr,category:sv.category,base:'None',numberingEnabled:'Yes',numbering:'Automatic',startNo:1,prefix:'',suffix:'',separator:'/',padding:'1',yearPosition:'none',annualReset:'No',dateMode:'Current FY',printTitle:sv.name,narration:'Optional',party:'Allowed',inventory:sv.category==='Inventory'?'Optional':'Not Required',active:'Active',
         notes:sv.impl?'Standard voucher type.':'Standard voucher type. Its entry screen is planned; the settings are kept for when it arrives.',permanent:true,system:true,implemented:sv.impl,createdAt:new Date().toISOString()});
       changed=true;
     });
@@ -5129,13 +5130,14 @@ body.maya-alter-stock-open #mayaacc-stock-overlay{z-index:110000!important}
     if(changed)write(VT_KEY(c),list);
     return list;
   }
-  const vtSettings=(c,type)=>Object.assign({numberingEnabled:'Yes',numbering:'Automatic',startNo:1,prefix:'',separator:'/',padding:'1',yearPosition:'none',annualReset:'No'},read(VT_KEY(c),[]).find(x=>x&&norm(x.name)===norm(type))||{});
+  const vtSettings=(c,type)=>Object.assign({numberingEnabled:'Yes',numbering:'Automatic',startNo:1,prefix:'',suffix:'',separator:'/',padding:'1',yearPosition:'none',annualReset:'No'},read(VT_KEY(c),[]).find(x=>x&&norm(x.name)===norm(type))||{});
   const fyLabel=d=>{const x=d?new Date(d+'T00:00:00'):new Date();const y=x.getMonth()<3?x.getFullYear()-1:x.getFullYear();return y+'-'+String((y+1)%100).padStart(2,'0');};
   /* serial taken from a voucher number by matching the company's own number format (a year suffix like 0001/2026-27 must not be read as the serial) */
   function serialFromNumber(c,type,number,date){
     number=String(number||'');if(!number)return 0;
     if(c&&type){
       const s=vtSettings(c,type),fy=fyLabel(date||''),sep=s.separator==null?'/':String(s.separator),esc=x=>String(x).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      if(s.suffix&&number.endsWith(String(s.suffix)))number=number.slice(0,number.length-String(s.suffix).length);
       const parts=[];if(s.yearPosition==='prefix')parts.push(esc(fy));if(s.prefix)parts.push(esc(s.prefix));parts.push('(\\d+)');if(s.yearPosition==='suffix')parts.push(esc(fy));
       let m=new RegExp('^'+parts.join(esc(sep))+'$').exec(number);
       if(!m&&s.yearPosition&&s.yearPosition!=='none'){const gen=[];if(s.yearPosition==='prefix')gen.push('\\d{4}-\\d{2}');if(s.prefix)gen.push(esc(s.prefix));gen.push('(\\d+)');if(s.yearPosition==='suffix')gen.push('\\d{4}-\\d{2}');m=new RegExp('^'+gen.join(esc(sep))+'$').exec(number);}
@@ -5150,7 +5152,9 @@ body.maya-alter-stock-open #mayaacc-stock-overlay{z-index:110000!important}
     if(s.prefix)parts.push(String(s.prefix));
     parts.push(String(serial).padStart(pad,'0'));
     if(s.yearPosition==='suffix')parts.push(fy);
-    return parts.join(s.separator==null?'/':String(s.separator));
+    var num=parts.join(s.separator==null?'/':String(s.separator));
+    if(s.suffix)num+=String(s.suffix);
+    return num;
   }
   function nextSerial(c,type,date){
     const s=vtSettings(c,type),key='mayaacc_vchno_'+c+'_'+type,start=Math.max(1,parseInt(s.startNo,10)||1);
@@ -6299,8 +6303,8 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
           <button class="mve-side-action" type="button" data-k="F7" data-t="Journal"><span>F7: Journal</span><span class="mve-side-key">F7</span></button>
           <button class="mve-side-action active" type="button" data-k="F8" data-t="Sales"><span>F8: Sales</span><span class="mve-side-key">F8</span></button>
           <button class="mve-side-action" type="button" data-k="F9" data-t="Purchase"><span>F9: Purchase</span><span class="mve-side-key">F9</span></button>
-          <button class="mve-side-action mve-side-hidden" type="button" data-k="CF8" data-t="Credit Note" tabindex="-1" aria-hidden="true"><span>Credit Note</span><span class="mve-side-key">Ctrl+F8</span></button>
-          <button class="mve-side-action mve-side-hidden" type="button" data-k="CF9" data-t="Debit Note" tabindex="-1" aria-hidden="true"><span>Debit Note</span><span class="mve-side-key">Ctrl+F9</span></button>
+          <button class="mve-side-action" type="button" data-k="CF8" data-t="Credit Note"><span>Credit Note</span><span class="mve-side-key">Ctrl+F8</span></button>
+          <button class="mve-side-action" type="button" data-k="CF9" data-t="Debit Note"><span>Debit Note</span><span class="mve-side-key">Ctrl+F9</span></button>
           <button class="mve-side-action" type="button" data-k="F10"><span>F10: Other Vouchers</span><span class="mve-side-key">F10</span></button>
           <button class="mve-side-action" type="button" data-k="AF7" id="mveSideSJ"><span>Stock Journal</span><span class="mve-side-key">Alt+F7</span></button>
           <div class="mve-side-sep"></div>
@@ -10920,6 +10924,10 @@ const MITEMS=[
  {k:'A',l:'Alter Company',f:()=>{const id=cid();if(!id||!company().id){alert('Please open a company first.');return}window.showCompanySetup(id)}},
  {k:'F',l:'Company Features',sc:'F11',f:()=>openFeatures()}
 ];
+/* m3 (audit #3): MITEMS lives in this script's scope, not the global one
+   (typeof MITEMS === 'undefined' from a later script), so expose the array
+   for the login snippet's wrapper below. */
+window.__mayaMITEMS=MITEMS;
 function menuCss(){
   if($('mcm-css'))return;const s=document.createElement('style');s.id='mcm-css';
   s.textContent='#mcm{position:fixed;z-index:2147482000;min-width:230px;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border:1px solid #c9d6ea;border-radius:12px;box-shadow:0 18px 50px rgba(15,25,50,.28);padding:6px;font:13px system-ui,Segoe UI,Arial,sans-serif;color:#1d2a44}'
@@ -13561,7 +13569,7 @@ function validate(rows){
   }else{
     const have=ledgerLookup(),books=company().booksStart||'',types=['Sales','Purchase','Receipt','Payment','Journal','Contra','Credit Note','Debit Note'],missing=new Set();
     rows.forEach(r=>{const o={r,st:'new',msg:[]},t=types.find(x=>norm(x)===norm(r.type));o.type=t;o.date=toIso(r.date);o.amt=r2(String(r.amt).replace(/,/g,''));
-      if(!t)o.st='err',o.msg.push('Voucher type "'+r.type+'" is not supported');
+      if(!t){o.st='err';o.msg.push(['Delivery Note','Receipt Note','Physical Stock','Sales Order','Purchase Order'].some(function(x){return norm(x)===norm(r.type);})?'Voucher type "'+r.type+'" needs item details, so it cannot be imported from this file — enter it from the voucher screen (F10).':norm(r.type)==='stock journal'?'Stock Journal needs item lines, so it cannot be imported from this file — enter it from the Stock Journal screen (Alt+F7).':'Voucher type "'+r.type+'" is not supported');}
       if(!o.date)o.st='err',o.msg.push('Date is not valid');else if(books&&o.date<books)o.st='err',o.msg.push('Date is before the books-beginning date ('+dmy(books)+')');
       if(!isNumStr(r.amt)||o.amt<=0)o.st='err',o.msg.push('Amount must be a positive number');
       if(!r.dr||!r.cr)o.st='err',o.msg.push('Both debit and credit ledgers are needed');else if(norm(r.dr)===norm(r.cr))o.st='err',o.msg.push('Debit and credit ledger are the same');
@@ -14089,7 +14097,7 @@ const SC=[
  {g:'Workspace (press the letter)',k:'C / A',d:'Create / Alter masters'},{k:'V',d:'Vouchers'},{k:'K',d:'Day Book'},{k:'O',d:'Chart of Accounts'},{k:'B',d:'Banking'},{k:'G',d:'Tax & GST'},{k:'T',d:'Trial Balance'},{k:'L',d:'Balance Sheet'},{k:'P',d:'Profit & Loss'},{k:'S',d:'Stock Summary'},{k:'R',d:'Ratio Analysis'},{k:'D',d:'Display More Reports'},{k:'H',d:'Dashboard (charts, ratios, alerts)'},{k:'N',d:'Sound Settings'},
  {g:'Top menus',k:'Y',d:'Data (backup, verify, split, repair)'},{k:'Z',d:'Exchange (e-Way Bill, GST, banking)'},{k:'I',d:'Import'},{k:'E',d:'Export'},{k:'M',d:'Share (e-mail, WhatsApp)'},
  {g:'Voucher entry',k:'F4 – F9',d:'Contra, Payment, Receipt, Journal, Sales, Purchase'},{k:'F10',d:'Other vouchers'},{k:'Ctrl+F8 / Ctrl+F9',d:'Credit Note / Debit Note'},{k:'Alt+F7',d:'Stock Journal'},{k:'F2',d:'Change the date'},{k:'Ctrl+A',d:'Accept the voucher'},{k:'Alt+C',d:'Create a ledger or item while entering'},{k:'Ctrl+H',d:'Change mode (Item / Accounting invoice)'},{k:'Ctrl+I',d:'Party details'},{k:'Alt+Q',d:'Related reports'},{k:'Ctrl+L / Ctrl+T',d:'Optional / Post-dated voucher'},{k:'Alt+D',d:'Delete the voucher'},{k:'Alt+X',d:'Cancel the voucher'},{k:'Ctrl+P',d:'Print the invoice'},{k:'Alt+W',d:'Send the bill on WhatsApp'},{k:'F12',d:'Configure the screen'},
- {g:'Reports',k:'↑ ↓ Enter',d:'Select and drill down'},{k:'Space',d:'Voucher details'},{k:'Ctrl+F or /',d:'Search in the report'},{k:'F2',d:'Change the period'},{k:'Ctrl+E',d:'Export (Excel, CSV, PDF)'},{k:'Ctrl+M',d:'Share the report by e-mail'},{k:'Ctrl+Alt+W',d:'Share by WhatsApp'},{k:'Esc',d:'Back to the previous screen'},
+ {g:'Reports',k:'↑ ↓ Enter',d:'Select and drill down'},{k:'Space',d:'Select / tick the highlighted entry'},{k:'Ctrl+F or /',d:'Search in the report'},{k:'F2',d:'Change the period'},{k:'Ctrl+E',d:'Export (Excel, CSV, PDF)'},{k:'Ctrl+M',d:'Share the report by e-mail'},{k:'Ctrl+Alt+W',d:'Share by WhatsApp'},{k:'Esc',d:'Back to the previous screen'},
  {g:'Menus and lists',k:'↑ ↓',d:'Move'},{k:'Enter',d:'Select the highlighted item'},{k:'Underlined letter',d:'Jump to that item'},{k:'← or Backspace',d:'Close a sub-menu'}
 ];
 
@@ -15949,25 +15957,36 @@ body.workspace-mode #dashboard .gateway-main{overflow-y:auto}
   }
 
   /* ---- F3 Company menu me "Password Security" item jodo ---- */
+  /* ---- m5 (audit #3): showAuth('login') guards must land on the first-run
+     setup screen when no users exist, not the deprecated login overlay
+     (reachable if storage is cleared mid-run) ---- */
+  function wrapShowAuth(){
+    if(typeof window.showAuth!=='function' || window.showAuth.__mayaSetupRoute) return;
+    var origShowAuth=window.showAuth;
+    var wrapped=function(mode){
+      if(mode==='login'){
+        try{ if(users().length===0){ buildSetupScreen(); showSetupScreen(); return; } }catch(e){}
+      }
+      return origShowAuth.apply(this, arguments);
+    };
+    wrapped.__mayaSetupRoute=true;
+    window.showAuth=wrapped;
+  }
   function addSecurityMenuItem(){
     if(typeof window.mayaCompanyMenu!=='function' || window.mayaCompanyMenu.__mayaSec) return;
     var origMenu=window.mayaCompanyMenu;
     var wrapped=function(){
-      var r=origMenu.apply(this, arguments);
       try{
-        var el=document.getElementById('mcm');
-        if(el && !el.querySelector('[data-maya-security]')){
-          var div=document.createElement('div');
-          div.setAttribute('data-maya-security','1');
-          div.innerHTML='<span><b>P</b>assword Security</span><kbd>'+(getSecurity().enabled?'ON':'OFF')+'</kbd>';
-          div.addEventListener('click', function(){
-            try{ window.mayaCompanyMenu(); }catch(e){}
-            setTimeout(openSecurityDialog, 30);
-          });
-          el.appendChild(div);
-        }
+        /* m3 (audit #3): register as a real MITEMS entry so arrows, P,
+           Enter and click all work through menuRender + menuRun. The old
+           appended div was wiped by menuRender on every arrow key and had
+           no data-i, so the P key never worked. */
+        var MI=window.__mayaMITEMS||null,sec=null;
+        if(MI){ for(var i=0;i<MI.length;i++){ if(MI[i].k==='P'&&MI[i].l==='Password Security'){ sec=MI[i]; break; } }
+        if(!sec){ sec={k:'P',l:'Password Security',f:function(){ setTimeout(openSecurityDialog,30); }}; MI.push(sec); } }
+        if(sec)sec.sc=getSecurity().enabled?'ON':'OFF';
       }catch(e){}
-      return r;
+      return origMenu.apply(this, arguments);
     };
     wrapped.__mayaSec=true;
     window.mayaCompanyMenu=wrapped;
@@ -16042,6 +16061,7 @@ body.workspace-mode #dashboard .gateway-main{overflow-y:auto}
     buildSetupScreen(); buildUnlockScreen(); buildSecurityDialog();
     wrapCompanyOpen();
     addSecurityMenuItem();
+    wrapShowAuth();
     /* Logout = lock + wapas Select Company par (login screen nahi) — aur wahin ruko: routeStartup single company ko wapas workspace me auto-open kar deta hai, isliye seedha Select Company dikhao. */
     var logoutAt=0;
     wrapOnce('logoutMaya', function(){ logoutAt=Date.now(); setTimeout(function(){ unlocked=false; ensureSession(); if(typeof window.showCompanySelect==='function') window.showCompanySelect(); }, 30); });
@@ -16863,7 +16883,27 @@ function doWa(){
   if(!v.party){ toast('This voucher has no party to send it to.'); return; }
   var L={}; try{ L=B().find(cid(),v.party)||{}; }catch(e){}
   var n=String(L.whatsapp||L.phone||'').replace(/\D/g,'').replace(/^0+/,'');
-  if(n.length<10){ toast('No mobile number is saved in the ledger of "'+v.party+'". Save it in the ledger first.'); return; }
+  if(n.length<10){
+    /* M3 (audit #3): no saved number -> same in-app number dialog as the
+       voucher screen (Fix 1), not a dead-end toast. waSendVoucher runs the
+       whole flow (dialog -> save to ledger -> PDF -> wa.me). */
+    if(typeof window.waSendVoucher==='function'){ window.waSendVoucher(cur.vid||v.id); return; }
+    if(typeof window.mayaAskWaNumber==='function'){
+      window.mayaAskWaNumber(v.party,function(num,saveIt){
+        if(!num)return;
+        var nn=String(num).replace(/\D/g,'').replace(/^0+/,'');
+        if(nn.length!==10){ toast('That is not a valid mobile number.'); return; }
+        if(saveIt){ try{ var key='mayaacc_ledgers_'+cid(); var arr=JSON.parse(localStorage.getItem(key)||'[]')||[]; var lg=null; arr.forEach(function(y){ if(String(y.name||'').toLowerCase()===String(v.party||'').toLowerCase()) lg=y; }); if(lg){ lg.whatsapp=nn; localStorage.setItem(key,JSON.stringify(arr)); } }catch(e){} }
+        doWaSend(nn);
+      });
+      return;
+    }
+    toast('No mobile number is saved in the ledger of "'+v.party+'". Save it in the ledger first.'); return;
+  }
+  doWaSend(n);
+}
+function doWaSend(n){
+  var v=cur.v; if(!v) return;
   if(n.length===10) n='91'+n;
   var co=companyOf().companyName||'us';
   var msg='Dear '+(v.party||'')+'\nPlease find '+v.type+' No. '+v.number+' dated '+dmy(v.date)+' for *₹ '+fmt(v.total||0)+'* from '+co+'.\nThank you.';
@@ -17068,7 +17108,7 @@ body.maya-topbar-on #mayaacc-tax-gst-overlay,
 body.maya-topbar-on #mayaacc-alter-group-form,
 body.maya-topbar-on #mcf-ov{top:var(--maya-topbar-h,48px)!important}
 body.maya-topbar-on #mayaacc-voucher-type-config{top:var(--maya-topbar-h,48px)!important;height:calc(100% - var(--maya-topbar-h,48px))!important}
-@media print{#maya-topbar{display:none!important}}
+@media print{#maya-topbar{display:none!important}body.maya-topbar-on #dashboard{padding-top:0!important}}
 /* --- per-screen Print buttons (fix 3) --- */
 .maya-print-btn{border:1px solid #b9c4d6;border-radius:8px;background:#fff;padding:7px 12px;font:700 12px system-ui,"Segoe UI",Arial,sans-serif;color:#22304d;cursor:pointer;white-space:nowrap}
 .maya-print-btn:hover{border-color:#2563eb;box-shadow:0 2px 8px rgba(37,99,235,.15)}
@@ -18499,6 +18539,7 @@ function closeUnhide(){var ov=$('mtlu-ov');if(ov)ov.classList.remove('on');}
 
 /* ---------- report footer line + summary block ---------- */
 var sel=new Set(),amtMap={},lastViewKey='',lastFooterKey='';
+var lastFooterDis={};
 function curView(){
   try{
     var st=window.MayaReportCtx&&window.MayaReportCtx.st;
@@ -18527,7 +18568,8 @@ function ensureBar(){
     var fl=document.createElement('div');fl.id='mtl-footline';fl.setAttribute('role','toolbar');fl.setAttribute('aria-label','Report actions');
     ov.appendChild(fl);
     fl.addEventListener('click',function(e){
-      var seg=e.target.closest('.mtl-fl-seg');if(!seg||seg.classList.contains('off'))return;
+      var seg=e.target.closest('.mtl-fl-seg');if(!seg)return;
+      if(seg.classList.contains('off')){footerOffToast(seg.dataset.act);return;}
       footerAction(seg.dataset.act);
     });
   }
@@ -18703,6 +18745,15 @@ function footerAction(act){
   else if(act==='restore')doRestoreLines();
   else if(act==='f12')doF12();
 }
+/* m8 (audit #3): a greyed footer action behaves the SAME from mouse and
+   keyboard — both show the same "not available" toast, never silent on
+   one side and a toast on the other. */
+function footerSegLabel(act){
+  try{var cur=curView2();var sgs=footerSegs(cur);for(var i=0;i<sgs.length;i++)if(sgs[i].act===act)return sgs[i].label;}catch(e){}
+  return act;
+}
+function footerOffToast(act){ toast(footerSegLabel(act)+' is not available on this screen right now.'); }
+function footerActOff(act){ return !!(lastFooterDis&&lastFooterDis[act]); }
 function doSpace(){
   var cur=curView2();if(!cur)return;
   if(SUMMARY_VIEWS.indexOf(cur.view)>=0){
@@ -18751,6 +18802,7 @@ function updateFooterLine(cur){
     dup:!hasV,insert:!hasV,delete:!hasV,cancelvch:!hasV,
     remove:!hasRows,restore:!hasRemoved
   };
+  lastFooterDis=dis;
   fl.querySelectorAll('.mtl-fl-seg').forEach(function(sg){
     var off=!!dis[sg.dataset.act];
     sg.classList.toggle('off',off);
@@ -19567,9 +19619,9 @@ window.addEventListener('keydown',function(e){
   var cur=curView2();if(!cur)return;
   if(!railDefs(cur))return;
   if(e.key==='F12'){e.preventDefault();e.stopImmediatePropagation();doF12();return;}
-  if(e.key==='q'||e.key==='Q'){e.preventDefault();e.stopImmediatePropagation();doCancel();return;}
-  if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();doSelect();return;}
-  if(e.key===' '){e.preventDefault();e.stopImmediatePropagation();doSpace();return;}
+  if((e.key==='q'||e.key==='Q')&&!e.ctrlKey&&!e.altKey&&!e.metaKey){e.preventDefault();e.stopImmediatePropagation();doCancel();return;} /* M2: Ctrl+Q / Alt+Q must not quit (Alt+Q is Related reports elsewhere) */
+  if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();if(footerActOff('select')){footerOffToast('select');return;}doSelect();return;}
+  if(e.key===' '){e.preventDefault();e.stopImmediatePropagation();if(footerActOff('space')){footerOffToast('space');return;}doSpace();return;}
 },true);
 
 /* F5 is claimed by the overlay for PL/BS format only; on every other
@@ -19632,9 +19684,13 @@ document.addEventListener('keydown',function(e){
   if(pickerOpen()&&e.key==='Escape'){closePicker();return;}
   if(!window.MayaReportCtx||!MayaReportCtx.isOpen||!MayaReportCtx.isOpen())return;
   var t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'))return;
+  /* M1 (audit #3): same button guard as the Q/Enter/Space/F12 handler —
+     a focused sidebar/filter button must not turn a letter key into a
+     voucher action (focusing Period + pressing D deleted a voucher). */
+  if(t&&(t.tagName==='BUTTON'||t.tagName==='A'))return;
   if(overlayBusy())return;
   if(e.key==='Delete'&&!e.ctrlKey&&!e.altKey&&!e.metaKey){
-    var cur=curView2();if(cur&&ACTION_VIEWS.indexOf(cur.view)>=0){e.preventDefault();doDelete();}
+    var cur=curView2();if(cur&&ACTION_VIEWS.indexOf(cur.view)>=0){e.preventDefault();if(footerActOff('delete'))footerOffToast('delete');else doDelete();}
     return;
   }
   if(e.ctrlKey||e.altKey||e.metaKey)return;
@@ -19649,13 +19705,9 @@ document.addEventListener('keydown',function(e){
     return;
   }
   if(ACTION_VIEWS.indexOf(cur2.view)<0)return;
-  if(k==='a'){e.preventDefault();doAdd();}
-  else if(k==='2'){e.preventDefault();doDuplicate();}
-  else if(k==='i'){e.preventDefault();doInsert();}
-  else if(k==='d'){e.preventDefault();doDelete();}
-  else if(k==='x'){e.preventDefault();doCancelVch();}
-  else if(k==='r'){e.preventDefault();doRemoveLine();}
-  else if(k==='u'){e.preventDefault();doRestoreLines();}
+  /* m8: letter keys consult the same disabled map as the footer line */
+  var keyAct={a:'add','2':'dup',i:'insert',d:'delete',x:'cancelvch',r:'remove',u:'restore'}[k];
+  if(keyAct){e.preventDefault();if(footerActOff(keyAct))footerOffToast(keyAct);else footerAction(keyAct);}
 });
 try{mtlAfterRender();}catch(e){}
 
