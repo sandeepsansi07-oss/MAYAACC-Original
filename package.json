@@ -18,7 +18,9 @@
       "deleteAppDataOnUninstall": false,
       "oneClick": false,
       "perMachine": false,
-      "shortcutName": "MAYAACC"
+      "shortcutName": "MAYAACC",
+      "installerIcon": "icon.ico",
+      "uninstallerIcon": "icon.ico"
     },
     "portable": {
       "artifactName": "MAYAACC-Setup-${version}.exe"
@@ -32,7 +34,8 @@
           ],
           "target": "nsis"
         }
-      ]
+      ],
+      "icon": "icon.ico"
     }
   },
   "description": "MAYAACC — Smart Accounting Software for Indian Businesses (Desktop for Windows PC). Data stays on this PC in Documents/MAYAACC-Data.",
