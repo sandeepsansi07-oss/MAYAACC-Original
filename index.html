@@ -4006,7 +4006,7 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
         <div class="mvt-summary" id="mvtSummary"></div>
         <div class="mvt-footer"><div class="mvt-savehint" onclick="mayaSaveVoucherType()">Save <u>Ctrl+S</u></div><div class="mvt-actions"><button type="button" onclick="mayaSaveVoucherType('new')">Save & New</button><button class="primary" type="button" onclick="mayaSaveVoucherType('save')">Save</button></div></div>
       </main>
-      <aside class="mvt-side"><h3>Actions</h3><button type="button" onclick="mayaVoucherTypeChangeCompany()">Change Company</button><button type="button" onclick="mayaOpenVoucherTypeConfig()">Configure F12</button></aside>
+      <aside class="mvt-side"><h3>Actions</h3><button type="button" onclick="mayaVoucherTypeChangeCompany()">Change Company</button><button type="button" onclick="mayaOpenVoucherTypeConfig()">Configure F12</button><button type="button" onclick="mayaVoucherConfigOpen()">Voucher Options</button></aside>
     </div>
     <div class="mvt-confirm" id="mvtConfirm"><div class="mvt-confirm-card"><h3>Save Voucher Type?</h3><p id="mvtConfirmText">Save this Voucher Type in the current company?</p><div class="mvt-confirm-actions"><button type="button" onclick="mayaCloseVoucherTypeConfirm()">Cancel</button><button class="primary" type="button" onclick="mayaConfirmVoucherTypeSave()">Save</button></div></div></div>
   </div>
@@ -4495,7 +4495,9 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
   function openPicker(){const d=$('alterLedgerPickerDialog');if(!d)return;if(typeof window.closeAlterMaster==='function')window.closeAlterMaster();d.style.display='flex';d.setAttribute('aria-hidden','false');pickerIndex=0;const q=$('alterLedgerPickerSearch');if(q){q.value='';renderPicker();setTimeout(()=>{q.focus();paintPicker()},0)}else renderPicker();}
   function closePicker(){const d=$('alterLedgerPickerDialog');if(!d)return;d.style.display='none';d.setAttribute('aria-hidden','true');}
   function filtered(){const q=($('alterLedgerPickerSearch')?.value||'').trim().toLowerCase();return ledgers().filter(x=>(String(x.name||'')+' '+String(x.nickname||'')+' '+String(x.under||'')).toLowerCase().includes(q));}
-  function renderPicker(){const a=filtered(),root=$('alterLedgerPickerList');if(!root)return;root.innerHTML=a.length?a.map((x,i)=>{const perm=x.permanent===true;return `<button type="button" class="alter-ledger-row" data-index="${i}" data-id="${esc(x.id||'')}" data-permanent="${perm?'1':'0'}"><span><strong>${esc(x.name||'Ledger')}</strong><br><small>${esc(x.under||'No Under Group')}</small></span><span class="meta"><span class="alter-ledger-badge ${perm?'':'created'}">${perm?'Permanent':'Created'}</span></span></button>`}).join(''):'<div style="padding:24px;text-align:center;color:#8995a5">No Ledger found in this company.</div>';paintPicker();$('alterLedgerPickerStatus').textContent=`${a.length} Ledger${a.length===1?'':'s'} available`;root.querySelectorAll('.alter-ledger-row').forEach(b=>b.addEventListener('click',()=>selectPicker(Number(b.dataset.index))));}
+  /* balance on typing (2026-11-16): picker rows show the ledger's current balance */
+  function balOf(n){try{var b=window.MayaBooks&&window.MayaBooks.balance(companyId(),n);return b?b.text:'—';}catch(e){return '—';}}
+  function renderPicker(){const a=filtered(),root=$('alterLedgerPickerList');if(!root)return;root.innerHTML=a.length?a.map((x,i)=>{const perm=x.permanent===true;return `<button type="button" class="alter-ledger-row" data-index="${i}" data-id="${esc(x.id||'')}" data-permanent="${perm?'1':'0'}"><span><strong>${esc(x.name||'Ledger')}</strong><br><small>${esc(x.under||'No Under Group')} · ${esc(balOf(x.name))}</small></span><span class="meta"><span class="alter-ledger-badge ${perm?'':'created'}">${perm?'Permanent':'Created'}</span></span></button>`}).join(''):'<div style="padding:24px;text-align:center;color:#8995a5">No Ledger found in this company.</div>';paintPicker();$('alterLedgerPickerStatus').textContent=`${a.length} Ledger${a.length===1?'':'s'} available`;root.querySelectorAll('.alter-ledger-row').forEach(b=>b.addEventListener('click',()=>selectPicker(Number(b.dataset.index))));}
   function paintPicker(){const a=[...document.querySelectorAll('#alterLedgerPickerList .alter-ledger-row')];a.forEach((x,i)=>x.classList.toggle('keyboard-active',i===pickerIndex));if(a[pickerIndex])a[pickerIndex].scrollIntoView({block:'nearest'});}
   function selectPicker(i){const a=filtered(),x=a[i];if(!x)return;pickerIndex=i;paintPicker();selectedId=x.id;selectedPermanent=x.permanent===true;if(selectedPermanent){$('alterLedgerPickerStatus').textContent='Permanent Ledger — visible for reference but cannot be altered.';return;}closePicker();setTimeout(()=>openForm(x),0);}
   function openForm(x){const d=$('mayaacc-alter-ledger-form');if(!d)return;selectedId=x.id;selectedPermanent=x.permanent===true;d.style.display='flex';d.setAttribute('aria-hidden','false');$('alfName').value=x.name||'';$('alfNickname').value=x.nickname||'';$('alfUnder').value=x.under||'';$('alfOpening').value=x.openingBalance||'';$('alfBalance').value=x.balance||'dr';$('alfPhone').value=x.phone||'';$('alfWhatsapp').value=x.whatsapp||'';$('alfEmail').value=x.email||'';$('alfAadhaar').value=x.aadhaar||'';$('alfAddress').value=x.address||'';(function(){const cp=(f,t,v,d)=>{const src=$(f),dst=$(t);if(!src||!dst)return;if(dst.options.length<=1)dst.innerHTML=src.innerHTML;if(v&&![...dst.options].some(o=>o.value===v)){const o=document.createElement('option');o.value=v;o.textContent=v;dst.appendChild(o)}dst.value=v||d||''};cp('mlgState','alfState',x.state||'','');cp('mlgCountry','alfCountry',x.country||'','India');})();$('alfPin').value=x.pin||'';$('alfGSTType').value=x.gstType||'unregistered';$('alfGSTIN').value=x.gstin||'';$('alfPAN').value=x.pan||'';$('alfBankName').value=x.bankName||'';$('alfAccount').value=x.account||'';$('alfBranch').value=x.branch||'';$('alfGstApplicable').value=x.gstApplicable?'yes':'no';$('alfGstRate').value=x.gstRate||'';$('alfHsn').value=x.hsn||'';$('alfItc').value=x.itc||'eligible';$('alfIFSC').value=x.ifsc||'';$('alfUPI').value=x.upi||'';$('alfCreditLimit').value=x.creditLimit||'';$('alfCreditDays').value=x.creditDays||'';$('alfNotes').value=x.notes||'';$('alterLedgerFormOrigin').textContent=(selectedPermanent?'Permanent/system Ledger — editing disabled.':'Company-created Ledger • '+companyId());$('alfSaveBtn').disabled=selectedPermanent;formFields=[...d.querySelectorAll('input:not([disabled]),select:not([disabled]),textarea:not([disabled])')];if(window.mayaAlfApplyKind)window.mayaAlfApplyKind();setTimeout(()=>{$('alfName').focus();$('alfName').select()},20);}
@@ -5209,9 +5211,10 @@ body.maya-alter-stock-open #mayaacc-stock-overlay{z-index:110000!important}
     showTurnover:false,showBalance:true,balAsOnDate:false,balFinal:false,consolidate:false,compoundUnit:false,compoundDetails:false,stripe:false,
     marks:false,packages:false,bankDefault:false,bankRecon:false,rateInclusive:false,roundOff:true,taxOnSubtotal:false,modifyGst:false,sendEwb:true};
   const FEAT_DEFAULTS={billWise:true,costCentres:true,discount:true,godowns:true,batches:false,expiry:false,bom:false,interest:false,multiCur:false,budgets:false,einv:false,ewb:true,tds:false,tcs:false,msme:false,showMore:false,showAll:false,
+    tdsCfg:{rate:10,section:'194C',threshold:0},tcsCfg:{rate:1,section:'206C(1H)',threshold:0},interestCfg:{rate:18},
     ewbCfg:{from:'',threshold:50000,intra:true,mode:'Road',vtype:'Regular',trName:'',trId:'',fromName:'',fromPlace:'',fromState:'',fromPin:'',promptAfterSave:true,printOnInvoice:true},
     einvCfg:{from:'',limit:5,supply:'B2B',promptAfterSave:true,printOnInvoice:true,remarks:''}};
-  const featuresOf=c=>{const s=read('mayaacc_features_'+c,{})||{};return Object.assign({},FEAT_DEFAULTS,s,{ewbCfg:Object.assign({},FEAT_DEFAULTS.ewbCfg,s.ewbCfg),einvCfg:Object.assign({},FEAT_DEFAULTS.einvCfg,s.einvCfg)})};
+  const featuresOf=c=>{const s=read('mayaacc_features_'+c,{})||{};return Object.assign({},FEAT_DEFAULTS,s,{tdsCfg:Object.assign({},FEAT_DEFAULTS.tdsCfg,s.tdsCfg),tcsCfg:Object.assign({},FEAT_DEFAULTS.tcsCfg,s.tcsCfg),interestCfg:Object.assign({},FEAT_DEFAULTS.interestCfg,s.interestCfg),ewbCfg:Object.assign({},FEAT_DEFAULTS.ewbCfg,s.ewbCfg),einvCfg:Object.assign({},FEAT_DEFAULTS.einvCfg,s.einvCfg)})};
   const saveFeatures=(c,f)=>write('mayaacc_features_'+c,f);
   const voucherConfig=c=>{const o=Object.assign({},VCFG_DEFAULTS,read('mayaacc_voucher_cfg_'+c,{}));if(featuresOf(c).discount===false)o.discountCol=false;return o};
   const saveVoucherConfig=(c,cfg)=>write('mayaacc_voucher_cfg_'+c,Object.assign({},VCFG_DEFAULTS,cfg));
@@ -5401,7 +5404,7 @@ body.maya-alter-stock-open #mayaacc-stock-overlay{z-index:110000!important}
       party:spec.party||'',ledger:spec.ledger||'',mode:spec.mode||'',
       entries:buildEntries(spec,g),items:(spec.items||[]).map((i,ix)=>({...i,godown:canonGd(c,i.godown)||undefined,amount:itemAmt(i),gst:g.rows[ix]?g.rows[ix].rate:undefined,cess:g.rows[ix]?g.rows[ix].cess:undefined})),
       gst:g.applicable?{place:g.place,companyState:g.companyState,partyState:g.partyState,taxable:g.taxable,tax:g.taxTotal,lines:g.lines,rcm:!!g.rcm}:null,
-      narration:spec.narration||'',total:s.total!=null?s.total:s.dr,
+      narration:spec.narration||'',costCentre:spec.costCentre||'',total:s.total!=null?s.total:s.dr,
       dispatch:spec.dispatch||null,order:spec.order||null,exportDetails:spec.exportDetails||null,buyer:spec.buyer||null,consignee:spec.consignee||null,posState:spec.posState||'',rateInclusive:!!spec.rateInclusive,reference:spec.reference||null,
       optional:!!spec.optional,postdated:!!spec.postdated,cancelled:false,createdAt:new Date().toISOString()
     };
@@ -5517,12 +5520,12 @@ body.maya-alter-stock-open #mayaacc-stock-overlay{z-index:110000!important}
 
   /* ---------- voucher alteration ---------- */
   function voucherToSpec(v){
-    const sp={type:v.type,mode:v.mode||'acct',date:v.date,number:v.number,party:v.party||'',ledger:v.ledger||'',narration:v.narration||'',optional:!!v.optional,postdated:!!v.postdated,items:[],lines:[],
+    const sp={type:v.type,mode:v.mode||'acct',date:v.date,number:v.number,party:v.party||'',ledger:v.ledger||'',narration:v.narration||'',costCentre:v.costCentre||'',optional:!!v.optional,postdated:!!v.postdated,items:[],lines:[],
       dispatch:v.dispatch||null,order:v.order||null,exportDetails:v.exportDetails||null,buyer:v.buyer||null,consignee:v.consignee||null,posState:v.posState||'',rateInclusive:!!v.rateInclusive,rcm:!!(v.gst&&v.gst.rcm),reference:v.reference||null};
     const e=v.entries||[],t=v.type,amt=x=>r2(num(x.dr)||num(x.cr));
     if(t==='Journal')e.forEach(x=>sp.lines.push({name:x.ledger,dr:num(x.dr)>0?String(num(x.dr)):'',cr:num(x.cr)>0?String(num(x.cr)):''}));
-    else if(isInv(t)&&v.mode==='item')sp.items=(v.items||[]).map(i=>({name:i.name,qty:String(i.qty),rate:String(i.rate),per:i.per||'',disc:i.disc?String(i.disc):'',godown:i.godown||'',gst:i.gst,cess:i.cess}));
-    else if(isNewT(t))sp.items=(v.items||[]).map(i=>({name:i.name,qty:String(i.qty),rate:String(i.rate),per:i.per||'',disc:i.disc?String(i.disc):'',godown:i.godown||'',gst:i.gst,cess:i.cess,adj:i.adj}));
+    else if(isInv(t)&&v.mode==='item')sp.items=(v.items||[]).map(i=>({name:i.name,desc:i.desc||'',qty:String(i.qty),rate:String(i.rate),per:i.per||'',disc:i.disc?String(i.disc):'',godown:i.godown||'',gst:i.gst,cess:i.cess}));
+    else if(isNewT(t))sp.items=(v.items||[]).map(i=>({name:i.name,desc:i.desc||'',qty:String(i.qty),rate:String(i.rate),per:i.per||'',disc:i.disc?String(i.disc):'',godown:i.godown||'',gst:i.gst,cess:i.cess,adj:i.adj}));
     else{
       const pick=x=>{
         if(t==='Payment'||t==='Contra')return num(x.dr)>0;
@@ -5546,7 +5549,7 @@ body.maya-alter-stock-open #mayaacc-stock-overlay{z-index:110000!important}
     const nv=Object.assign({},old,{date:spec.date,number:String(spec.number||'').trim()||old.number,party:spec.party||'',ledger:spec.ledger||'',mode:spec.mode||'',
       entries:buildEntries(spec,g),items:(spec.items||[]).map((x,ix)=>Object.assign({},x,{godown:canonGd(c,x.godown)||undefined,amount:itemAmt(x),gst:g.rows[ix]?g.rows[ix].rate:undefined,cess:g.rows[ix]?g.rows[ix].cess:undefined})),
       gst:g.applicable?{place:g.place,companyState:g.companyState,partyState:g.partyState,taxable:g.taxable,tax:g.taxTotal,lines:g.lines,rcm:!!g.rcm}:null,
-      narration:spec.narration||'',total:s.total!=null?s.total:s.dr,
+      narration:spec.narration||'',costCentre:spec.costCentre||'',total:s.total!=null?s.total:s.dr,
       dispatch:spec.dispatch||null,order:spec.order||null,exportDetails:spec.exportDetails||null,buyer:spec.buyer||null,consignee:spec.consignee||null,posState:spec.posState||'',rateInclusive:!!spec.rateInclusive,reference:spec.reference||null,
       optional:!!spec.optional,postdated:!!spec.postdated,updatedAt:new Date().toISOString()});
     attachBills(c,spec,nv,{ignoreId:id});
@@ -6247,7 +6250,7 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
             <div class="mve-grid-wrap">
               <table class="mve-grid" id="mveItemTable" aria-label="Item particulars">
                 <colgroup><col style="width:26%"><col style="width:9%"><col style="width:11%"><col style="width:7%"><col style="width:8%"><col style="width:13%"><col style="width:8%"><col style="width:18%"></colgroup>
-                <thead><tr><th>Name of Item</th><th>Quantity</th><th>Rate</th><th>Per</th><th>Disc %</th><th>Godown</th><th style="text-align:right">GST %</th><th style="text-align:right">Amount</th></tr></thead>
+                <thead><tr><th>Name of Item</th><th id="mveDescTh" style="display:none">Description</th><th>Quantity</th><th>Rate</th><th>Per</th><th>Disc %</th><th id="mveGodownTh">Godown</th><th style="text-align:right">GST %</th><th style="text-align:right">Amount</th></tr></thead>
                 <tbody></tbody>
               </table>
             </div>
@@ -6426,7 +6429,9 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
   const cell=(col,cls,label)=>'<td><input data-col="'+col+'" class="'+(cls||'')+'" aria-label="'+label+'" autocomplete="off"></td>';
   function addItemRow(){
     const tr=document.createElement('tr');
-    tr.innerHTML=cell('item','','Name of item')+cell('qty','num','Quantity')+cell('rate','num','Rate')+cell('per','','Per')+cell('disc','num','Discount percent')+'<td><input data-col="godown" data-pick="godown" aria-label="Godown" autocomplete="off"></td>'+'<td class="mve-amt mve-gstc" data-col="gst" style="font-weight:600;color:#6b7a90">—</td><td class="mve-amt" data-col="amt">0.00</td>';
+    /* godown column follows F11 godowns; description column follows Voucher Configuration descItem (2026-11-16) */
+    var gdOn=true;try{gdOn=Books.features(Books.cid()).godowns!==false;}catch(e){}
+    tr.innerHTML=cell('item','','Name of item')+(cfgNow().descItem?cell('desc','','Item description'):'')+cell('qty','num','Quantity')+cell('rate','num','Rate')+cell('per','','Per')+cell('disc','num','Discount percent')+(gdOn?'<td><input data-col="godown" data-pick="godown" aria-label="Godown" autocomplete="off"></td>':'')+'<td class="mve-amt mve-gstc" data-col="gst" style="font-weight:600;color:#6b7a90">—</td><td class="mve-amt" data-col="amt">0.00</td>';
     itemBody.appendChild(tr);return tr;
   }
   function addSingleRow(){
@@ -6560,6 +6565,50 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
     overlay.querySelector('[data-k=L]').classList.toggle('flag-on',st.optional);
     overlay.querySelector('[data-k=T]').classList.toggle('flag-on',st.postdated);
     $('mveNumber').value=st.editId?st.editNumber:voucherNo();$('mveNumber').readOnly=numberingMode()==='auto';fitNo();
+    /* column + cost-centre visibility (2026-11-16): godown column follows F11 godowns; description column follows Voucher Configuration descItem; cost-centre row follows F11 costCentres */
+    var gdTh=$('mveGodownTh');if(gdTh){var gOn=true;try{gOn=Books.features(Books.cid()).godowns!==false;}catch(e){}gdTh.style.display=gOn?'':'none';}
+    var dsTh=$('mveDescTh');if(dsTh)dsTh.style.display=cfgNow().descItem?'':'none';
+    var ccRow=$('mveCostCentreRow');
+    if(!ccRow){
+      ccRow=document.createElement('div');ccRow.id='mveCostCentreRow';ccRow.className='mve-narration';
+      ccRow.innerHTML='<label for="mveCostCentre">Cost Centre</label><select id="mveCostCentre" aria-label="Cost Centre" style="height:29px;margin-right:9px;border:1px solid #b6c2d6;padding:4px 7px;box-sizing:border-box;font-size:12px;border-radius:4px;background:#fff"></select>';
+      var nr=overlay.querySelector('.mve-narration');if(nr&&nr.parentNode)nr.parentNode.insertBefore(ccRow,nr.nextSibling);
+    }
+    var ccOn=false;try{ccOn=Books.features(Books.cid()).costCentres!==false;}catch(e){}
+    ccRow.style.display=ccOn?'':'none';
+    if(ccOn){
+      var ccSel=$('mveCostCentre'),opts=[''];
+      try{opts=opts.concat((Books.masterList(Books.cid(),'Cost Centre')||[]).map(function(x){return x.name;}).filter(Boolean));}catch(e){}
+      var curCc=ccSel.value;
+      ccSel.innerHTML=opts.map(function(n){return '<option value="'+esc(n)+'">'+(n||'— No cost centre —')+'</option>';}).join('');
+      if(curCc&&opts.indexOf(curCc)>=0)ccSel.value=curCc;
+    }
+    /* keep the existing item rows in step with the column switches (2026-11-16):
+       rows are created once at load, so toggling descItem / godowns must add
+       or remove the cell on every row, not only on new rows. Row code reads
+       cells by data-col, so inserting a cell is safe. */
+    var descOn=!!cfgNow().descItem;
+    var gOn2=true;try{gOn2=Books.features(Books.cid()).godowns!==false;}catch(e){}
+    itemBody.querySelectorAll('tr').forEach(function(tr){
+      var qtyCell=tr.querySelector('input[data-col="qty"]');
+      var descCell=tr.querySelector('input[data-col="desc"]');
+      if(descOn&&!descCell&&qtyCell){
+        var td=document.createElement('td');
+        td.innerHTML='<input data-col="desc" class="" aria-label="Item description" autocomplete="off">';
+        tr.insertBefore(td,qtyCell.closest('td'));
+      }else if(!descOn&&descCell){
+        descCell.closest('td').remove();
+      }
+      var gdCell=tr.querySelector('input[data-col="godown"]');
+      var gstCell=tr.querySelector('td[data-col="gst"]');
+      if(gOn2&&!gdCell&&gstCell){
+        var td2=document.createElement('td');
+        td2.innerHTML='<input data-col="godown" data-pick="godown" aria-label="Godown" autocomplete="off">';
+        tr.insertBefore(td2,gstCell);
+      }else if(!gOn2&&gdCell){
+        gdCell.closest('td').remove();
+      }
+    });
     recalc();
   }
   /* the voucher-number box grows with its content so prefixed numbers are always fully visible */
@@ -6574,6 +6623,11 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
     window.mayaaccCurrentVoucherType=type;
     closePicker();
     layout();
+    /* bankDefault (2026-11-16, Voucher Configuration): a new Payment / Receipt / Contra voucher prefills the Account with the configured default bank / cash ledger */
+    if(!st.editId&&(type==='Payment'||type==='Receipt'||type==='Contra')){
+      var bc=null;try{bc=cfgNow();}catch(e){}
+      if(bc&&bc.bankDefault&&bc.bankDefaultLedger&&!$('mveParty').value.trim()){$('mveParty').value=bc.bankDefaultLedger;updateBalances();}
+    }
     if(!keepFocus)setTimeout(()=>focusEl(fields().find(f=>f.closest('.mve-party-cell,.mve-grid'))),10);
   }
   window.switchVoucherType=switchVoucherType;
@@ -6611,6 +6665,7 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
     while(journalBody.rows.length>6)journalBody.deleteRow(-1);
     st.dirty=false;st.optional=false;st.postdated=false;st.details={};
     if($('mveRefNo')){$('mveRefNo').value='';$('mveRefDate').value='';}
+    var cc=$('mveCostCentre');if(cc)cc.value='';
   }
   function setRow(tr,vals){Object.keys(vals).forEach(k=>{const e=tr.querySelector('[data-col='+k+']');if(e)e.value=vals[k]==null?'':vals[k];});}
   function ensureRows(body,n,adder){while(body.rows.length<n)adder();}
@@ -6621,11 +6676,13 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
     st.optional=!!v.optional;st.postdated=!!v.postdated;st.editId=v.id;st.editNumber=v.number;
     $('mveDate').value=v.date;
     $('mveParty').value=sp.party||'';$('mveSalesLedger').value=sp.ledger||'';$('mveNarration').value=sp.narration||'';
+    /* cost-centre row is created by layout() (runs after loadVoucher), so restore the value on the next tick */
+    setTimeout(function(){var cc=$('mveCostCentre');if(cc)cc.value=sp.costCentre||'';},0);
     if(sp.reference&&typeof sp.reference==='object'){$('mveRefNo').value=sp.reference.no||'';$('mveRefDate').value=sp.reference.date||'';}else if(sp.reference){$('mveRefNo').value=String(sp.reference);}
     st.details={buyer:sp.buyer||null,consignee:sp.consignee||null,dispatch:sp.dispatch||null,order:sp.order||null,exportDetails:sp.exportDetails||null,posState:sp.posState||'',rateInclusive:!!sp.rateInclusive,rcm:!!sp.rcm,forParty:sp.party||''};
     if(st.mode==='item'&&(isInvT(v.type)||isNewT(v.type))){
       ensureRows(itemBody,sp.items.length+1,addItemRow);
-      sp.items.forEach((it,i)=>{const tr=itemBody.rows[i];setRow(tr,{item:it.name,qty:it.qty,rate:it.rate,per:it.per,disc:it.disc,godown:it.godown||''});const ii=tr.querySelector('input[data-col=item]');if(ii)ii.dataset.lastCommit=it.name;if(it.gst!==undefined&&it.gst!==null)tr.dataset.gstFixed=String(it.gst);if(it.cess!==undefined&&it.cess!==null)tr.dataset.cessFixed=String(it.cess);});
+      sp.items.forEach((it,i)=>{const tr=itemBody.rows[i];setRow(tr,{item:it.name,desc:it.desc||'',qty:it.qty,rate:it.rate,per:it.per,disc:it.disc,godown:it.godown||''});const ii=tr.querySelector('input[data-col=item]');if(ii)ii.dataset.lastCommit=it.name;if(it.gst!==undefined&&it.gst!==null)tr.dataset.gstFixed=String(it.gst);if(it.cess!==undefined&&it.cess!==null)tr.dataset.cessFixed=String(it.cess);});
     }else if(v.type==='Journal'){
       ensureRows(journalBody,sp.lines.length+1,addJournalRow);
       sp.lines.forEach((l,i)=>{const tr=journalBody.rows[i];setRow(tr,{drcr:Books.num(l.dr)>0?'Dr':'Cr',part:l.name,dr:l.dr,cr:l.cr});syncJournalRow(tr);});
@@ -6705,7 +6762,7 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
     const t=st.type,inv=isInvT(t),jr=t==='Journal',nw=isNewT(t),item=(inv||nw)&&st.mode==='item';
     const spec={type:t,mode:item?'item':'acct',date:$('mveDate').value,number:$('mveNumber').value.trim(),
       party:jr?'':$('mveParty').value.trim(),ledger:inv?$('mveSalesLedger').value.trim():'',
-      narration:$('mveNarration').value.trim(),optional:st.optional,postdated:st.postdated,items:[],lines:[]};
+      narration:$('mveNarration').value.trim(),costCentre:(function(){var s=$('mveCostCentre');return s?s.value:'';})(),optional:st.optional,postdated:st.postdated,items:[],lines:[]};
     const C0=cfgNow();spec.roundOff=C0.roundOff!==false;
     if(inv&&st.details){const D=st.details;if(D.buyer&&C0.buyer)spec.buyer=D.buyer;if(D.consignee&&C0.buyer)spec.consignee=D.consignee;if(D.dispatch)spec.dispatch=D.dispatch;if(D.order&&C0.dispatch&&C0.order)spec.order=D.order;if(D.exportDetails&&C0.dispatch&&C0.export)spec.exportDetails=D.exportDetails;if(D.posState)spec.posState=D.posState;if(D.rateInclusive&&C0.rateInclusive)spec.rateInclusive=true;if(D.rcm&&(spec.type==='Purchase'||spec.type==='Debit Note'))spec.rcm=true;}
     if(C0.refNo&&($('mveRefNo').value.trim()||$('mveRefDate').value)){spec.reference={no:$('mveRefNo').value.trim(),date:$('mveRefDate').value};}
@@ -6713,9 +6770,9 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
     const v=(tr,c)=>{const e=tr.querySelector('[data-col='+c+']');return e?e.value.trim():'';};
     if(item){
       for(const tr of itemBody.rows){
-        if(v(tr,'item')||v(tr,'qty')||v(tr,'rate')){spec.items.push({name:v(tr,'item'),qty:v(tr,'qty'),rate:v(tr,'rate'),per:v(tr,'per'),disc:C0.discountCol?v(tr,'disc'):'',godown:v(tr,'godown'),gst:tr.dataset.gstFixed,cess:tr.dataset.cessFixed});rows.item.push(tr);}
+        if(v(tr,'item')||v(tr,'qty')||v(tr,'rate')){spec.items.push({name:v(tr,'item'),desc:v(tr,'desc'),qty:v(tr,'qty'),rate:v(tr,'rate'),per:v(tr,'per'),disc:C0.discountCol?v(tr,'disc'):'',godown:v(tr,'godown'),gst:tr.dataset.gstFixed,cess:tr.dataset.cessFixed});rows.item.push(tr);}
       }
-      if(C0.consolidate){const m=new Map(),out=[];spec.items.forEach(i=>{const k=[Books.norm(i.name),i.rate,i.per,i.disc,i.godown,i.gst,i.cess].join('|');const q=m.get(k);if(q&&i.name&&Books.num(i.qty)>0&&Books.num(q.qty)>0){q.qty=String(Books.r2(Books.num(q.qty)+Books.num(i.qty)));}else{const c=Object.assign({},i);m.set(k,c);out.push(c);}});spec.items=out;}
+      if(C0.consolidate){const m=new Map(),out=[];spec.items.forEach(i=>{const k=[Books.norm(i.name),i.desc||'',i.rate,i.per,i.disc,i.godown,i.gst,i.cess].join('|');const q=m.get(k);if(q&&i.name&&Books.num(i.qty)>0&&Books.num(q.qty)>0){q.qty=String(Books.r2(Books.num(q.qty)+Books.num(i.qty)));}else{const c=Object.assign({},i);m.set(k,c);out.push(c);}});spec.items=out;}
       if(t==='Physical Stock'){const seen={};spec.items.forEach(i=>{const book=Books.stockQtyOn(Books.cid(),i.name,spec.date,st.editId||undefined),phys=Books.num(i.qty),k=Books.norm(i.name);i.adj=seen[k]!=null?phys:Books.r2(phys-book);seen[k]=1;});}
     }else if(jr){
       for(const tr of journalBody.rows){
@@ -6817,13 +6874,15 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
     const c=Books.cid(),q=Books.norm(queryOverride!==undefined?queryOverride:el.value);
     let rows;
     if(role==='item'){
-      rows=Books.items(c).map(i=>({label:i.name,sub:[i.primaryUnit,i.salesRate?'₹'+i.salesRate:''].filter(Boolean).join(' · '),rec:i}));
+      /* balance on typing (2026-11-16): suggestion rows show the stock on hand next to the item, like Tally shows the item balance */
+      rows=Books.items(c).map(i=>{var st='';try{var q=Books.stockQtyOn(c,i.name,$('mveDate')?$('mveDate').value:undefined);st='Stock '+q+(i.primaryUnit?' '+i.primaryUnit:'');}catch(e){}return {label:i.name,sub:[i.primaryUnit,i.salesRate?'₹'+i.salesRate:'',st].filter(Boolean).join(' · '),rec:i};});
     }else if(role==='godown'){
       rows=Books.godownNames(c).map(g=>({label:g,sub:'',rec:{name:g}}));
     }else{
       const header=Books.norm($('mveParty').value);
       rows=Books.ledgers(c).filter(l=>l&&l.name&&ledgerOk(role,l,c)&&!(role==='line'&&header&&Books.norm(l.name)===header))
-        .map(l=>({label:l.name,sub:l.under||'',rec:l}));
+        /* balance on typing (2026-11-16): each ledger suggestion shows its current balance (Dr/Cr) next to the group */
+        .map(l=>({label:l.name,sub:[l.under||'',balText(l.name)].filter(Boolean).join(' · '),rec:l}));
     }
     if(q){
       rows=rows.filter(r=>Books.norm(r.label).includes(q)||Books.norm(r.rec.nickname||r.rec.alias||'').includes(q));
@@ -7023,7 +7082,9 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
   /* ---------- F10: every voucher type (standard ones that have an entry screen can be opened) ---------- */
 
   /* ---------- Dispatch box -> Party Details box (after party selection / Ctrl+I), F12 configuration ---------- */
-  const cfgNow=()=>Books.voucherConfig(Books.cid());
+  /* per-type voucher options (2026-11-16): Voucher Configuration saves overrides in mayaacc_vchcfg_<cid>_<type>; they win over the company voucher config.
+     Function declaration (not const arrow): addItemRow() runs at IIFE init, before this line — a const would throw a TDZ ReferenceError. */
+  function cfgNow(){const g=Books.voucherConfig(Books.cid());try{const o=JSON.parse(localStorage.getItem('mayaacc_vchcfg_'+Books.cid()+'_'+st.type)||'null');return o?Object.assign({},g,o):g;}catch(e){return g;}}
   const stateOpts=()=>{const o=[...document.querySelectorAll('#mlgState option')].map(x=>x.value).filter(Boolean);return ['',...(o.length?o:['Haryana','Delhi','Punjab','Rajasthan','Uttar Pradesh','Maharashtra','Gujarat'])]};
   function fillDlgParty(el,l){
     if(!l)return;const map={dlg_bName:['bAddr','bState','bGstin','bPhone','bAadhaar'],dlg_cName:['cAddr','cState','cGstin','cPhone','cAadhaar']}[el.id];if(!map)return;
@@ -7504,6 +7565,8 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
       if(lk==='d'){e.preventDefault();e.stopImmediatePropagation();doDelete();return;}
       if(lk==='x'){e.preventDefault();e.stopImmediatePropagation();doCancel();return;}
       if(lk==='c'&&roleOf(el)){e.preventDefault();e.stopImmediatePropagation();inlineCreate(el);return;}
+      /* Calculator (2026-11-16): Alt+C in an amount field opens the calculator; the result fills back into that field. Ledger/item fields keep Alt+C = inline-create above. */
+      if(lk==='c'&&el&&el.tagName==='INPUT'&&(el.classList.contains('num')||['qty','rate','disc','dr','cr','amt1'].indexOf(el.dataset.col)>=0)){e.preventDefault();e.stopImmediatePropagation();if(typeof window.mayaCalcOpen==='function')window.mayaCalcOpen(el);return;}
     }
     if(k==='Tab'){trapTab(e);return;}
     if(k==='Backspace'){
@@ -7706,12 +7769,16 @@ html.mayaacc-reports-open,body.mayaacc-reports-open{overflow:hidden!important;he
     $('mrp-title').textContent=isR?'Bills Receivable':'Bills Payable';
     $('mrp-crumb').textContent='Outstanding as on '+ddmmyyyy(st.to)+' · ageing by due date (bill date where no credit days are set)';
     if(!O.rows.length){$('mrp-body').innerHTML='<div class="mrp-empty">No pending bills.<br>Bills are created by '+(isR?'Sales':'Purchase')+' vouchers and settled by '+(isR?'Receipt':'Payment')+' vouchers.</div>';return;}
+    /* interest column (2026-11-16): shown only when the F11 interest switch is ON — pending × overdue days × rate ÷ 365, per bill */
+    var intOn=false,intRate=0;try{var f=B.features(B.cid());intOn=!!f.interest;intRate=B.num(f.interestCfg&&f.interestCfg.rate)||18;}catch(e){}
+    var intTot=0;
     let h='';const tot=[0,0,0,0,0];
     O.rows.forEach(r=>{st.sel.push({kind:'bills',name:r.name,bk:kd});r.ageing.forEach((x,i)=>tot[i]+=x);
-      h+='<tr data-i="'+(st.sel.length-1)+'"><td>'+esc(r.name)+'</td><td class="r">'+fmt(r.total)+'</td>'+r.ageing.map(x=>'<td class="r">'+(x?fmt(x):'')+'</td>').join('')+'</tr>';});
-    h+='<tr class="tot"><td>Total</td><td class="r">'+fmt(O.total)+'</td>'+tot.map(x=>'<td class="r">'+(x?fmt(B.r2(x)):'')+'</td>').join('')+'</tr>';
-    h+='<tr class="note"><td colspan="7">The last column also holds On Account / advance amounts (shown as negative). Press Enter on a party to see its bills.</td></tr>';
-    $('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Party</th><th class="r">Pending</th>'+O.labels.map((l,i)=>'<th class="r">'+(i===4?'Over 90 days / On Account':l)+'</th>').join('')+'</tr></thead><tbody>'+h+'</tbody></table>';
+      var ip=0;if(intOn)(r.bills||[]).forEach(function(b){if(b.overdue>0&&b.pending>0)ip+=b.pending*b.overdue*intRate/365;});ip=B.r2(ip);intTot+=ip;
+      h+='<tr data-i="'+(st.sel.length-1)+'"><td>'+esc(r.name)+'</td><td class="r">'+fmt(r.total)+'</td>'+r.ageing.map(x=>'<td class="r">'+(x?fmt(x):'')+'</td>').join('')+(intOn?'<td class="r">'+(ip?fmt(ip):'')+'</td>':'')+'</tr>';});
+    h+='<tr class="tot"><td>Total</td><td class="r">'+fmt(O.total)+'</td>'+tot.map(x=>'<td class="r">'+(x?fmt(B.r2(x)):'')+'</td>').join('')+(intOn?'<td class="r">'+(intTot?fmt(B.r2(intTot)):'')+'</td>':'')+'</tr>';
+    h+='<tr class="note"><td colspan="'+(intOn?8:7)+'">The last column also holds On Account / advance amounts (shown as negative). Press Enter on a party to see its bills.'+(intOn?' Interest @ '+intRate+'% p.a. on overdue bills.':'')+'</td></tr>';
+    $('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Party</th><th class="r">Pending</th>'+O.labels.map((l,i)=>'<th class="r">'+(i===4?'Over 90 days / On Account':l)+'</th>').join('')+(intOn?'<th class="r">Interest @ '+intRate+'%</th>':'')+'</tr></thead><tbody>'+h+'</tbody></table>';
   }
   function viewBills(name){
     const bills=B.pendingBills(B.cid(),name,{asOf:st.to});st.sel=[];
@@ -7899,11 +7966,11 @@ html.mayaacc-reports-open,body.mayaacc-reports-open{overflow:hidden!important;he
   function showDetail(id){
     const v=B.voucherById(B.cid(),id);if(!v)return;window.__mayaDetailVid=id;
     const ent=(v.entries||[]).map(e=>'<tr><td>'+esc(e.ledger)+'</td><td class="r">'+(e.dr?fmt(e.dr):'')+'</td><td class="r">'+(e.cr?fmt(e.cr):'')+'</td></tr>').join('');
-    const its=(v.items||[]).length?'<table><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Rate</th><th class="r">Disc %</th><th class="r">Amount</th></tr></thead><tbody>'+v.items.map(i=>'<tr><td>'+esc(i.name)+'</td><td class="r">'+esc(i.qty)+' '+esc(i.per||'')+'</td><td class="r">'+esc(i.rate)+'</td><td class="r">'+esc(i.disc||'')+'</td><td class="r">'+fmt(i.amount)+'</td></tr>').join('')+'</tbody></table>':'';
+    const its=(v.items||[]).length?'<table><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Rate</th><th class="r">Disc %</th><th class="r">Amount</th></tr></thead><tbody>'+v.items.map(i=>'<tr><td>'+esc(i.name)+(i.desc?'<br><small style="color:#6b7a90">'+esc(i.desc)+'</small>':'')+'</td><td class="r">'+esc(i.qty)+' '+esc(i.per||'')+'</td><td class="r">'+esc(i.rate)+'</td><td class="r">'+esc(i.disc||'')+'</td><td class="r">'+fmt(i.amount)+'</td></tr>').join('')+'</tbody></table>':'';
     $('mrpDetailBox').innerHTML='<h3>'+esc(v.type)+' Voucher #'+esc(v.number)+'</h3><div class="sub">'+esc(ddmmyyyy(v.date))+(v.optional?' · Optional':'')+(v.postdated?' · Post-Dated':'')+(v.party?' · '+esc(v.party):'')+'</div>'
       +its+'<table><thead><tr><th>Ledger</th><th class="r">Debit</th><th class="r">Credit</th></tr></thead><tbody>'+ent+'<tr><td><b>Total</b></td><td class="r"><b>'+fmt(v.total)+'</b></td><td class="r"><b>'+fmt(v.total)+'</b></td></tr></tbody></table>'
       +(v.gst?'<div class="nar">GST: '+(v.gst.place==='inter'?'Inter-state':'Intra-state')+' supply ('+esc(v.gst.companyState||'')+(v.gst.partyState?' → '+esc(v.gst.partyState):'')+') · Taxable '+fmt(v.gst.taxable)+' · Tax '+fmt(v.gst.tax)+'</div>':'')
-      +(v.narration?'<div class="nar">Narration: '+esc(v.narration)+'</div>':'')+'<div class="nar" style="color:#6b7a90">Press Esc to close'+((B.isInv(v.type)&&B.isSalesSide(v.type))?' · Press P to print this invoice':'')+'</div>';
+      +(v.narration?'<div class="nar">Narration: '+esc(v.narration)+'</div>':'')+(v.costCentre?'<div class="nar">Cost Centre: '+esc(v.costCentre)+'</div>':'')+'<div class="nar" style="color:#6b7a90">Press Esc to close'+((B.isInv(v.type)&&B.isSalesSide(v.type))?' · Press P to print this invoice':'')+'</div>';
     $('mrp-detail').hidden=false;
   }
   function closeDetail(){$('mrp-detail').hidden=true;$('mrp-body').focus();}
@@ -7914,6 +7981,11 @@ html.mayaacc-reports-open,body.mayaacc-reports-open{overflow:hidden!important;he
     if(!c){if(window.mayaToast)mayaToast('Open a company first.');return;}
     st.opener=document.activeElement;
     if(!st.from||!st.to||!isOpen()){st.from=B.fyStart();st.to=today();}
+    /* recon-period fix (2026-11-16): mayaOpenReportView(view,{from,to}) must
+       set the report period — recon views read st.from/st.to (not cur), so
+       a book voucher dated after today silently dropped out of
+       "Missing in GSTR-2B". Args win over the FY default above. */
+    if(spec&&spec.args){if(spec.args.from)st.from=spec.args.from;if(spec.args.to)st.to=spec.args.to;}
     $('mrpFrom').value=st.from;$('mrpTo').value=st.to;
     const VM={'Trial Balance':'trial','Chart of Accounts':'coa','Profit & Loss':'pl','Balance Sheet':'bs','Stock Summary':'stock','More Reports':'more'};
     st.stack=[spec&&spec.view?Object.assign({view:spec.view},spec.args||{}):{view:VM[name]||'daybook'}];
@@ -9063,7 +9135,8 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
    {gap:1},{l:'Account Books',k:'A',m:'books'},{l:'Statements of Accounts',k:'S',m:'stm'},
    {sec:'INVENTORY'},{l:'Inventory Books',k:'I',m:'invb'},{l:'Statements of Inventory',k:'E',m:'invs'},
    {sec:'STATUTORY'},{l:'Statutory Reports',k:'O',m:'stat'},
-   {sec:'EXCEPTION'},{l:'Exception Reports',k:'X',soon:1},{l:'Analysis & Verification',k:'V',soon:1},
+   {sec:'EXCEPTION'},{l:'Exception Reports',k:'X',v:'exceptions'},{l:'Analysis & Verification',k:'V',v:'analysis'},
+   {sec:'TAX & BUDGETS'},{l:'TDS Summary',k:'U',v:'tdssum'},{l:'TCS Summary',k:'W',v:'tcssum'},{l:'Budget Variance',k:'J',v:'budgets'},
    {sec:'PAYROLL'},{l:'Payroll',k:'P',fn:'mayaOpenPayroll'},
    {sec:'PRINTING'},{l:'Invoice Designer',k:'N',fn:'mayaOpenInvoiceDesigner'},
    {gap:1},{l:'Quit',k:'Q',quit:1}]},
@@ -9075,12 +9148,12 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
    {gap:1},{l:'Journal Register',k:'J',v:'register',a:{type:'Journal'}},{l:'Debit Note Register',k:'D',v:'register',a:{type:'Debit Note'}},{l:'Credit Note Register',k:'E',v:'register',a:{type:'Credit Note'}},
    {gap:1},{l:'Delivery Note Register',k:'1',v:'register',a:{type:'Delivery Note'}},{l:'Receipt Note Register',k:'2',v:'register',a:{type:'Receipt Note'}},{l:'Physical Stock Register',k:'3',v:'register',a:{type:'Physical Stock'}},
    {gap:1},{l:'Sales Order Register',k:'4',v:'register',a:{type:'Sales Order'}},{l:'Purchase Order Register',k:'5',v:'register',a:{type:'Purchase Order'}},
-   {gap:1},{l:'Voucher Clarification',k:'U',soon:1},{gap:1},{l:'Quit',k:'Q',quit:1}]},
+   {gap:1},{l:'Voucher Clarification',k:'U',v:'clarify'},{l:'Cost Centre Summary',k:'K',v:'costcentre'},{gap:1},{l:'Quit',k:'Q',quit:1}]},
   stm:{label:'Statements of Accounts',items:[
    {sec:'OUTSTANDINGS'},{l:'Bills Receivable',k:'R',v:'recv'},{l:'Bills Payable',k:'P',v:'pay'},{l:'Ageing Analysis',k:'A',v:'ageing'},
    {gap:1},{l:'Statistics',k:'S',v:'stats'},{gap:1},{l:'Quit',k:'Q',quit:1}]},
   invb:{label:'Inventory Books',items:[
-   {l:'Stock Item Summary',k:'S',v:'pickitem'},{l:'Stock Transfers',k:'T',v:'stocktransfer'},{l:'Bill of Materials',k:'B',v:'bomlist'},{gap:1},{l:'Quit',k:'Q',quit:1}]},
+   {l:'Stock Item Summary',k:'S',v:'pickitem'},{l:'Stock Transfers',k:'T',v:'stocktransfer'},{l:'Bill of Materials',k:'B',v:'bomlist',gate:'bom'},{gap:1},{l:'Quit',k:'Q',quit:1}]},
   invs:{label:'Statements of Inventory',items:[
    {l:'Stock Query',k:'U',v:'pickquery'},{gap:1},{l:'Quit',k:'Q',quit:1}]},
   stat:{label:'Statutory Reports',items:[
@@ -9099,6 +9172,7 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
   bank:{label:'Banking',items:[
    {sec:'BANK BOOKS'},{l:'Cash/Bank Book(s)',k:'C',v:'cashbook'},{l:'Payment Register',k:'P',v:'register',a:{type:'Payment'}},{l:'Receipt Register',k:'R',v:'register',a:{type:'Receipt'}},{l:'Contra Register',k:'T',v:'register',a:{type:'Contra'}},
    {sec:'RECONCILIATION'},{l:'Bank Statement (import and match)',k:'B',fn:'mayaBankStatement'},{l:'Bank Balance Check',k:'A',fn:'mayaBankBalance'},
+   {sec:'CHEQUES'},{l:'Cheque Printing',k:'H',fn:'mayaChequePrint'},{l:'Cheque Register',k:'E',v:'chequereg'},{l:'Post-dated Summary',k:'D',v:'postdated'},
    {sec:'PAYMENTS'},{l:'Send Payments (bank upload file)',k:'S',fn:'mayaBankPayments'},
    {gap:1},{l:'Quit',k:'Q',quit:1}]},
   msme:{label:'MSME Reports',items:[
@@ -9106,7 +9180,10 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
  };
  const MM={open:false,stack:[],el:null};
  const mmTop=()=>MM.stack[MM.stack.length-1];
- const mmItems=()=>MENUS[mmTop().id].items;
+ /* menu gating (2026-11-16): an item with gate:<F11 key> is hidden while that Company Features switch is OFF (e.g. Bill of Materials while bom is off).
+    NOTE: in this script block B is the engine OBJECT (B.features / B.cid), not a function — B() would throw and the gate would silently never hide. */
+ const mmGateOk=it=>{if(!it.gate)return true;try{return !!B.features(B.cid())[it.gate];}catch(e){return true;}};
+ const mmItems=()=>MENUS[mmTop().id].items.filter(mmGateOk);
  const mmFocusable=()=>mmItems().map((it,i)=>it.l?i:-1).filter(i=>i>=0);
  const mmBold=(l,k)=>{const i=l.toLowerCase().indexOf(String(k).toLowerCase());return i<0?esc(l):esc(l.slice(0,i))+'<strong>'+esc(l.charAt(i))+'</strong>'+esc(l.slice(i+1));};
  function mmEl(){
@@ -9124,7 +9201,7 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
  function mmRender(){
   const el=mmEl(),m=MENUS[mmTop().id],trail=MM.stack.map(x=>MENUS[x.id].label).join('  ›  ');
   let h='<div class="menu-title">MAYAACC Workspace</div><div class="mm-trail">'+esc(trail)+'</div>';
-  m.items.forEach((it,i)=>{
+  mmItems().forEach((it,i)=>{
    if(it.sec)h+='<div class="menu-section">'+esc(it.sec)+'</div>';
    else if(it.gap)h+='<div class="mm-gap"></div>';
    else h+='<button type="button" role="menuitem" data-ix="'+i+'"'+(it.soon?' class="mm-soon" title="Not available yet"':'')+(it.quit?' class="quit"':'')+'>'+mmBold(it.l,it.k)+(it.soon?'<small>soon</small>':'')+'</button>';
@@ -9144,7 +9221,7 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
   if(!MM.open||start!=='root'){MM.stack=[{id:start,idx:mmFocusableOf(start)[0]}];}
   document.documentElement.classList.add('mm-lock');MM.open=true;mmPlace();mmEl().classList.add('open');mmRender();
  }
- const mmFocusableOf=id=>MENUS[id].items.map((it,i)=>it.l?i:-1).filter(i=>i>=0);
+ const mmFocusableOf=id=>MENUS[id].items.filter(mmGateOk).map((it,i)=>it.l?i:-1).filter(i=>i>=0);
  function mmClose(){document.documentElement.classList.remove('mm-lock');MM.open=false;if(MM.el)MM.el.classList.remove('open');}
  function mmBack(){if(MM.stack.length>1){MM.stack.pop();mmRender();}else mmClose();}
  function mmChoose(it){
@@ -9616,7 +9693,7 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
   $('mrp-title').textContent='GSTR-1 — '+(G1_LBL[tab]||'');$('mrp-crumb').textContent=ddmmyyyy(R1.from)+' to '+ddmmyyyy(R1.to)+' · ← → switch section · Enter opens the voucher';
   const D=gstData(c,R1.from,R1.to),invAll=D.filter(d=>!d.cn),inv=invAll.filter(d=>d.lines.length),cn=D.filter(d=>d.cn&&d.lines.length),nilD=D.filter(d=>d.nil.total>0);
   const b2b=inv.filter(d=>d.gstin),b2c=inv.filter(d=>!d.gstin);
-  const b2cl=b2c.filter(d=>d.inter&&d.value>250000),b2cs=b2c.filter(d=>!(d.inter&&d.value>250000));
+  const b2cl=b2c.filter(d=>d.inter&&d.value>100000),b2cs=b2c.filter(d=>!(d.inter&&d.value>100000));
   const counts={b2b:b2b.length,b2cl:b2cl.length,b2cs:b2cs.length,hsn:'',cdn:cn.length,nil:nilD.length};
   const tabs='<div class="mrp-tabs">'+G1_TABS.map(t=>'<span class="mrp-tab'+(t[0]===tab?' on':'')+'">'+t[1]+(counts[t[0]]!==''?' ('+counts[t[0]]+')':'')+'</span>').join('')+'</div>';
   const sum=(arr,f)=>r2(arr.reduce((a,d)=>a+d.lines.reduce((b,l)=>b+f(l),0),0));
@@ -9638,7 +9715,7 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
    body=R.T.rows?'<table class="mrp-table"><thead><tr><th>GSTIN / UIN</th><th>Party</th><th>Invoice No.</th><th>Date</th><th class="r">Invoice Value</th><th>Place of Supply</th><th class="r">Rate %</th><th class="r">Taxable</th><th class="r">IGST</th><th class="r">CGST</th><th class="r">SGST</th><th class="r">Cess</th></tr></thead><tbody>'+R.h+'<tr class="tot"><td colspan="7">Total</td>'+m(r2(R.T.taxable))+m(r2(R.T.igst))+m(r2(R.T.cgst))+m(r2(R.T.sgst))+m(r2(R.T.cess))+'</tr></tbody></table>':'<div class="mrp-empty">No B2B invoices (sales to parties with a GSTIN) in this period.</div>';
   }else if(tab==='b2cl'){
    const R=rowsOf(b2cl,(d,l)=>'<td>'+esc(d.v.number)+'</td><td>'+esc(ddmmyyyy(d.v.date))+'</td>'+m(d.value)+'<td>'+esc(stateLabel(d.pos))+'</td><td class="r">'+l.rate+'</td>'+m(l.taxable)+m(l.igst)+m(l.cess));
-   body=R.T.rows?'<table class="mrp-table"><thead><tr><th>Invoice No.</th><th>Date</th><th class="r">Invoice Value</th><th>Place of Supply</th><th class="r">Rate %</th><th class="r">Taxable</th><th class="r">IGST</th><th class="r">Cess</th></tr></thead><tbody>'+R.h+'<tr class="tot"><td colspan="5">Total</td>'+m(r2(R.T.taxable))+m(r2(R.T.igst))+m(r2(R.T.cess))+'</tr></tbody></table>':'<div class="mrp-empty">No B2C Large invoices. These are inter-state invoices above ₹ 2,50,000 to unregistered buyers.</div>';
+   body=R.T.rows?'<table class="mrp-table"><thead><tr><th>Invoice No.</th><th>Date</th><th class="r">Invoice Value</th><th>Place of Supply</th><th class="r">Rate %</th><th class="r">Taxable</th><th class="r">IGST</th><th class="r">Cess</th></tr></thead><tbody>'+R.h+'<tr class="tot"><td colspan="5">Total</td>'+m(r2(R.T.taxable))+m(r2(R.T.igst))+m(r2(R.T.cess))+'</tr></tbody></table>':'<div class="mrp-empty">No B2C Large invoices. These are inter-state invoices above ₹ 1,00,000 to unregistered buyers.</div>';
   }else if(tab==='b2cs'){
    const map=new Map();b2cs.forEach(d=>d.lines.forEach(l=>{const k=(d.inter?'inter':'intra')+'|'+norm(d.pos)+'|'+l.rate;const x=map.get(k)||{pos:d.pos,rate:l.rate,taxable:0,igst:0,cgst:0,sgst:0,cess:0};['taxable','igst','cgst','sgst','cess'].forEach(f=>x[f]+=l[f]);map.set(k,x);}));
    const rows=[...map.values()].sort((a,b)=>String(a.pos).localeCompare(String(b.pos))||a.rate-b.rate);const T={taxable:0,igst:0,cgst:0,sgst:0,cess:0};
@@ -9653,11 +9730,12 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
    invAll.forEach(d=>(d.v.items||[]).forEach(i=>{
     const it=B.findItem(c,i.name)||{},hsn=String(it.hsn||'').trim()||'(missing)';if(hsn==='(missing)')missing++;
     const rate=num(i.gst),amt=num(i.amount);let tx=amt;if(d.v.rateInclusive&&rate)tx=amt/(1+rate/100);
-    const tax=tx*rate/100,k=hsn+'|'+(it.uqc||it.primaryUnit||'')+'|'+rate;
-    const x=map.get(k)||{hsn,desc:it.hsnDescription||it.name,uqc:it.uqc||it.primaryUnit||'',rate,qty:0,value:0,taxable:0,igst:0,cgst:0,sgst:0,cess:0};
+    const tax=tx*rate/100,uqc=mapUqc(it.uqc||it.primaryUnit||''),k=hsn+'|'+uqc;
+    const x=map.get(k)||{hsn,desc:it.hsnDescription||it.name,uqc,rate,rateMixed:false,qty:0,value:0,taxable:0,igst:0,cgst:0,sgst:0,cess:0};
+    if(x.rate!==rate)x.rateMixed=true;
     x.qty+=num(i.qty);x.taxable+=tx;x.cess+=tx*num(i.cess)/100;if(d.inter)x.igst+=tax;else{x.cgst+=tax/2;x.sgst+=tax/2;}x.value+=tx+tax+tx*num(i.cess)/100;map.set(k,x);}));
-   const rows=[...map.values()].sort((a,b)=>a.hsn.localeCompare(b.hsn)||a.rate-b.rate);const T={qty:0,value:0,taxable:0,igst:0,cgst:0,sgst:0,cess:0};
-   body=rows.length?'<table class="mrp-table"><thead><tr><th>HSN / SAC</th><th>Description</th><th>UQC</th><th class="r">Rate %</th><th class="r">Total Qty</th><th class="r">Total Value</th><th class="r">Taxable</th><th class="r">IGST</th><th class="r">CGST</th><th class="r">SGST</th><th class="r">Cess</th></tr></thead><tbody>'+rows.map(x=>{Object.keys(T).forEach(f=>T[f]+=x[f]);return '<tr><td>'+esc(x.hsn)+'</td><td>'+esc(x.desc)+'</td><td>'+esc(x.uqc)+'</td><td class="r">'+x.rate+'</td><td class="r">'+String(Math.round(x.qty*1000)/1000)+'</td>'+m(r2(x.value))+m(r2(x.taxable))+m(r2(x.igst))+m(r2(x.cgst))+m(r2(x.sgst))+m(r2(x.cess))+'</tr>';}).join('')+'<tr class="tot"><td colspan="5">Total</td>'+m(r2(T.value))+m(r2(T.taxable))+m(r2(T.igst))+m(r2(T.cgst))+m(r2(T.sgst))+m(r2(T.cess))+'</tr></tbody></table>'+(missing?'<div class="mrp-empty" style="padding:8px 14px;font-size:11px;text-align:left;color:#8a5a00">'+missing+' invoice line'+(missing>1?'s have':' has')+' an item without HSN. Add the HSN in the Stock Item master.</div>':''):'<div class="mrp-empty">No itemised sales in this period.</div>';
+   const rows=[...map.values()].map(x=>{if(x.rateMixed)x.rate=null;return x;}).sort((a,b)=>a.hsn.localeCompare(b.hsn)||String(a.uqc).localeCompare(String(b.uqc))||((a.rate||0)-(b.rate||0)));const T={qty:0,value:0,taxable:0,igst:0,cgst:0,sgst:0,cess:0};
+   body=rows.length?'<table class="mrp-table"><thead><tr><th>HSN / SAC</th><th>Description</th><th>UQC</th><th class="r">Rate %</th><th class="r">Total Qty</th><th class="r">Total Value</th><th class="r">Taxable</th><th class="r">IGST</th><th class="r">CGST</th><th class="r">SGST</th><th class="r">Cess</th></tr></thead><tbody>'+rows.map(x=>{Object.keys(T).forEach(f=>T[f]+=x[f]);return '<tr><td>'+esc(x.hsn)+'</td><td>'+esc(x.desc)+'</td><td>'+esc(x.uqc)+'</td><td class="r">'+(x.rate===null?'—':x.rate)+'</td><td class="r">'+String(Math.round(x.qty*1000)/1000)+'</td>'+m(r2(x.value))+m(r2(x.taxable))+m(r2(x.igst))+m(r2(x.cgst))+m(r2(x.sgst))+m(r2(x.cess))+'</tr>';}).join('')+'<tr class="tot"><td colspan="5">Total</td>'+m(r2(T.value))+m(r2(T.taxable))+m(r2(T.igst))+m(r2(T.cgst))+m(r2(T.sgst))+m(r2(T.cess))+'</tr></tbody></table>'+(missing?'<div class="mrp-empty" style="padding:8px 14px;font-size:11px;text-align:left;color:#8a5a00">'+missing+' invoice line'+(missing>1?'s have':' has')+' an item without HSN. Add the HSN in the Stock Item master.</div>':''):'<div class="mrp-empty">No itemised sales in this period.</div>';
   }else{
    const R=rowsOf(cn,(d,l)=>'<td>'+esc(d.gstin||'Unregistered')+'</td><td>'+esc(d.party)+'</td><td>'+esc(d.v.number)+'</td><td>'+esc(ddmmyyyy(d.v.date))+'</td><td>Credit Note</td>'+m(d.value)+'<td>'+esc(stateLabel(d.pos))+'</td><td class="r">'+l.rate+'</td>'+m(l.taxable)+m(l.igst)+m(l.cgst)+m(l.sgst)+m(l.cess));
    body=R.T.rows?'<table class="mrp-table"><thead><tr><th>GSTIN / UIN</th><th>Party</th><th>Note No.</th><th>Date</th><th>Note Type</th><th class="r">Note Value</th><th>Place of Supply</th><th class="r">Rate %</th><th class="r">Taxable</th><th class="r">IGST</th><th class="r">CGST</th><th class="r">SGST</th><th class="r">Cess</th></tr></thead><tbody>'+R.h+'<tr class="tot"><td colspan="8">Total</td>'+m(r2(R.T.taxable))+m(r2(R.T.igst))+m(r2(R.T.cgst))+m(r2(R.T.sgst))+m(r2(R.T.cess))+'</tr></tbody></table>':'<div class="mrp-empty">No Credit Notes in this period.</div>';
@@ -9818,7 +9896,7 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
     const zero=its.filter(i=>{const it=B.findItem(c,i.name)||{};return num(i.gst)===0&&(!it.taxability||it.taxability==='taxable');}).map(i=>i.name);
     if(zero.length)add('warn',v,'0% GST rate on taxable item: '+zero.slice(0,3).join(', ')+'. Check the item\'s tax rate.');
     const inter=v.gst?v.gst.place==='inter':false;
-    if(t==='Sales'&&!gstin&&inter&&num(v.total)>250000)add('warn',v,'Inter-state sale above ₹ 2,50,000 to an unregistered party: it is reported in B2C Large with its place of supply.');
+    if(t==='Sales'&&!gstin&&inter&&num(v.total)>100000)add('warn',v,'Inter-state sale above ₹ 1,00,000 to an unregistered party: it is reported in B2C Large with its place of supply.');
     const d=v.dispatch||{};
     if(t==='Sales'&&num(v.total)>50000&&!(d.vehicleNo||d.lrNo))add('warn',v,'Invoice above ₹ 50,000 has no vehicle / transport details for the e-Way Bill.');
    }else{
@@ -9863,9 +9941,13 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
  /* ---------- GSTR-1: section-wise summary (like the portal) ---------- */
  const G1_LBL={nil:'8 — Nil Rated, Exempted and Non-GST Outward Supplies',b2b:'4A, 4B, 4C, 6B, 6C — B2B Invoices',b2cl:'5 — B2C (Large) Invoices',b2cs:'7 — B2C (Small) Summary',hsn:'12 — HSN-wise Summary of Outward Supplies',cdn:'9B — Credit / Debit Notes'};
  const lsum=arr=>{const T={n:arr.length,value:0,taxable:0,igst:0,cgst:0,sgst:0,cess:0};arr.forEach(d=>{T.value+=d.value;d.lines.forEach(l=>{T.taxable+=l.taxable;T.igst+=l.igst;T.cgst+=l.cgst;T.sgst+=l.sgst;T.cess+=l.cess;});});Object.keys(T).forEach(k=>{if(k!=='n')T[k]=r2(T[k]);});return T;};
+ /* UQC — official GSTN 45-code list (offline-tool workbook template, master sheet): BAG BAL BDL BKL BOU BOX BTL BUN CAN CBM CCM CMS CTN DOZ DRM GGK GMS GRS GYD KGS KLR KME MLT MTR MTS NOS PAC PCS PRS QTL ROL SET SQF SQM SQY TBS TGM THD TON TUB UGS UNT YDS OTH. There is NO official code for litres (LTR) — such units pass through unchanged so the user can see and correct them on the stock item. */
+ const UQC_MAP={BAG:'BAG',BAGS:'BAG',BAL:'BAL',BALE:'BAL',BALES:'BAL',BDL:'BDL',BUNDLE:'BDL',BUNDLES:'BDL',BKL:'BKL',BUCKLE:'BKL',BUCKLES:'BKL',BOU:'BOU',BILLIONUNITS:'BOU',BOX:'BOX',BOXES:'BOX',BTL:'BTL',BOTTLE:'BTL',BOTTLES:'BTL',BUN:'BUN',BUNCH:'BUN',BUNCHES:'BUN',CAN:'CAN',CANS:'CAN',CBM:'CBM',CUBICMETER:'CBM',CUBICMETRE:'CBM',CUBICMETERS:'CBM',CUBICMETRES:'CBM',CCM:'CCM',CUBICCENTIMETER:'CCM',CUBICCENTIMETRE:'CCM',CMS:'CMS',CM:'CMS',CENTIMETER:'CMS',CENTIMETRE:'CMS',CENTIMETERS:'CMS',CENTIMETRES:'CMS',CTN:'CTN',CARTON:'CTN',CARTONS:'CTN',DOZ:'DOZ',DOZEN:'DOZ',DOZENS:'DOZ',DZN:'DOZ',DRM:'DRM',DRUM:'DRM',DRUMS:'DRM',GGK:'GGK',GREATGROSS:'GGK',GMS:'GMS',G:'GMS',GM:'GMS',GRAM:'GMS',GRAMS:'GMS',GRS:'GRS',GROSS:'GRS',GYD:'GYD',GROSSYARD:'GYD',GROSSYARDS:'GYD',KGS:'KGS',KG:'KGS',KILOGRAM:'KGS',KILOGRAMS:'KGS',KLR:'KLR',KL:'KLR',KILOLITRE:'KLR',KILOLITER:'KLR',KILOLITRES:'KLR',KILOLITERS:'KLR',KME:'KME',KM:'KME',KILOMETER:'KME',KILOMETRE:'KME',KILOMETERS:'KME',KILOMETRES:'KME',MLT:'MLT',ML:'MLT',MILLILITRE:'MLT',MILLILITER:'MLT',MILLILITRES:'MLT',MILLILITERS:'MLT',MTR:'MTR',M:'MTR',METER:'MTR',METRE:'MTR',METERS:'MTR',METRES:'MTR',MTS:'MTS',MT:'MTS',METRICTON:'MTS',METRICTONNE:'MTS',NOS:'NOS',NO:'NOS',NUMBER:'NOS',NUMBERS:'NOS',PAC:'PAC',PACK:'PAC',PACKS:'PAC',PACKET:'PAC',PACKETS:'PAC',PKT:'PAC',PCS:'PCS',PC:'PCS',PIECE:'PCS',PIECES:'PCS',PRS:'PRS',PAIR:'PRS',PAIRS:'PRS',QTL:'QTL',QUINTAL:'QTL',QUINTALS:'QTL',ROL:'ROL',ROLL:'ROL',ROLLS:'ROL',SET:'SET',SETS:'SET',SQF:'SQF',SQFT:'SQF',SQUAREFEET:'SQF',SQUAREFOOT:'SQF',SQM:'SQM',SQMETER:'SQM',SQMETRE:'SQM',SQUAREMETER:'SQM',SQUAREMETRE:'SQM',SQY:'SQY',SQYARD:'SQY',SQUAREYARD:'SQY',SQUAREYARDS:'SQY',TBS:'TBS',TABLET:'TBS',TABLETS:'TBS',TGM:'TGM',TENGROSS:'TGM',THD:'THD',THOUSAND:'THD',THOUSANDS:'THD',TON:'TON',TONNE:'TON',TONNES:'TON',TUB:'TUB',TUBE:'TUB',TUBES:'TUB',UGS:'UGS',USGALLON:'UGS',USGALLONS:'UGS',UNT:'UNT',UNIT:'UNT',UNITS:'UNT',YDS:'YDS',YARD:'YDS',YARDS:'YDS',OTH:'OTH',OTHER:'OTH',OTHERS:'OTH'};
+ function mapUqc(u){const k=String(u||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(!k)return 'OTH';return UQC_MAP[k]||String(u||'').toUpperCase();}
+ window.mayaMapUqc=mapUqc;
  function g1Parts(c,from,to){
   const D=gstData(c,from,to),invAll=D.filter(d=>!d.cn),inv=invAll.filter(d=>d.lines.length),cn=D.filter(d=>d.cn&&d.lines.length),b2c=inv.filter(d=>!d.gstin);
-  const b2cl=b2c.filter(d=>d.inter&&d.value>250000),b2cs=b2c.filter(d=>!(d.inter&&d.value>250000));
+  const b2cl=b2c.filter(d=>d.inter&&d.value>100000),b2cs=b2c.filter(d=>!(d.inter&&d.value>100000));
   /* inv / cn carry tax lines only; invAll feeds HSN and documents issued; nilD feeds Table 8 */
   return {inv,invAll,cn,nilD:D.filter(d=>d.nil.total>0),b2b:inv.filter(d=>d.gstin),b2cl,b2cs,cnr:cn.filter(d=>d.gstin),cnu:cn.filter(d=>!d.gstin)};
  }
@@ -9873,10 +9955,11 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
   const map=new Map();
   inv.forEach(d=>(d.v.items||[]).forEach(i=>{
    const it=B.findItem(c,i.name)||{},hsn=String(it.hsn||'').trim()||'',rate=num(i.gst),amt=num(i.amount);let tx=amt;if(d.v.rateInclusive&&rate)tx=amt/(1+rate/100);
-   const tax=tx*rate/100,uqc=String(it.uqc||it.primaryUnit||'OTH').toUpperCase(),k=hsn+'|'+uqc+'|'+rate;
-   const x=map.get(k)||{hsn,desc:it.hsnDescription||it.name,uqc,rate,qty:0,value:0,taxable:0,igst:0,cgst:0,sgst:0,cess:0};
+   const tax=tx*rate/100,uqc=mapUqc(it.uqc||it.primaryUnit||'OTH'),k=hsn+'|'+uqc;
+   const x=map.get(k)||{hsn,desc:it.hsnDescription||it.name,uqc,rate,rateMixed:false,qty:0,value:0,taxable:0,igst:0,cgst:0,sgst:0,cess:0};
+   if(x.rate!==rate)x.rateMixed=true;
    const cs=tx*num(i.cess)/100;x.qty+=num(i.qty);x.taxable+=tx;x.cess+=cs;if(d.inter)x.igst+=tax;else{x.cgst+=tax/2;x.sgst+=tax/2;}x.value+=tx+tax+cs;map.set(k,x);}));
-  return [...map.values()].sort((a,b)=>a.hsn.localeCompare(b.hsn)||a.rate-b.rate);
+  return [...map.values()].map(x=>{if(x.rateMixed)x.rate=null;return x;}).sort((a,b)=>a.hsn.localeCompare(b.hsn)||String(a.uqc).localeCompare(String(b.uqc)));
  }
  V.gstr1=function(cur){
   const c=cid(),R=rng(cur);st.sel=[];
@@ -9892,7 +9975,7 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
   let h='<div class="mrp-cards">'+card('Invoices',all.n)+card('Taxable value',fmt(all.taxable))+card('Credit notes',cn.n+' · '+fmt(cn.taxable))+card('Net taxable value',fmt(net.taxable))+card('Net tax liability',fmt(net.tax))+'</div>';
   h+=tbl(['Table','<Description','Records','Invoice Value','Taxable Value','IGST','CGST','SGST / UTGST','Cess'],
    sec('4A','Taxable outward supplies to registered persons (B2B)',tb,'b2b')
-   +sec('5','Taxable outward inter-state supplies to unregistered persons, invoice value above ₹ 2.5 lakh (B2C Large)',tl,'b2cl')
+   +sec('5','Taxable outward inter-state supplies to unregistered persons, invoice value above ₹ 1 lakh (B2C Large)',tl,'b2cl')
    +sec('7','Taxable supplies to unregistered persons, other than B2C Large (B2C Small)',ts,'b2cs')
    +sec('9B','Credit / Debit Notes — registered persons',tr,'cdn')
    +sec('9B','Credit / Debit Notes — unregistered persons',tu,'cdn')
@@ -9919,28 +10002,31 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
   if(e.length&&!window.confirm(e.length+' error'+(e.length>1?'s were':' was')+' found in the vouchers of this month (see Track GST Return Activities).\n\nExport anyway?'))return null;
   return {c,gstin:g};
  }
+ /* Aggregate turnover = outward supplies (Sales less Credit Notes, invoice values) in a financial year. gt is the preceding FY; if the books have no preceding-FY sales it falls back to the current FY, so the return never carries a 0 turnover when sales exist. */
+ function fyTurnover(c,from,to){let t=0;B.vouchers(c).forEach(v=>{if(!live(v)||!inRange(v,from,to))return;if(v.type==='Sales')t+=num(v.total);else if(v.type==='Credit Note')t-=num(v.total);});return r2(t);}
  function buildGstr1(c,gstin,from,to){
   const P=g1Parts(c,from,to);
   const itms=d=>d.lines.map((l,i)=>{const x={rt:l.rate,txval:r0(l.taxable)};if(d.inter)x.iamt=r0(l.igst);else{x.camt=r0(l.cgst);x.samt=r0(l.sgst);}x.csamt=r0(l.cess);return {num:i+1,itm_det:x};});
   const group=(arr,keyFn,mk)=>{const m=new Map();arr.forEach(d=>{const k=keyFn(d);if(!m.has(k))m.set(k,[]);m.get(k).push(mk(d));});return m;};
-  const o={gstin,fp:fpOf(to),version:'GST3.1.6',hash:'hash',gt:0,cur_gt:0};
+  const fy0=B.fyStart(to),fyY=+fy0.slice(0,4),curGt=fyTurnover(c,fy0,(fyY+1)+'-03-31'),prevGt=fyTurnover(c,(fyY-1)+'-04-01',fyY+'-03-31');
+  const o={gstin,fp:fpOf(to),version:'GST3.2.4',hash:'hash',gt:prevGt>0?prevGt:curGt,cur_gt:curGt};
   const b2b=[];group(P.b2b,d=>d.gstin,d=>({inum:String(d.v.number),idt:ddmm(d.v.date),val:r0(d.value),pos:posOf(d.pos),rchrg:'N',inv_typ:'R',itms:itms(d)})).forEach((inv,ctin)=>b2b.push({ctin,inv}));
   if(b2b.length)o.b2b=b2b;
   const b2cl=[];group(P.b2cl,d=>posOf(d.pos),d=>({inum:String(d.v.number),idt:ddmm(d.v.date),val:r0(d.value),itms:itms(d).map(x=>({num:x.num,itm_det:{rt:x.itm_det.rt,txval:x.itm_det.txval,iamt:x.itm_det.iamt||0,csamt:x.itm_det.csamt}}))})).forEach((inv,pos)=>b2cl.push({pos,inv}));
   if(b2cl.length)o.b2cl=b2cl;
   const cs=new Map(),addCs=(d,sg)=>d.lines.forEach(l=>{const k=(d.inter?'INTER':'INTRA')+'|'+posOf(d.pos)+'|'+l.rate;const x=cs.get(k)||{sply_ty:d.inter?'INTER':'INTRA',rt:l.rate,typ:'OE',pos:posOf(d.pos),txval:0,iamt:0,camt:0,samt:0,csamt:0};x.txval+=sg*l.taxable;x.iamt+=sg*l.igst;x.camt+=sg*l.cgst;x.samt+=sg*l.sgst;x.csamt+=sg*l.cess;cs.set(k,x);});
-  P.b2cs.forEach(d=>addCs(d,1));P.cnu.filter(d=>!(d.inter&&d.value>250000)).forEach(d=>addCs(d,-1));
+  P.b2cs.forEach(d=>addCs(d,1));P.cnu.filter(d=>!(d.inter&&d.value>100000)).forEach(d=>addCs(d,-1));
   const b2cs=[...cs.values()].map(x=>{['txval','iamt','camt','samt','csamt'].forEach(k=>x[k]=r0(x[k]));return x;});
   if(b2cs.length)o.b2cs=b2cs;
   const cdnr=[];group(P.cnr,d=>d.gstin,d=>({ntty:'C',nt_num:String(d.v.number),nt_dt:ddmm(d.v.date),val:r0(d.value),pos:posOf(d.pos),rchrg:'N',inv_typ:'R',itms:itms(d)})).forEach((nt,ctin)=>cdnr.push({ctin,nt}));
   if(cdnr.length)o.cdnr=cdnr;
-  const cdnur=P.cnu.filter(d=>d.inter&&d.value>250000).map(d=>({typ:'B2CL',ntty:'C',nt_num:String(d.v.number),nt_dt:ddmm(d.v.date),val:r0(d.value),pos:posOf(d.pos),itms:itms(d).map(x=>({num:x.num,itm_det:{rt:x.itm_det.rt,txval:x.itm_det.txval,iamt:x.itm_det.iamt||0,csamt:x.itm_det.csamt}}))}));
+  const cdnur=P.cnu.filter(d=>d.inter&&d.value>100000).map(d=>({typ:'B2CL',ntty:'C',nt_num:String(d.v.number),nt_dt:ddmm(d.v.date),val:r0(d.value),itms:itms(d).map(x=>({num:x.num,itm_det:{rt:x.itm_det.rt,txval:x.itm_det.txval,iamt:x.itm_det.iamt||0,csamt:x.itm_det.csamt}}))}));
   if(cdnur.length)o.cdnur=cdnur;
   const nilMap=new Map();
   P.nilD.forEach(d=>{const g=d.cn?-1:1,k=(d.inter?'INTR':'INTRA')+(d.gstin?'B2B':'B2C'),x=nilMap.get(k)||{sply_ty:k,expt_amt:0,nil_amt:0,ngsup_amt:0};x.expt_amt+=g*d.nil.exempt;x.nil_amt+=g*d.nil.nil;x.ngsup_amt+=g*d.nil.nongst;nilMap.set(k,x);});
   if(nilMap.size)o.nil={inv:[...nilMap.values()].map(x=>({sply_ty:x.sply_ty,expt_amt:r0(x.expt_amt),nil_amt:r0(x.nil_amt),ngsup_amt:r0(x.ngsup_amt)}))};
   const hs=hsnRows(c,P.invAll);
-  if(hs.length)o.hsn={data:hs.map((x,i)=>({num:i+1,hsn_sc:x.hsn,desc:String(x.desc||'').slice(0,30),uqc:x.uqc,qty:r0(x.qty),val:r0(x.value),txval:r0(x.taxable),iamt:r0(x.igst),camt:r0(x.cgst),samt:r0(x.sgst),csamt:r0(x.cess),rt:x.rate}))};
+  if(hs.length)o.hsn={data:hs.map((x,i)=>({num:i+1,hsn_sc:x.hsn,desc:String(x.desc||'').slice(0,30),uqc:x.uqc,qty:r0(x.qty),val:r0(x.value),txval:r0(x.taxable),iamt:r0(x.igst),camt:r0(x.cgst),samt:r0(x.sgst),csamt:r0(x.cess)}))};
   const docs=[];
   const dn=(num_,list)=>{if(!list.length)return;const s=list.slice().sort((a,b)=>(a.serial||0)-(b.serial||0)||byDate(a,b));const cancel=s.filter(v=>v.cancelled).length;docs.push({doc_num:num_,docs:[{num:1,from:String(s[0].number),to:String(s[s.length-1].number),totnum:s.length,cancel,net_issue:s.length-cancel}]});};
   const all=B.vouchers(c).filter(v=>inRange(v,from,to));
@@ -10031,11 +10117,11 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
  const keyOf=k=>'mayaacc_gstr'+k+'_'+cid();
  const loadK=k=>{try{return JSON.parse(localStorage.getItem(keyOf(k))||'null')}catch(e){return null}};
  const normInv=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'').replace(/^0+/,'');
- function parseB2B(json){
+ function parseB2B(json,kind){
   const root=json&&(json.data&&json.data.docdata?json.data.docdata:(json.docdata||json));
-  const b2b=root&&root.b2b;if(!Array.isArray(b2b))return null;
+  if(!root||typeof root!=='object')return null;
   const rows=[];
-  b2b.forEach(s=>(s.inv||[]).forEach(i=>{
+  (Array.isArray(root.b2b)?root.b2b:[]).forEach(s=>(s.inv||[]).forEach(i=>{
    let tx=0,ig=0,cg=0,sg=0,cs=0;
    const arr=Array.isArray(i.items)&&i.items.length?i.items:(Array.isArray(i.itms)&&i.itms.length?i.itms.map(z=>z.itm_det||z):null);
    const pick=(x,a,b)=>num(x[a]!==undefined?x[a]:x[b]);
@@ -10043,7 +10129,21 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
    else{tx=num(i.txval);ig=pick(i,'igst','iamt');cg=pick(i,'cgst','camt');sg=pick(i,'sgst','samt');cs=pick(i,'cess','csamt');}
    rows.push({gstin:String(s.ctin||'').toUpperCase(),name:s.trdnm||s.tradeName||'',inv:String(i.inum||''),date:String(i.dt||i.idt||''),value:num(i.val),taxable:r2(tx),tax:r2(ig+cg+sg+cs),itcAvl:i.itcavl!=='N'});
   }));
-  return {importedAt:new Date().toISOString(),period:String((json.data&&json.data.rtnprd)||json.rtnprd||json.fp||''),rows};
+  /* Supplier credit/debit notes (2A/2B cdnr) — same row shape as an invoice, kind 'cdnr'. NOT parsed for GSTR-1 files (kind '1'): there cdnr means outward notes, a different thing. */
+  const cdnr=[];
+  if(kind!=='1'&&Array.isArray(root.cdnr))root.cdnr.forEach(s=>(s.nt||[]).forEach(n=>{
+   let tx=0,ig=0,cg=0,sg=0,cs=0;
+   const arr=Array.isArray(n.itms)&&n.itms.length?n.itms.map(z=>z.itm_det||z):(Array.isArray(n.items)&&n.items.length?n.items:null);
+   const pick=(x,a,b)=>num(x[a]!==undefined?x[a]:x[b]);
+   if(arr)arr.forEach(x=>{tx+=num(x.txval);ig+=pick(x,'igst','iamt');cg+=pick(x,'cgst','camt');sg+=pick(x,'sgst','samt');cs+=pick(x,'cess','csamt');});
+   else{tx=num(n.txval);ig=pick(n,'igst','iamt');cg=pick(n,'cgst','camt');sg=pick(n,'sgst','samt');cs=pick(n,'cess','csamt');}
+   cdnr.push({gstin:String(s.ctin||'').toUpperCase(),name:s.trdnm||s.tradeName||'',inv:String(n.nt_num||''),date:String(n.nt_dt||''),value:num(n.val),taxable:r2(tx),tax:r2(ig+cg+sg+cs),ntty:n.ntty||'C',kind:'cdnr'});
+  }));
+  /* Sections the app cannot use yet — named in the import message instead of silently dropped. */
+  const ignored=[];
+  if(kind!=='1')['b2ba','b2bcd','cdnra','isd','impg','impgsez','tds','tcs'].forEach(s=>{if(Array.isArray(root[s])&&root[s].length)ignored.push(s);});
+  if(!rows.length&&!cdnr.length)return null;
+  return {importedAt:new Date().toISOString(),period:String((json.data&&json.data.rtnprd)||json.rtnprd||json.fp||''),rows,cdnr,ignored};
  }
  const d2b=s=>{const m=/^(\d{2})-(\d{2})-(\d{4})$/.exec(s);return m?m[3]+'-'+m[2]+'-'+m[1]:s;};
  const fileIn=document.createElement('input');fileIn.type='file';fileIn.accept='.json,application/json';fileIn.style.display='none';document.body.appendChild(fileIn);
@@ -10053,9 +10153,9 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
   const f=fileIn.files[0];fileIn.value='';if(!f)return;const kind=importKind,L=KL[kind];
   const r=new FileReader();
   r.onload=()=>{let j;try{j=JSON.parse(r.result)}catch(e){C.banner('The file could not be read: it is not valid JSON.');return}
-   const p=parseB2B(j);if(!p||!p.rows.length){C.banner('This does not look like a '+L+' JSON file (no B2B invoices found).');return;}
+   const p=parseB2B(j,kind);if(!p||(!p.rows.length&&!(p.cdnr||[]).length)){C.banner('This does not look like a '+L+' JSON file (no B2B invoices or credit notes found).');return;}
    if(!saveJSON(keyOf(kind),p))return;
-   C.banner('');C.render(true);if(window.mayaToast)mayaToast(L+' imported: '+p.rows.length+' invoices.');};
+   C.banner('');C.render(true);if(window.mayaToast){const parts=[];if(p.rows.length)parts.push(p.rows.length+' invoice'+(p.rows.length===1?'':'s'));if((p.cdnr||[]).length)parts.push((p.cdnr||[]).length+' credit note'+((p.cdnr||[]).length===1?'':'s'));let m=L+' imported: '+parts.join(', ')+'.';if((p.ignored||[]).length)m+=' Not imported from this file: '+p.ignored.join(', ')+' (not supported yet).';mayaToast(m);}};
   r.readAsText(f);
  });
  const VIEW_KIND={gstr1rec:'1',gstr2a:'2a',gstr2b:'2b',ims:'2b'};
@@ -10076,6 +10176,9 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
   if(kind==='1')return gstData(c,'0000-01-01','9999-12-31').filter(d=>!d.cn&&d.gstin).map(d=>({v:d.v,gstin:d.gstin,inv:String(d.v.number),party:d.party,value:d.value,tax:r2(d.lines.reduce((a,l)=>a+gstTax(l),0))}));
   return B.vouchers(c).filter(v=>v.type==='Purchase'&&live(v)).map(v=>{const l=B.find(c,v.party)||{};return {v,gstin:String(l.gstin||'').toUpperCase(),inv:String((v.reference&&typeof v.reference==='object'?v.reference.no:v.reference)||v.number),party:v.party,value:num(v.total),tax:v.gst?num(v.gst.tax):0};});
  }
+ function dnBooksFor(c){
+  return B.vouchers(c).filter(v=>v.type==='Debit Note'&&live(v)).map(v=>{const l=B.find(c,v.party)||{};return {v,gstin:String(l.gstin||'').toUpperCase(),inv:String((v.reference&&typeof v.reference==='object'?v.reference.no:v.reference)||v.number),party:v.party,value:num(v.total),tax:v.gst?num(v.gst.tax):0};});
+ }
  function reconcile(imp,books){
   const used=new Set(),rows=[];
   imp.rows.forEach(r=>{
@@ -10090,19 +10193,24 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
   const other=out?'Portal':L;
   $('mrp-title').textContent=L+' Reconciliation';$('mrp-crumb').textContent=(out?'Sales in your books compared with the GSTR-1 file from the GST portal':'Purchases in your books compared with the '+L+' file from the GST portal')+' · press I to import a '+L+' JSON file';
   const imp=loadK(kind);
-  if(!imp||!imp.rows.length){empty('No '+L+' file imported yet.<br><br>Download the '+L+' JSON file from the GST portal, then press <b>I</b> here to import it.<br>Invoices are matched on '+(out?'customer':'supplier')+' GSTIN and invoice number.'+(out?'':'<br>Enter the supplier\'s invoice number in the voucher\'s Reference No. (F12 → Provide Reference No. and Date); otherwise the voucher number is used.'));return;}
+  if(!imp||(!imp.rows.length&&!(imp.cdnr||[]).length)){empty('No '+L+' file imported yet.<br><br>Download the '+L+' JSON file from the GST portal, then press <b>I</b> here to import it.<br>Invoices are matched on '+(out?'customer':'supplier')+' GSTIN and invoice number.'+(out?'':'<br>Enter the supplier\'s invoice number in the voucher\'s Reference No. (F12 → Provide Reference No. and Date); otherwise the voucher number is used.'));return;}
   const books=booksFor(kind,c),R=reconcile(imp,books),rows=R.rows;
   const lbl=out?'Missing in portal':'Missing in '+L;
-  books.filter(x=>x.gstin&&!R.used.has(x.v.id)&&inRange(x.v,st.from,st.to)).forEach(b=>rows.push({status:lbl,r:null,b}));
+  if(imp.rows.length)books.filter(x=>x.gstin&&!R.used.has(x.v.id)&&inRange(x.v,st.from,st.to)).forEach(b=>rows.push({status:lbl,r:null,b}));
+  if(!out){
+   const cdnrRows=imp.cdnr||[],dnb=dnBooksFor(c),dnR=reconcile({rows:cdnrRows},dnb);
+   dnR.rows.forEach(x=>{x.kind='cdnr';rows.push(x);});
+   if(cdnrRows.length)dnb.filter(x=>x.gstin&&!dnR.used.has(x.v.id)&&inRange(x.v,st.from,st.to)).forEach(b=>rows.push({status:lbl,r:null,b,kind:'cdnr'}));
+  }
   const cnt=s=>rows.filter(x=>x.status===s).length;
   const taxFile=r2((out?imp.rows:imp.rows.filter(r=>r.itcAvl)).reduce((a,r)=>a+r.tax,0)),taxBooks=r2(books.filter(x=>x.gstin&&inRange(x.v,st.from,st.to)).reduce((a,x)=>a+x.tax,0));
   const chip={'Matched':'ok','Mismatch':'warn','Missing in books':'bad'};chip[lbl]='bad';
   const cards='<div class="mrp-cards"><div class="mrp-card"><span>'+(out?'Tax as per GSTR-1 file':'ITC as per '+L)+'</span><b>'+fmt(taxFile)+'</b></div><div class="mrp-card"><span>'+(out?'Tax as per books':'ITC as per books')+' ('+ddmmyyyy(st.from)+' to '+ddmmyyyy(st.to)+')</span><b>'+fmt(taxBooks)+'</b></div><div class="mrp-card"><span>Matched</span><b>'+cnt('Matched')+'</b></div><div class="mrp-card"><span>Mismatch</span><b>'+cnt('Mismatch')+'</b></div><div class="mrp-card"><span>Missing in books</span><b>'+cnt('Missing in books')+'</b></div><div class="mrp-card"><span>'+lbl+'</span><b>'+cnt(lbl)+'</b></div></div>';
   const order={'Mismatch':0,'Missing in books':1};order[lbl]=2;order['Matched']=3;rows.sort((a,b)=>order[a.status]-order[b.status]);
   const h=rows.map(x=>{const r=x.r,b=x.b;if(b)st.sel.push({kind:'voucher',id:b.v.id});
-   return '<tr'+(b?' data-i="'+(st.sel.length-1)+'"':'')+'><td><span class="mrp-chip '+chip[x.status]+'">'+x.status+'</span></td><td>'+esc(r?r.gstin:b.gstin)+'</td><td>'+esc(r&&r.name?r.name:(b?b.party:''))+'</td><td>'+esc(r?r.inv:b.inv)+'</td><td>'+esc(ddmmyyyy(r?d2b(r.date):b.v.date))+'</td><td class="r">'+(r?fmt(r.value):'')+'</td><td class="r">'+(b?fmt(b.value):'')+'</td><td class="r">'+(r?fmt(r.tax):'')+'</td><td class="r">'+(b?fmt(b.tax):'')+'</td><td class="r">'+(r&&b?fmt(r2(r.tax-b.tax)):'')+'</td></tr>';}).join('');
-  $('mrp-body').innerHTML=cards+tbl(['Status','<'+(out?'Customer GSTIN':'Supplier GSTIN'),'<'+(out?'Customer':'Supplier'),'<Invoice No.','<Date','Value ('+other+')','Value (Books)','Tax ('+other+')','Tax (Books)','Tax Difference'],h)
-   +note('Imported '+esc(new Date(imp.importedAt).toLocaleString('en-IN'))+(imp.period?' · period '+esc(imp.period):'')+' · '+imp.rows.length+' B2B invoices. Amounts within ₹ 1 are treated as matching. Enter opens the voucher.');
+   return '<tr'+(x.kind==='cdnr'?' data-kind="cdnr"':'')+(b?' data-i="'+(st.sel.length-1)+'"':'')+'><td><span class="mrp-chip '+chip[x.status]+'">'+x.status+'</span></td><td>'+esc(r?r.gstin:b.gstin)+'</td><td>'+esc(r&&r.name?r.name:(b?b.party:''))+'</td><td>'+esc(r?r.inv:b.inv)+'</td><td>'+esc(ddmmyyyy(r?d2b(r.date):b.v.date))+'</td><td class="r">'+(r?fmt(r.value):'')+'</td><td class="r">'+(b?fmt(b.value):'')+'</td><td class="r">'+(r?fmt(r.tax):'')+'</td><td class="r">'+(b?fmt(b.tax):'')+'</td><td class="r">'+(r&&b?fmt(r2(r.tax-b.tax)):'')+'</td><td>'+(x.kind==='cdnr'?'Credit Note':'Invoice')+'</td></tr>';}).join('');
+  $('mrp-body').innerHTML=cards+tbl(['Status','<'+(out?'Customer GSTIN':'Supplier GSTIN'),'<'+(out?'Customer':'Supplier'),'<Invoice No.','<Date','Value ('+other+')','Value (Books)','Tax ('+other+')','Tax (Books)','Tax Difference','<Type'],h)
+   +note('Imported '+esc(new Date(imp.importedAt).toLocaleString('en-IN'))+(imp.period?' · period '+esc(imp.period):'')+' · '+imp.rows.length+' B2B invoices'+((imp.cdnr||[]).length?' · '+(imp.cdnr||[]).length+' supplier credit note'+((imp.cdnr||[]).length===1?'':'s'):'')+((imp.ignored||[]).length?' · Sections in this file that were not imported: '+esc(imp.ignored.join(', '))+' (not supported yet).':'')+'. Amounts within ₹ 1 are treated as matching. Enter opens the voucher.');
  };
  META.gstr1rec={};META.gstr2a={};META.gstr2b={};
  ['gstr1rec','gstr2a','gstr2b'].forEach(n=>META[n].noJson=true);
@@ -10710,7 +10818,7 @@ const ROWS=[
  {col:0,sec:'Accounting'},
  {k:'billWise',l:'Maintain bill-wise details',n:'Bill allocation prompt on Receipt / Payment'},
  {k:'costCentres',l:'Enable cost centres'},
- {k:'interest',l:'Enable interest calculation',more:1},
+ {k:'interest',l:'Enable interest calculation',more:1,sub:'interest',subl:'Set / alter interest details'},
  {k:'budgets',l:'Maintain budgets and controls',more:1},
  {k:'multiCur',l:'Enable multi-currency',more:2},
  {col:0,sec:'Inventory'},
@@ -10723,14 +10831,14 @@ const ROWS=[
  {info:'gst'},
  {k:'einv',l:'Enable e-Invoicing',sub:'einv',subl:'Set / alter e-Invoice details'},
  {k:'ewb',l:'Enable e-Way Bill',sub:'ewb',subl:'Set / alter e-Way Bill details'},
- {k:'tds',l:'Enable Tax Deducted at Source (TDS)',more:2},
- {k:'tcs',l:'Enable Tax Collected at Source (TCS)',more:2},
+ {k:'tds',l:'Enable Tax Deducted at Source (TDS)',more:2,sub:'tds',subl:'Set / alter TDS details'},
+ {k:'tcs',l:'Enable Tax Collected at Source (TCS)',more:2,sub:'tcs',subl:'Set / alter TCS details'},
  {col:1,sec:'Online Access'},
  {text:'MAYAACC runs in the browser. No extra set-up is needed for online access.'},
  {col:1,sec:'Others'},
  {k:'msme',l:'Registered under MSME (Udyam)',sub:'udyam',subl:'Set / alter Udyam details'}
 ];
-const WIRED={billWise:1,discount:1,einv:1,ewb:1,msme:1};
+const WIRED={billWise:1,costCentres:1,godowns:1,discount:1,bom:1,interest:1,budgets:1,tds:1,tcs:1,einv:1,ewb:1,msme:1};
 function visible(r,f){const m=r.more||0;return !m||(m===1&&(f.showMore||f.showAll))||(m===2&&f.showAll)}
 function buildItems(){
   const f=S.list.f,items=[],cols=[[],[]];let col=0;
@@ -10749,6 +10857,9 @@ function subSummary(k){
   const f=S.list.f;
   if(k==='einv')return (f.einvCfg.from?'From '+dmy(f.einvCfg.from)+' · ':'From — · ')+f.einvCfg.supply;
   if(k==='ewb')return (f.ewbCfg.from?'From '+dmy(f.ewbCfg.from)+' · ':'')+'Above ₹ '+B().fmt(B().num(f.ewbCfg.threshold));
+  if(k==='tds')return 'Rate '+B().fmt(B().num(f.tdsCfg.rate))+'% · Sec '+esc(f.tdsCfg.section)+(f.tdsCfg.threshold?' · above ₹ '+B().fmt(f.tdsCfg.threshold):' · all payments');
+  if(k==='tcs')return 'Rate '+B().fmt(B().num(f.tcsCfg.rate))+'% · Sec '+esc(f.tcsCfg.section)+(f.tcsCfg.threshold?' · above ₹ '+B().fmt(f.tcsCfg.threshold):' · all sales');
+  if(k==='interest')return 'Interest @ '+B().fmt(B().num(f.interestCfg.rate))+'% p.a. on overdue bills';
   if(k==='udyam')return S.list.co.udyam||'Udyam number not entered';
   return '';
 }
@@ -10881,6 +10992,34 @@ function openSub(k){
         const t=String(v.trId||'').toUpperCase();if(t&&!B().GSTIN_RE.test(t))return {m:'Transporter ID is not a valid GSTIN.',f:'trId'};
         if(v.fromPin&&!/^\d{6}$/.test(v.fromPin))return {m:'PIN code must be 6 digits.',f:'fromPin'};return null},
       onSave:v=>{L.f.ewbCfg=Object.assign({},L.f.ewbCfg,v,{threshold:v.threshold===''?50000:Number(v.threshold),trId:String(v.trId||'').toUpperCase(),intra:v.intra==='Yes',promptAfterSave:v.promptAfterSave==='Yes',printOnInvoice:v.printOnInvoice==='Yes'});L.dirty=true;back()},onCancel:back});
+  }else if(k==='tds'){
+    const c=f.tdsCfg;
+    openForm({title:'TDS details',sub:'Company Features',saveLabel:'Accept',
+      note:'TDS is deducted on Payment vouchers and shown in the TDS Summary report (Display › More Reports).',
+      vals:{rate:c.rate,section:c.section,threshold:c.threshold},
+      fields:[{id:'rate',l:'TDS rate (%)',t:'number',hint:'TDS deducted on payments — default 10%'},
+        {id:'section',l:'Section',hint:'e.g. 194C (contractors), 194J (professional fees)'},
+        {id:'threshold',l:'Apply only above amount (₹, 0 = all)',t:'number',hint:'Payments at or below this amount attract no TDS'}],
+      validate:v=>{if(v.rate!==''&&(!isFinite(Number(v.rate))||Number(v.rate)<0||Number(v.rate)>100))return {m:'Rate must be between 0 and 100.',f:'rate'};return null},
+      onSave:v=>{L.f.tdsCfg=Object.assign({},L.f.tdsCfg,{rate:v.rate===''?10:Number(v.rate),section:String(v.section||'194C').trim()||'194C',threshold:v.threshold===''?0:Number(v.threshold)});L.dirty=true;back()},onCancel:back});
+  }else if(k==='tcs'){
+    const c=f.tcsCfg;
+    openForm({title:'TCS details',sub:'Company Features',saveLabel:'Accept',
+      note:'TCS is collected on Sales vouchers and shown in the TCS Summary report (Display › More Reports).',
+      vals:{rate:c.rate,section:c.section,threshold:c.threshold},
+      fields:[{id:'rate',l:'TCS rate (%)',t:'number',hint:'TCS collected on sales — default 1%'},
+        {id:'section',l:'Section',hint:'e.g. 206C(1H) for sales of goods above the threshold'},
+        {id:'threshold',l:'Apply only above amount (₹, 0 = all)',t:'number',hint:'Sales at or below this amount attract no TCS'}],
+      validate:v=>{if(v.rate!==''&&(!isFinite(Number(v.rate))||Number(v.rate)<0||Number(v.rate)>100))return {m:'Rate must be between 0 and 100.',f:'rate'};return null},
+      onSave:v=>{L.f.tcsCfg=Object.assign({},L.f.tcsCfg,{rate:v.rate===''?1:Number(v.rate),section:String(v.section||'206C(1H)').trim()||'206C(1H)',threshold:v.threshold===''?0:Number(v.threshold)});L.dirty=true;back()},onCancel:back});
+  }else if(k==='interest'){
+    const c=f.interestCfg;
+    openForm({title:'Interest details',sub:'Company Features',saveLabel:'Accept',
+      note:'Interest is shown as a column in Bills Receivable / Bills Payable (Display › Account Books › Statements of Accounts). Formula: pending amount × overdue days × rate ÷ 365.',
+      vals:{rate:c.rate},
+      fields:[{id:'rate',l:'Interest rate (% per year)',t:'number',hint:'Charged on overdue bill amounts — default 18% p.a.'}],
+      validate:v=>{if(v.rate!==''&&(!isFinite(Number(v.rate))||Number(v.rate)<0||Number(v.rate)>100))return {m:'Rate must be between 0 and 100.',f:'rate'};return null},
+      onSave:v=>{L.f.interestCfg=Object.assign({},L.f.interestCfg,{rate:v.rate===''?18:Number(v.rate)});L.dirty=true;back()},onCancel:back});
   }else if(k==='udyam'){
     const c=L.co;
     openForm({title:'Udyam (MSME) details',sub:'Company Features',saveLabel:'Accept',
@@ -18970,6 +19109,34 @@ function dbQty(v){
   }catch(e){}
   return {iq:Math.round(iq*1000)/1000,oq:Math.round(oq*1000)/1000};
 }
+/* ---------- F7 Show Profit / F8 Columnar (2026-11-16) ----------
+   Profit per Sales voucher = sale value ex-GST (taxable) − cost of goods sold.
+   COGS = Σ qty × moving-average cost of the item on the voucher date
+   (avgCostOn, excluding this voucher). Service sales have no stock items,
+   so their whole value is profit (cost 0). Non-sales rows stay blank. */
+var dayProfitOn=false;
+function profitOf(v){
+  if(!v||v.cancelled||v.type!=='Sales')return null;
+  var sale=0;
+  try{sale=v.gst?B().num(v.gst.taxable):0;}catch(e){}
+  if(!sale){(v.items||[]).forEach(function(i){sale+=B().num(i.amount)||B().num(i.qty)*B().num(i.rate);});}
+  var cost=0;
+  (v.items||[]).forEach(function(i){
+    try{var c=B().avgCostOn(cid(),i.name,v.date,v.id);cost+=B().num(i.qty)*B().num(c);}catch(e){}
+  });
+  return {sale:B().r2(sale),cost:B().r2(cost),profit:B().r2(sale-cost)};
+}
+function doF7(cur){
+  if(!cur)return;
+  if(cur.view==='daybook'){dayProfitOn=!dayProfitOn;if(window.mayaReportRefresh){try{window.mayaReportRefresh();}catch(e){}}toast(dayProfitOn?'Show Profit ON — profit = sale value less cost of goods.':'Show Profit OFF.');return;}
+  if(cur.view==='ledger'){if(cur.name)window.mayaOpenReportView('gstinfo',{name:cur.name});else toast('Open a ledger first.');return;}
+  toast('F7 applies to Day Book (Show Profit) and Ledger (GST Info).');
+}
+function doF8(cur){
+  if(!cur)return;
+  if(cur.view==='daybook'||cur.view==='ledger'||cur.view==='daybookcol'||cur.view==='ledgercol'){if(typeof window.mayaToggleColumnar==='function'){window.mayaToggleColumnar(cur);return;}toast('Columnar view is not available yet.');return;}
+  toast('Columnar applies to Day Book and Ledger.');
+}
 function viewDayBook2(cur){
   var RC=window.MayaReportCtx,st=RC.st,from=st.from,to=st.to;
   var rows=B().dayBook(cid(),from,to);
@@ -18989,17 +19156,18 @@ function viewDayBook2(cur){
   $('mrp-title').textContent='Day Book';
   $('mrp-crumb').textContent=(from===to)?('For '+RC.ddmmyyyy(from)):('Vouchers from '+RC.ddmmyyyy(from)+' to '+RC.ddmmyyyy(to));
   if(!rows.length){$('mrp-body').innerHTML='<div class="mrp-empty">No vouchers in this period.<br>Change the period with F2, or post a voucher from Transactions → Vouchers.</div>';return;}
-  var tdr=0,tcr=0,tiq=0,toq=0;
+  var tdr=0,tcr=0,tiq=0,toq=0,tprof=0;
   var html=rows.map(function(r,i){
     var v=null;try{v=B().voucherById(cid(),r.id);}catch(e){}
     var q=dbQty(v),dr=!!DB_DR[r.type],amt=num(r.amount);
     if(dr)tdr+=amt;else tcr+=amt;
     tiq+=q.iq;toq+=q.oq;
-    return '<tr data-i="'+i+'"'+(r.cancelled?' class="cxrow"':'')+'><td>'+esc(RC.ddmmyyyy(r.date))+'</td><td>'+esc(r.particulars)+(r.cancelled?'<span class="mrp-chip cx">Cancelled</span>':'')+(r.optional?'<span class="mrp-chip">Optional</span>':'')+(r.postdated?'<span class="mrp-chip">Post-Dated</span>':'')+'</td><td>'+esc(r.type)+'</td><td>'+esc(r.number)+'</td><td class="r">'+(dr&&amt?fmt(amt):'')+'</td><td class="r">'+(q.iq?qfmt(q.iq):'')+'</td><td class="r">'+(!dr&&amt?fmt(amt):'')+'</td><td class="r">'+(q.oq?qfmt(q.oq):'')+'</td></tr>';
+    var pf=dayProfitOn?profitOf(v):null;if(pf)tprof+=pf.profit;
+    return '<tr data-i="'+i+'"'+(r.cancelled?' class="cxrow"':'')+'><td>'+esc(RC.ddmmyyyy(r.date))+'</td><td>'+esc(r.particulars)+(r.cancelled?'<span class="mrp-chip cx">Cancelled</span>':'')+(r.optional?'<span class="mrp-chip">Optional</span>':'')+(r.postdated?'<span class="mrp-chip">Post-Dated</span>':'')+'</td><td>'+esc(r.type)+'</td><td>'+esc(r.number)+'</td><td class="r">'+(dr&&amt?fmt(amt):'')+'</td><td class="r">'+(q.iq?qfmt(q.iq):'')+'</td><td class="r">'+(!dr&&amt?fmt(amt):'')+'</td><td class="r">'+(q.oq?qfmt(q.oq):'')+'</td>'+(dayProfitOn?'<td class="r">'+(pf?fmt(pf.profit):'')+'</td>':'')+'</tr>';
   }).join('');
-  var tot='<tr class="tot"><td colspan="4">'+rows.length+' voucher'+(rows.length>1?'s':'')+(active?' (filtered — '+rows.length+' of '+total+' shown)':'')+'</td><td class="r">'+fmt(B().r2(tdr))+'</td><td class="r">'+(tiq?qfmt(tiq):'')+'</td><td class="r">'+fmt(B().r2(tcr))+'</td><td class="r">'+(toq?qfmt(toq):'')+'</td></tr>';
-  var note=active?'<tr class="note"><td colspan="8">Filter active — totals are for the filtered rows. Press F to change the filter, Clear to remove it.</td></tr>':'';
-  $('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Date</th><th>Particulars</th><th>Vch Type</th><th>Vch No.</th><th class="r">Debit Amount</th><th class="r">Inwards Qty</th><th class="r">Credit Amount</th><th class="r">Outwards Qty</th></tr></thead><tbody>'+html+tot+note+'</tbody></table>';
+  var tot='<tr class="tot"><td colspan="4">'+rows.length+' voucher'+(rows.length>1?'s':'')+(active?' (filtered — '+rows.length+' of '+total+' shown)':'')+'</td><td class="r">'+fmt(B().r2(tdr))+'</td><td class="r">'+(tiq?qfmt(tiq):'')+'</td><td class="r">'+fmt(B().r2(tcr))+'</td><td class="r">'+(toq?qfmt(toq):'')+'</td>'+(dayProfitOn?'<td class="r">'+fmt(B().r2(tprof))+'</td>':'')+'</tr>';
+  var note=active?'<tr class="note"><td colspan="'+(dayProfitOn?9:8)+'">Filter active — totals are for the filtered rows. Press F to change the filter, Clear to remove it.</td></tr>':'';
+  $('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Date</th><th>Particulars</th><th>Vch Type</th><th>Vch No.</th><th class="r">Debit Amount</th><th class="r">Inwards Qty</th><th class="r">Credit Amount</th><th class="r">Outwards Qty</th>'+(dayProfitOn?'<th class="r">Profit</th>':'')+'</tr></thead><tbody>'+html+tot+note+'</tbody></table>';
 }
 
 /* ---------- Trial Balance modes (shot 12) ---------- */
@@ -19010,10 +19178,73 @@ function setTbMode(m){
   try{if(window.MayaReportCtx&&MayaReportCtx.st)MayaReportCtx.st.tbMode=m;}catch(e){}
   if(window.mayaReportRefresh){try{window.mayaReportRefresh();}catch(e){}}
 }
+/* ---------- Trial Balance comparison columns (2026-11-16, shot 12) ----------
+   C New Column, A Alter Column, D Delete Column, N Auto Column.
+   Columns are stored per company in mayaacc_tb_cols_<cid> as
+   [{id,label,from,to}] and rendered next to Closing Balance. A column
+   shows the ledger's closing balance for that period; group rows
+   aggregate their ledgers. Monthly mode skips them (one period per row). */
+function tbCols(){try{return JSON.parse(localStorage.getItem('mayaacc_tb_cols_'+cid())||'[]');}catch(e){return [];}}
+function setTbCols(cols){try{localStorage.setItem('mayaacc_tb_cols_'+cid(),JSON.stringify(cols||[]));}catch(e){}if(window.mayaReportRefresh){try{window.mayaReportRefresh();}catch(e){}}}
+function tbColCell(Tc,name,isGroup){
+  if(!Tc)return '<td class="r"></td>';
+  var v=0,found=false;
+  (Tc.groups||[]).forEach(function(gg){
+    if(isGroup){if(gg.name===name){v=gg.close;found=true;}}
+    else{(gg.rows||[]).forEach(function(rr){if(rr.name===name){v=rr.close;found=true;}});}
+  });
+  return '<td class="r">'+(found&&v?window.MayaReportCtx.side(v):'')+'</td>';
+}
+function tbColDialog(def,cb){
+  var mod=window.__mayaMod;
+  if(!mod||typeof mod.open!=='function'){toast('Column dialog is not available.');return;}
+  var id=def?def.id:('col-'+Date.now());
+  var body='<label style="display:block;font-size:12px;margin-bottom:4px">Column label</label>'
+    +'<input id="mtl-tbc-label" type="text" value="'+esc(def?def.label:'')+'" style="width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid #b6c2d6;border-radius:4px;font-size:13px;margin-bottom:10px" placeholder="e.g. Previous FY">'
+    +'<div style="display:flex;gap:10px"><div style="flex:1"><label style="display:block;font-size:12px;margin-bottom:4px">From</label><input id="mtl-tbc-from" type="date" value="'+esc(def?def.from:'')+'" style="width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid #b6c2d6;border-radius:4px;font-size:13px"></div>'
+    +'<div style="flex:1"><label style="display:block;font-size:12px;margin-bottom:4px">To</label><input id="mtl-tbc-to" type="date" value="'+esc(def?def.to:'')+'" style="width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid #b6c2d6;border-radius:4px;font-size:13px"></div></div>';
+  var ov=mod.open('maya-tbcol',def?'Alter Column':'New Column','Trial Balance',body,
+    '<button type="button" class="maya-mod-btn pri" data-act="ok">Accept</button><button type="button" class="maya-mod-btn" data-act="cancel">Cancel</button>');
+  ov.querySelector('[data-act="ok"]').addEventListener('click',function(){
+    var label=ov.querySelector('#mtl-tbc-label').value.trim()||'Column';
+    var from=ov.querySelector('#mtl-tbc-from').value,to=ov.querySelector('#mtl-tbc-to').value;
+    if(!from||!to){toast('Enter both From and To dates.');return;}
+    if(from>to){toast('From date is after To date.');return;}
+    window.mayaModClose('maya-tbcol');cb({id:id,label:label,from:from,to:to});
+  });
+  ov.querySelector('[data-act="cancel"]').addEventListener('click',function(){window.mayaModClose('maya-tbcol');});
+  setTimeout(function(){var l=ov.querySelector('#mtl-tbc-label');if(l)l.focus();},30);
+}
+function tbColNew(){tbColDialog(null,function(def){var cols=tbCols();cols.push(def);setTbCols(cols);toast('Column "'+def.label+'" added.');});}
+function tbColPick(title,cb){
+  var cols=tbCols();if(!cols.length){toast('No extra columns yet — press C to add one.');return;}
+  var mod=window.__mayaMod;if(!mod||typeof mod.open!=='function'){toast('Column dialog is not available.');return;}
+  var ov=mod.open('maya-tbcol-pick',title,'Trial Balance',
+    cols.map(function(c,i){return '<button type="button" data-i="'+i+'" style="display:block;width:100%;text-align:left;padding:8px 10px;margin-bottom:6px;border:1px solid #dfe4ec;border-radius:6px;background:#fff;font-size:13px;cursor:pointer">'+esc(c.label)+' <span style="color:#6b7a90">('+esc(c.from)+' to '+esc(c.to)+')</span></button>';}).join(''),
+    '<button type="button" class="maya-mod-btn" data-act="cancel">Cancel</button>');
+  ov.querySelector('[data-act="cancel"]').addEventListener('click',function(){window.mayaModClose('maya-tbcol-pick');});
+  ov.querySelectorAll('[data-i]').forEach(function(b){b.addEventListener('click',function(){var i=+b.dataset.i;window.mayaModClose('maya-tbcol-pick');cb(i,cols);});});
+}
+function tbColAlter(){tbColPick('Alter Column',function(i,cols){tbColDialog(cols[i],function(def){cols[i]=def;setTbCols(cols);toast('Column updated.');});});}
+function tbColDelete(){tbColPick('Delete Column',function(i,cols){var c=cols[i];cols.splice(i,1);setTbCols(cols);toast('Column "'+c.label+'" deleted.');});}
+function tbColAuto(){
+  var RC=window.MayaReportCtx,st=RC.st;
+  var prevFY=function(d){return (+d.slice(0,4)-1)+d.slice(4);};
+  var shiftM=function(d,dm){var dt=new Date(d+'T00:00:00');dt.setMonth(dt.getMonth()+dm);return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');};
+  var cols=tbCols(),added=[];
+  var pf={id:'col-prevfy-'+Date.now(),label:'Previous FY',from:prevFY(st.from),to:prevFY(st.to)};
+  if(!cols.some(function(c){return c.label===pf.label;})){cols.push(pf);added.push(pf.label);}
+  var pq={id:'col-prevq-'+Date.now(),label:'Previous Quarter',from:shiftM(st.from,-3),to:shiftM(st.to,-3)};
+  if(!cols.some(function(c){return c.label===pq.label;})){cols.push(pq);added.push(pq.label);}
+  setTbCols(cols);
+  toast(added.length?('Auto columns added: '+added.join(', ')+'.'):'Auto columns already exist.');
+}
 function viewTrial2(cur){
   var RC=window.MayaReportCtx,st=RC.st;
   var mode=st.tbMode||tbMode();st.tbMode=mode;
   var T=B().trialBalance(cid(),st.from,st.to);
+  var extraCols=tbCols();
+  var extraData=extraCols.map(function(c){var Tc=null;try{Tc=B().trialBalance(cid(),c.from,c.to);}catch(e){}return {def:c,T:Tc};});
   st.sel=[];
   $('mrp-title').textContent='Trial Balance';
   var modeLbl=mode==='group'?'Group view':mode==='monthly'?'Monthly view':'Ledger-wise view';
@@ -19035,20 +19266,20 @@ function viewTrial2(cur){
   if(mode==='group'){
     T.groups.forEach(function(g){
       st.sel.push({kind:'view',view:'groupled',args:{group:g.name}});
-      html+='<tr class="grp" data-i="'+(st.sel.length-1)+'"><td>'+esc(g.name)+'</td><td class="r">'+RC.side(g.open)+'</td><td class="r">'+(g.dr?fmt(g.dr):'')+'</td><td class="r">'+(g.cr?fmt(g.cr):'')+'</td><td class="r">'+RC.side(g.close)+'</td></tr>';
+      html+='<tr class="grp" data-i="'+(st.sel.length-1)+'"><td>'+esc(g.name)+'</td><td class="r">'+RC.side(g.open)+'</td><td class="r">'+(g.dr?fmt(g.dr):'')+'</td><td class="r">'+(g.cr?fmt(g.cr):'')+'</td><td class="r">'+RC.side(g.close)+'</td>'+extraData.map(function(x){return tbColCell(x.T,g.name,true);}).join('')+'</tr>';
     });
   }else{
     T.groups.forEach(function(g){
-      html+='<tr class="grp"><td>'+esc(g.name)+'</td><td class="r">'+RC.side(g.open)+'</td><td class="r">'+(g.dr?fmt(g.dr):'')+'</td><td class="r">'+(g.cr?fmt(g.cr):'')+'</td><td class="r">'+RC.side(g.close)+'</td></tr>';
+      html+='<tr class="grp"><td>'+esc(g.name)+'</td><td class="r">'+RC.side(g.open)+'</td><td class="r">'+(g.dr?fmt(g.dr):'')+'</td><td class="r">'+(g.cr?fmt(g.cr):'')+'</td><td class="r">'+RC.side(g.close)+'</td>'+extraData.map(function(x){return tbColCell(x.T,g.name,true);}).join('')+'</tr>';
       g.rows.forEach(function(r){st.sel.push({kind:'ledger',name:r.name});
-        html+='<tr class="led" data-i="'+(st.sel.length-1)+'"><td>'+esc(r.name)+'</td><td class="r">'+(r.open?RC.side(r.open):'')+'</td><td class="r">'+(r.dr?fmt(r.dr):'')+'</td><td class="r">'+(r.cr?fmt(r.cr):'')+'</td><td class="r">'+(r.close?RC.side(r.close):'')+'</td></tr>';});
+        html+='<tr class="led" data-i="'+(st.sel.length-1)+'"><td>'+esc(r.name)+'</td><td class="r">'+(r.open?RC.side(r.open):'')+'</td><td class="r">'+(r.dr?fmt(r.dr):'')+'</td><td class="r">'+(r.cr?fmt(r.cr):'')+'</td><td class="r">'+(r.close?RC.side(r.close):'')+'</td>'+extraData.map(function(x){return tbColCell(x.T,r.name,false);}).join('')+'</tr>';});
     });
   }
-  if(T.diff!==0)html+='<tr class="note"><td>'+(T.suspense?'Suspense Account — difference in opening balances':'Difference in opening balances')+'</td><td class="r">'+RC.side(T.diff)+'</td><td></td><td></td><td class="r">'+RC.side(T.diff)+'</td></tr>';
+  if(T.diff!==0)html+='<tr class="note"><td>'+(T.suspense?'Suspense Account — difference in opening balances':'Difference in opening balances')+'</td><td class="r">'+RC.side(T.diff)+'</td><td></td><td></td><td class="r">'+RC.side(T.diff)+'</td>'+extraCols.map(function(){return '<td></td>';}).join('')+'</tr>';
   var tally=T.totals.dr===T.totals.cr&&T.totals.closeDr===T.totals.closeCr;
-  html+='<tr class="tot"><td>Grand Total</td><td class="r">'+fmt(T.totals.openDr)+'</td><td class="r">'+fmt(T.totals.dr)+'</td><td class="r">'+fmt(T.totals.cr)+'</td><td class="r">'+fmt(T.totals.closeDr)+'</td></tr>';
-  html+='<tr class="note"><td colspan="5">Debit total '+(tally?'<span class="mrp-ok">equals</span>':'<span class="mrp-bad">does not equal</span>')+' Credit total — books are '+(tally?'<span class="mrp-ok">balanced ✓</span>':'<span class="mrp-bad">out of balance ✗</span>')+'</td></tr>';
-  $('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Particulars</th><th class="r">Opening Balance</th><th class="r">Debit</th><th class="r">Credit</th><th class="r">Closing Balance</th></tr></thead><tbody>'+html+'</tbody></table>';
+  html+='<tr class="tot"><td>Grand Total</td><td class="r">'+fmt(T.totals.openDr)+'</td><td class="r">'+fmt(T.totals.dr)+'</td><td class="r">'+fmt(T.totals.cr)+'</td><td class="r">'+fmt(T.totals.closeDr)+'</td>'+extraData.map(function(x){return '<td class="r">'+(x.T?RC.side(B().r2(x.T.totals.closeDr-x.T.totals.closeCr)):'')+'</td>';}).join('')+'</tr>';
+  html+='<tr class="note"><td colspan="'+(5+extraCols.length)+'">Debit total '+(tally?'<span class="mrp-ok">equals</span>':'<span class="mrp-bad">does not equal</span>')+' Credit total — books are '+(tally?'<span class="mrp-ok">balanced ✓</span>':'<span class="mrp-bad">out of balance ✗</span>')+'</td></tr>';
+  $('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Particulars</th><th class="r">Opening Balance</th><th class="r">Debit</th><th class="r">Credit</th><th class="r">Closing Balance</th>'+extraCols.map(function(c){return '<th class="r">'+esc(c.label)+'</th>';}).join('')+'</tr></thead><tbody>'+html+'</tbody></table>';
 }
 
 /* ---------- Cash / Bank Summary (shot 5) ---------- */
@@ -19413,10 +19644,41 @@ function railAction(k){
   if(k==='ledgermode'){setTbMode('ledger');return;}
   if(k==='monthlymode'){setTbMode('monthly');return;}
   if(k==='vtype'){openTypePicker();return;}
+  if(k==='f7'){doF7(cur);return;}
+  if(k==='f8'){doF8(cur);return;}
+  if(k==='gstinfo'){if(cur.name)window.mayaOpenReportView('gstinfo',{name:cur.name});else toast('Open a ledger first.');return;}
+  if(k==='ledgergst'){if(cur.name)window.mayaOpenReportView('ledgergst',{name:cur.name});else toast('Open a ledger first.');return;}
+  if(k==='chgview'){
+    if(cur.view==='ledger'){if(cur.name)window.mayaOpenReportView('monthly',{name:cur.name});}
+    else if(cur.view==='monthly'){if(cur.name)window.mayaOpenReportView('ledger',{name:cur.name});}
+    else if(cur.view==='daybook'){window.mayaOpenReportView('daybookcond',{});}
+    else toast('Change View is not available here.');
+    return;
+  }
+  if(k==='tbtoggle'){setTbMode(tbMode()==='group'?'ledger':'group');return;}
+  if(k==='exceptions'){window.mayaOpenReportView('exceptions',{});return;}
+  if(k==='recon'){if(typeof window.mayaBankStatement==='function')window.mayaBankStatement();else toast('Bank Statement is not available.');return;}
+  if(k==='contact'){if(cur.name&&typeof window.mayaContactDialog==='function')window.mayaContactDialog(cur.name);else toast('Open a ledger first.');return;}
+  if(k==='gstportal'){try{window.open('https://www.gst.gov.in','_blank');}catch(e){}return;}
+  if(k==='gststatus'){if(cur.name&&typeof window.mayaGstStatusDialog==='function')window.mayaGstStatusDialog(cur.name);else toast('Open a ledger first.');return;}
+  if(k==='tbcol-new'){tbColNew();return;}
+  if(k==='tbcol-alter'){tbColAlter();return;}
+  if(k==='tbcol-del'){tbColDelete();return;}
+  if(k==='tbcol-auto'){tbColAuto();return;}
   if(k==='filter'){toggleFilterPanel();return;}
   if(k==='filterapply'){applyFilterFromPanel();return;}
   if(k==='filterclear'){clearFilter();return;}
   if(k==='saveview'){saveCurrentView();return;}
+}
+/* Reconcile is only meaningful for a bank / cash ledger (2026-11-16). */
+function reconLive(cur){
+  if(!cur||!cur.name)return false;
+  try{
+    var rec=(B().ledgers(cid())||[]).filter(function(l){return l.name===cur.name;})[0];
+    if(!rec)return false;
+    var kd=B().kind(cid(),rec);
+    return !!B().isCB(kd);
+  }catch(e){return false;}
 }
 function sidebarDefs(cur){
   var v=cur.view;
@@ -19433,22 +19695,25 @@ function sidebarDefs(cur){
     {k:'ledger',key:'F4',label:'Ledger',live:true,hint:'Pick another ledger'},
     {k:'billwise',key:'F5',label:'Bill-wise',live:true,hint:'Pending bills of this ledger'},
     {k:'monthly',key:'F6',label:'Monthly',live:true,hint:'Monthly summary of this ledger'},
-    G('F7','GST Info'),G('F8','Columnar'),G('F9','Ledger Vouchers - GST'),G('F10',''),
-    G('B','Basis of Values'),G('H','Change View'),G('J','Exception Reports'),
-    S,F,FD,G('R','Reconcile'),G('S','Contact'),G('W','GST Portal View'),G('V','Set GST Status'),
+    {k:'gstinfo',key:'F7',label:'GST Info',live:true,hint:'GST registration and tax totals for this ledger'},
+    {k:'f8',key:'F8',label:'Columnar',live:true,hint:'Monthly columns view'},
+    {k:'ledgergst',key:'F9',label:'Ledger Vouchers - GST',live:true,hint:'This ledger\u2019s vouchers with GST breakup'},
+    G('F10',''),
+    G('B','Basis of Values'),{k:'chgview',key:'H',label:'Change View',live:true,hint:'Ledger vouchers / Monthly summary'},{k:'exceptions',key:'J',label:'Exception Reports',live:true,hint:'Open the Exception Reports'},
+    S,F,FD,{k:'recon',key:'R',label:'Reconcile',live:reconLive(cur),hint:reconLive(cur)?'Open the bank statement reconciliation':'Reconcile is for bank ledgers'},{k:'contact',key:'S',label:'Contact',live:true,hint:'Party contact details'},{k:'gstportal',key:'W',label:'GST Portal View',live:true,hint:'Open the GST portal in a new window'},{k:'gststatus',key:'V',label:'Set GST Status',live:true,hint:'Set this ledger\u2019s GST registration status'},
     hideRow,unhideRow,F12];
   if(v==='daybook')return [P,C,
     {k:'vtype',key:'F4',label:'Voucher Type',live:true,hint:'Filter by voucher type'},
-    G('F5',''),G('F6',''),G('F7','Show Profit'),G('F8','Columnar'),G('F9',''),G('F10',''),
-    G('B','Basis of Values'),G('H','Change View'),G('J','Exception Reports'),
-    S,F,FD,hideRow,unhideRow,F12];
+    G('F5',''),G('F6',''),{k:'f7',key:'F7',label:dayProfitOn?'Hide Profit':'Show Profit',live:true,hint:'Show profit per sales voucher (sale value less cost of goods)'},{k:'f8',key:'F8',label:'Columnar',live:true,hint:'Monthly columns view'},G('F9',''),G('F10',''),
+    G('B','Basis of Values'),{k:'chgview',key:'H',label:'Change View',live:true,hint:'Day Book / Voucher-type summary'},{k:'exceptions',key:'J',label:'Exception Reports',live:true,hint:'Open the Exception Reports'},
+    S,F,FD,{k:'gstportal',key:'W',label:'GST Portal View',live:true,hint:'Open the GST portal in a new window'},hideRow,unhideRow,F12];
   if(v==='trial')return [P,C,
     {k:'groupmode',key:'F4',label:'Group',live:true,hint:'Group view'},
     {k:'ledgermode',key:'F5',label:'Ledger-wise',live:true,hint:'Ledger-wise view'},
     {k:'monthlymode',key:'F6',label:'Monthly',live:true,hint:'Monthly view'},
     G('F7',''),G('F8',''),G('F9',''),G('F10',''),
-    G('B','Basis of Values'),G('H','Change View'),G('J','Exception Reports'),
-    S,F,FD,G('C','New Column'),G('A','Alter Column'),G('D','Delete Column'),G('N','Auto Column'),
+    G('B','Basis of Values'),{k:'tbtoggle',key:'H',label:'Change View',live:true,hint:'Group view / Ledger-wise view'},{k:'exceptions',key:'J',label:'Exception Reports',live:true,hint:'Open the Exception Reports'},
+    S,F,FD,{k:'tbcol-new',key:'C',label:'New Column',live:true,hint:'Add a comparison column'},{k:'tbcol-alter',key:'A',label:'Alter Column',live:true,hint:'Change a comparison column'},{k:'tbcol-del',key:'D',label:'Delete Column',live:true,hint:'Remove a comparison column'},{k:'tbcol-auto',key:'N',label:'Auto Column',live:true,hint:'Add Previous FY and Previous Quarter columns'},
     hideRow,unhideRow,F12];
   if(v==='monthly')return [P,C,
     {k:'ledger',key:'F4',label:'Ledger',live:true,hint:'Pick another ledger'},
@@ -19457,6 +19722,10 @@ function sidebarDefs(cur){
   if(v==='billwise')return [P,C,
     {k:'ledgerback',key:'F4',label:'Ledger Vouchers',live:true,hint:'Back to the ledger vouchers'},
     {k:'monthly',key:'F6',label:'Monthly',live:true,hint:'Monthly summary of this ledger'},
+    S,F,hideRow,unhideRow,F12];
+  /* columnar views: F8 toggles back to the normal Day Book / Ledger */
+  if(v==='daybookcol'||v==='ledgercol')return [P,C,
+    {k:'f8',key:'F8',label:'Columnar',live:true,hint:'Toggle back to the normal view'},
     S,F,hideRow,unhideRow,F12];
   /* register / register-month / group-voucher / Cash-Bank Summary and other
      list views: Period, Company, Filter, Save View, Hide, Unhide, F12. */
@@ -19697,6 +19966,8 @@ document.addEventListener('keydown',function(e){
   var cur2=curView2();if(!cur2)return;
   if(e.key==='F4'){e.preventDefault();doF4(cur2);return;}
   if(e.key==='F6'){e.preventDefault();doF6(cur2);return;}
+  if(e.key==='F7'){e.preventDefault();doF7(cur2);return;}
+  if(e.key==='F8'){e.preventDefault();doF8(cur2);return;}
   var k=String(e.key||'').toLowerCase();
   if(k==='l'||k==='f'){
     if(!railDefs(cur2))return;
@@ -19723,6 +19994,9 @@ window.__mayaTally={
   sidebar:function(){var r=$('mtl-rail');if(!r)return null;return {visible:r.style.display!=='none',rows:Array.from(r.querySelectorAll('.mtl-sb-row')).map(function(x){return {k:x.dataset.sb||'',key:(x.querySelector('b')||{}).textContent||'',label:(x.querySelector('span')||{}).textContent||'',live:!x.classList.contains('off')};})};},
   footer:function(){var f=$('mtl-footline');if(!f)return null;return {visible:f.style.display!=='none',segments:Array.from(f.querySelectorAll('.mtl-fl-seg')).map(function(x){return {act:x.dataset.act,key:x.dataset.key||'',live:!x.classList.contains('off')};})};},
   doF12:doF12,doSpace:doSpace,footerAction:footerAction,
+  profitOn:function(){return dayProfitOn;},profitOf:profitOf,doF7:doF7,doF8:doF8,
+  tbCols:tbCols,tbColNew:tbColNew,tbColAlter:tbColAlter,tbColDelete:tbColDelete,tbColAuto:tbColAuto,
+  reconLive:reconLive,
   chart:function(){var c=$('mtl-chart');if(!c)return null;return {bars:c.querySelectorAll('.mtl-chart-row').length,values:Array.from(c.querySelectorAll('.mtl-chart-val')).map(function(x){return x.textContent.trim();})};},
   daybook:function(){return {headers:Array.from(document.querySelectorAll('#mrp-body thead th')).map(function(x){return x.textContent.trim();}),crumb:($('mrp-crumb')||{}).textContent||'',rows:document.querySelectorAll('#mrp-body tbody tr[data-i]').length};},
   tbMode:function(){try{return (window.MayaReportCtx&&MayaReportCtx.st&&MayaReportCtx.st.tbMode)||tbMode();}catch(e){return 'ledger';}},
@@ -19736,5 +20010,1035 @@ window.__mayaTally={
 })();
 
 </script>
+<script id="maya-calc-modules">
+/* ================================================================
+   MAYAACC — CALCULATOR + REMAINING MODULES (2026-11-16)
+   Source of truth for this code lives in
+   maya-calc-modules-snippet.html — edit there, then re-inject this
+   whole block (between the script open tag and its close tag)
+   before the last </body> of index.html.
+
+   CONTENTS
+   1. CALCULATOR (Tally-style): Ctrl+N opens it from anywhere;
+      Alt+C in an amount field opens it and the result fills back
+      into that field (= / Enter accepts, Esc cancels). Keyboard-first
+      (+ - * / % and parentheses), live result, clickable buttons,
+      MAYAACC theme. Expression engine is a small recursive-descent
+      parser — no eval(). Percent follows Tally: "1000+10%" = 1100
+      (the % is taken of the running left value of + / -).
+   2. AMOUNT IN WORDS (Indian system: lakh / crore) for cheques.
+   3. CHEQUES: print dialog + Cheque Register + Post-dated Summary.
+      Cheques are stored per company in localStorage
+      `mayaacc_cheques_<cid>` (payee, date, bank, amount, no., status).
+   4. NEW REPORT VIEWS (window.MayaMoreViews): exceptions,
+      analysis, clarify, daybookcol, ledgercol, daybookcond,
+      ledgergst, gstinfo, chequereg, postdated, costcentre,
+      tdssum, tcssum, budgets. Columnar toggle helper
+      window.mayaToggleColumnar(cur) (F8) and the menu/dialog
+      helpers mayaChequePrint / mayaVoucherConfig / mayaContactDialog /
+      mayaGstStatusDialog / mayaSetBudgets / mayaOpenExceptions etc.
+   5. PER-VOUCHER-TYPE CONFIG overrides (the 9 Tally options):
+      stored in `mayaacc_vchcfg_<cid>_<type>`, merged over the
+      company voucher config by cfgNow() (see the direct edit there).
+      Wired with a real effect: descItem, bankDefault.
+      Display-only (reason shown in the dialog): commonLedger,
+      descLedger, modifyAll, compoundUnit, compoundDetails,
+      bankRecon, taxOnSubtotal.
+   F11 sub-forms for TDS / TCS / interest / budgets live as direct
+   edits in the F11 script block (openSub), not here.
+   ================================================================ */
+(function(){
+'use strict';
+var B=function(){return window.MayaBooks;};
+var cid=function(){try{return B().cid();}catch(e){return null;}};
+var $=function(id){return document.getElementById(id);};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>\"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});};
+var fmt=function(n){try{return B().fmt(n);}catch(e){return String(n);}};
+var num=function(x){try{return B().num(x);}catch(e){return Number(x)||0;}};
+var r2=function(x){try{return B().r2(x);}catch(e){return Math.round(Number(x)*100)/100;}};
+var toast=function(m){if(window.mayaToast)window.mayaToast(m);};
+var RC=function(){return window.MayaReportCtx||null;};
+var readLS=function(k,d){try{var v=JSON.parse(localStorage.getItem(k)||'null');return v==null?d:v;}catch(e){return d;}};
+var writeLS=function(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
+
+/* ================= 1. CALCULATOR ================= */
+/* --- expression engine: recursive descent, no eval() --- */
+function calcTokenize(s){
+  var toks=[],i=0;
+  while(i<s.length){
+    var ch=s[i];
+    if(ch===' '||ch==='\t'){i++;continue;}
+    if((ch>='0'&&ch<='9')||ch==='.'){
+      var j=i;while(j<s.length&&((s[j]>='0'&&s[j]<='9')||s[j]==='.'))j++;
+      var t=s.slice(i,j);if(t.split('.').length>2)throw new Error('bad number');
+      toks.push({t:'n',v:parseFloat(t)});i=j;continue;
+    }
+    if('+-*/%()'.indexOf(ch)>=0){toks.push({t:ch});i++;continue;}
+    throw new Error('bad character '+ch);
+  }
+  return toks;
+}
+function calcEval(expr){
+  var s=String(expr||'').trim();
+  if(!s)throw new Error('empty');
+  var toks=calcTokenize(s),p=0;
+  function peek(){return toks[p]||null;}
+  function next(){return toks[p++];}
+  /* parseExpr: terms joined by + / -. The `base` of a % is the running
+     left value of the enclosing + / - (Tally behaviour). */
+  function parseExpr(base){
+    var v=parseTerm(base);
+    var t;
+    while((t=peek())&&(t.t==='+'||t.t==='-')){
+      next();
+      var r=parseTerm(v);
+      v=t.t==='+'?v+r:v-r;
+    }
+    return v;
+  }
+  function parseTerm(base){
+    var v=parseFactor(base),t;
+    while((t=peek())&&(t.t==='*'||t.t==='/')){
+      next();
+      var r=parseFactor(null);
+      if(t.t==='*')v=v*r;
+      else{if(r===0)throw new Error('divide by zero');v=v/r;}
+    }
+    return v;
+  }
+  function parseFactor(base){
+    var t=peek();
+    if(!t)throw new Error('incomplete');
+    if(t.t==='-'){next();return -parseFactor(base);}
+    if(t.t==='+'){next();return parseFactor(base);}
+    var v;
+    if(t.t==='('){next();v=parseExpr(null);if(!peek()||peek().t!==')')throw new Error('missing )');next();}
+    else if(t.t==='n'){next();v=t.v;}
+    else throw new Error('unexpected '+t.t);
+    while(peek()&&peek().t==='%'){
+      next();
+      v=base!=null?base*v/100:v/100;
+    }
+    return v;
+  }
+  var out=parseExpr(null);
+  if(p<toks.length)throw new Error('unexpected input');
+  if(!isFinite(out))throw new Error('not a number');
+  return Math.round(out*100)/100;
+}
+function calcFmt(n){
+  if(!isFinite(n))return '';
+  var r=Math.round(n*100)/100;
+  return String(r);
+}
+
+var calc={open:false,target:null,result:null,built:false};
+function calcCss(){
+  if($('maya-calc-css'))return;
+  var s=document.createElement('style');s.id='maya-calc-css';
+  s.textContent=
+   '#maya-calc-ov{position:fixed;inset:0;z-index:2147483500;display:none;align-items:center;justify-content:center;background:rgba(18,28,48,.42);font:13px/1.4 system-ui,Segoe UI,Arial,sans-serif;color:#172033}'
+  +'#maya-calc-ov.on{display:flex}'
+  +'.maya-calc-card{width:320px;background:#fff;border-radius:14px;box-shadow:0 24px 70px rgba(15,25,50,.35);overflow:hidden;border:1px solid #dbe4f0}'
+  +'.maya-calc-head{background:#172033;color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;font-weight:700}'
+  +'.maya-calc-head small{font-weight:400;color:#aebbd0;font-size:11px}'
+  +'.maya-calc-head button{background:none;border:0;color:#fff;font-size:16px;cursor:pointer;padding:0 4px}'
+  +'.maya-calc-expr{width:100%;box-sizing:border-box;border:0;border-bottom:1px solid #dbe4f0;padding:12px 14px;font-size:20px;text-align:right;outline:none;color:#172033;background:#f7f9fc}'
+  +'.maya-calc-result{min-height:22px;text-align:right;padding:6px 14px;font-size:15px;font-weight:700;color:#5478d4;background:#f7f9fc}'
+  +'.maya-calc-result.err{color:#b02a2a;font-size:12px;font-weight:600}'
+  +'.maya-calc-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:12px}'
+  +'.maya-calc-keys button{height:40px;border:1px solid #dbe4f0;border-radius:8px;background:#fff;font-size:16px;cursor:pointer;color:#172033}'
+  +'.maya-calc-keys button:hover{background:#eef3fb}'
+  +'.maya-calc-keys button.op{background:#eaf0ff;color:#244b9e;font-weight:700}'
+  +'.maya-calc-keys button.eq{background:#5478d4;border-color:#5478d4;color:#fff;font-weight:700}'
+  +'.maya-calc-keys button.use{grid-column:span 2;background:#172033;border-color:#172033;color:#fff;font-weight:700}'
+  +'.maya-calc-hint{padding:0 14px 12px;font-size:11px;color:#6b7a90}'
+  +'.maya-calc-hint b{color:#34465d}';
+  document.head.appendChild(s);
+}
+function calcBuild(){
+  if(calc.built)return;
+  calcCss();
+  var ov=document.createElement('div');ov.id='maya-calc-ov';
+  ov.innerHTML='<div class="maya-calc-card" role="dialog" aria-modal="true" aria-label="Calculator">'
+    +'<div class="maya-calc-head"><span>Calculator <small>Ctrl+N · Alt+C in an amount field</small></span><button type="button" data-act="close" title="Close (Esc)">✕</button></div>'
+    +'<input id="maya-calc-input" class="maya-calc-expr" autocomplete="off" spellcheck="false" placeholder="0">'
+    +'<div id="maya-calc-result" class="maya-calc-result"></div>'
+    +'<div class="maya-calc-keys">'
+    +['7','8','9','÷','4','5','6','×','1','2','3','−','0','.','%','+'].map(function(k){
+        var op='÷×−+'.indexOf(k)>=0;
+        return '<button type="button" data-k="'+k+'"'+(op?' class="op"':'')+'>'+k+'</button>';
+      }).join('')
+    +'<button type="button" data-k="(">(</button><button type="button" data-k=")">)</button>'
+    +'<button type="button" data-k="C">C</button><button type="button" data-k="⌫">⌫</button>'
+    +'<button type="button" data-k="=" class="eq">=</button><button type="button" data-k="USE" class="use">Use result ⏎</button>'
+    +'</div>'
+    +'<div class="maya-calc-hint"><b>Enter / Use</b> fills the amount field &nbsp;·&nbsp; <b>Esc</b> cancels &nbsp;·&nbsp; % is of the running total (1000+10% = 1100)</div>'
+    +'</div>';
+  document.body.appendChild(ov);
+  calc.built=true;
+  var inp=$('maya-calc-input');
+  inp.addEventListener('input',function(){calcLive();});
+  inp.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){e.preventDefault();calcAccept();}
+    else if(e.key==='Escape'){e.preventDefault();closeCalc(false);}
+    else if(e.key==='Tab'){e.preventDefault();calcAccept();}
+  });
+  ov.addEventListener('click',function(e){
+    var b=e.target.closest('button');if(!b)return;
+    if(b.dataset.act==='close'){closeCalc(false);return;}
+    calcPress(b.dataset.k);
+  });
+  ov.addEventListener('mousedown',function(e){if(e.target===ov)closeCalc(false);});
+}
+function calcLive(){
+  var inp=$('maya-calc-input'),res=$('maya-calc-result');
+  var s=inp.value.trim();
+  if(!s){res.textContent='';res.classList.remove('err');calc.result=null;return;}
+  try{var v=calcEval(s);calc.result=v;res.textContent='= '+calcFmt(v);res.classList.remove('err');}
+  catch(err){calc.result=null;res.textContent=err.message;res.classList.add('err');}
+}
+function calcPress(k){
+  var inp=$('maya-calc-input');
+  if(k==='C'){inp.value='';calcLive();inp.focus();return;}
+  if(k==='⌫'){inp.value=inp.value.slice(0,-1);calcLive();inp.focus();return;}
+  if(k==='='){calcLive();inp.focus();return;}
+  if(k==='USE'){calcAccept();return;}
+  var map={'÷':'/','×':'*','−':'-'};
+  var ch=map[k]||k;
+  var start=inp.selectionStart!=null?inp.selectionStart:inp.value.length;
+  var end=inp.selectionEnd!=null?inp.selectionEnd:inp.value.length;
+  inp.value=inp.value.slice(0,start)+ch+inp.value.slice(end);
+  inp.focus();
+  inp.setSelectionRange(start+1,start+1);
+  calcLive();
+}
+function openCalc(target){
+  calcBuild();
+  calc.target=(target&&target.tagName==='INPUT')?target:null;
+  var inp=$('maya-calc-input');
+  var start='';
+  if(calc.target&&calc.target.value.trim()!==''&&isFinite(Number(String(calc.target.value).replace(/,/g,''))))start=String(Number(String(calc.target.value).replace(/,/g,'')));
+  inp.value=start;
+  calcLive();
+  $('maya-calc-ov').classList.add('on');
+  calc.open=true;
+  setTimeout(function(){inp.focus();inp.select();},10);
+}
+function closeCalc(fill){
+  if(!calc.open)return;
+  var t=calc.target;
+  $('maya-calc-ov').classList.remove('on');
+  calc.open=false;calc.target=null;
+  if(fill&&t){
+    var v=calc.result;
+    if(v==null){try{v=calcEval($('maya-calc-input').value);}catch(e){v=null;}}
+    if(v!=null){
+      t.value=(Math.round(v*100)/100).toFixed(2);
+      t.dispatchEvent(new Event('input',{bubbles:true}));
+      t.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+    if(t.focus)try{t.focus();}catch(e){}
+  }
+}
+function calcAccept(){
+  var inp=$('maya-calc-input'),s=inp.value.trim();
+  if(!s){closeCalc(false);return;}
+  try{calc.result=calcEval(s);calcLive();}catch(e){calcLive();return;}
+  closeCalc(true);
+}
+window.mayaCalcOpen=openCalc;
+window.mayaCalcClose=function(){closeCalc(false);};
+window.MayaCalc={
+  open:openCalc,close:function(){closeCalc(false);},isOpen:function(){return calc.open;},
+  compute:calcEval,expr:function(){var i=$('maya-calc-input');return i?i.value:'';},
+  result:function(){return calc.result;},press:calcPress,target:function(){return calc.target;}
+};
+/* Ctrl+N opens the calculator from anywhere. No existing Ctrl+N handler
+   in the app (only Ctrl+S/A/H/I/G/L/T and Alt+Q/D/X/C); the Electron
+   menu has no New-Window accelerator, so the renderer sees the key.
+   Capture phase so it pre-empts overlay handlers; Esc inside the
+   calculator cancels without changing anything. */
+window.addEventListener('keydown',function(e){
+  if(!e.ctrlKey||e.altKey||e.metaKey)return;
+  var k=String(e.key||'').toLowerCase();
+  if(k!=='n')return;
+  e.preventDefault();e.stopPropagation();
+  if(calc.open)closeCalc(false);else openCalc(null);
+},true);
+
+/* ================= 2. AMOUNT IN WORDS (Indian system) ================= */
+var WORD_ONES=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+var WORD_TENS=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+function wordsUnder1000(n){
+  var out='';
+  if(n>=100){out+=WORD_ONES[Math.floor(n/100)]+' Hundred';n%=100;if(n)out+=' ';}
+  if(n>=20){out+=WORD_TENS[Math.floor(n/10)];if(n%10)out+=' '+WORD_ONES[n%10];}
+  else if(n>0)out+=WORD_ONES[n];
+  return out;
+}
+function wordsInt(n){
+  n=Math.floor(Math.abs(Number(n)||0));
+  if(n===0)return 'Zero';
+  var parts=[];
+  var crore=Math.floor(n/10000000);n%=10000000;
+  var lakh=Math.floor(n/100000);n%=100000;
+  var thou=Math.floor(n/1000);n%=1000;
+  if(crore)parts.push(wordsUnder1000(crore)+' Crore');
+  if(lakh)parts.push(wordsUnder1000(lakh)+' Lakh');
+  if(thou)parts.push(wordsUnder1000(thou)+' Thousand');
+  if(n)parts.push(wordsUnder1000(n));
+  return parts.join(' ');
+}
+function amountWords(n){
+  var v=Math.abs(Number(n)||0);
+  var rupees=Math.floor(v+1e-9),paise=Math.round((v-rupees)*100);
+  if(paise===100){rupees+=1;paise=0;}
+  var out=wordsInt(rupees)+' Rupees';
+  if(paise)out+=' and '+wordsInt(paise)+' Paise';
+  return out+' Only';
+}
+window.mayaAmountWords=amountWords;
+
+/* ================= shared small dialog ================= */
+function modCss(){
+  if($('maya-mod-css'))return;
+  var s=document.createElement('style');s.id='maya-mod-css';
+  s.textContent=
+   '.maya-mod-ov{position:fixed;inset:0;z-index:2147483500;display:none;align-items:center;justify-content:center;background:rgba(18,28,48,.42);font:13px/1.4 system-ui,Segoe UI,Arial,sans-serif;color:#172033}'
+  +'.maya-mod-ov.on{display:flex}'
+  +'.maya-mod-card{width:min(560px,94vw);max-height:88vh;display:flex;flex-direction:column;background:#fff;border-radius:14px;box-shadow:0 24px 70px rgba(15,25,50,.35);overflow:hidden;border:1px solid #dbe4f0}'
+  +'.maya-mod-head{background:#172033;color:#fff;padding:11px 16px;display:flex;justify-content:space-between;align-items:center;font-weight:700}'
+  +'.maya-mod-head small{font-weight:400;color:#aebbd0;font-size:11px}'
+  +'.maya-mod-head button{background:none;border:0;color:#fff;font-size:16px;cursor:pointer;padding:0 4px}'
+  +'.maya-mod-body{padding:14px 18px;overflow:auto}'
+  +'.maya-mod-foot{padding:10px 18px;border-top:1px solid #dbe4f0;display:flex;gap:8px;justify-content:flex-end;align-items:center;flex-wrap:wrap;background:#f7f9fc}'
+  +'.maya-mod-foot .hint{margin-right:auto;color:#5b6b88;font-size:11.5px}'
+  +'.maya-mod-btn{height:32px;padding:0 14px;border-radius:8px;border:1px solid #aebbd0;background:#fff;cursor:pointer;font:inherit}'
+  +'.maya-mod-btn.pri{background:#5478d4;border-color:#5478d4;color:#fff;font-weight:700}'
+  +'.maya-mod-btn.danger{border-color:#e0a3a3;color:#b02a2a}'
+  +'.maya-mod-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;cursor:pointer}'
+  +'.maya-mod-row.sel{background:#dce8ff;box-shadow:inset 0 0 0 1px #8fb0f0}'
+  +'.maya-mod-row small{color:#7a89a5;display:block;font-size:11px}'
+  +'.maya-mod-row .pill{min-width:44px;text-align:center;font-weight:800;padding:2px 10px;border-radius:99px;background:#e8edf5;color:#5b6b88}'
+  +'.maya-mod-row .pill.y{background:#d7f3e3;color:#136b3a}'
+  +'.maya-mod-field{margin-bottom:10px}.maya-mod-field>span{display:block;font-weight:700;margin-bottom:3px}'
+  +'.maya-mod-field small{color:#7a89a5;font-size:11px;display:block;margin-top:2px}'
+  +'.maya-mod-field input,.maya-mod-field select{width:100%;box-sizing:border-box;height:32px;border:1px solid #aebbd0;border-radius:7px;padding:0 8px;font:inherit;background:#fff}'
+  +'.maya-mod-note{background:#fff7e0;border:1px solid #f0d98a;border-radius:8px;padding:8px 10px;font-size:12px;margin-bottom:10px;color:#6a5310}'
+  +'.maya-mod-err{color:#b02a2a;font-weight:700;min-height:18px;margin:2px 0 0}';
+  document.head.appendChild(s);
+}
+function modOpen(id,title,sub,bodyHtml,footHtml){
+  modCss();
+  /* Escape closes the topmost mod dialog (capture phase, so overlay
+     handlers underneath — reports, voucher entry — do not also fire). */
+  if(!modOpen._esc){
+    modOpen._esc=true;
+    window.addEventListener('keydown',function(e){
+      if(e.key!=='Escape')return;
+      var open=document.querySelector('.maya-mod-ov.on');
+      if(!open)return;
+      e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+      open.classList.remove('on');
+    },true);
+  }
+  var ov=$(id);
+  if(!ov){
+    ov=document.createElement('div');ov.id=id;ov.className='maya-mod-ov';
+    ov.innerHTML='<div class="maya-mod-card" role="dialog" aria-modal="true"><div class="maya-mod-head"><span></span><button type="button" data-act="close" title="Close (Esc)">✕</button></div><div class="maya-mod-body"></div><div class="maya-mod-foot"></div></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click',function(e){if(e.target===ov||(e.target.closest&&e.target.closest('[data-act="close"]')))modClose(id);});
+    ov.addEventListener('keydown',function(e){if(e.key==='Escape'){e.preventDefault();e.stopPropagation();modClose(id);}});
+  }
+  ov.querySelector('.maya-mod-head span').innerHTML=esc(title)+(sub?' <small>'+esc(sub)+'</small>':'');
+  ov.querySelector('.maya-mod-body').innerHTML=bodyHtml;
+  ov.querySelector('.maya-mod-foot').innerHTML=footHtml||'';
+  ov.classList.add('on');
+  return ov;
+}
+function modClose(id){var ov=$(id);if(ov)ov.classList.remove('on');}
+window.mayaModClose=modClose;
+
+/* ================= 3. CHEQUES ================= */
+function chequeKey(){return 'mayaacc_cheques_'+cid();}
+function readCheques(){var a=readLS(chequeKey(),[]);return Array.isArray(a)?a:[];}
+function writeCheques(a){writeLS(chequeKey(),a);}
+function bankLedgers(){
+  try{return B().ledgers(cid()).filter(function(l){var k='';try{k=B().kind(cid(),l);}catch(e){}return k==='bank'||k==='cash';});}
+  catch(e){return [];}
+}
+function chequePrintHtml(ch){
+  var co={};try{co=(JSON.parse(localStorage.getItem('mayaacc_companies')||'[]')||[]).find(function(x){return x&&x.id===cid();})||{};}catch(e){}
+  var d=String(ch.date||'');
+  var dmy=d?d.slice(8,10)+'-'+d.slice(5,7)+'-'+d.slice(0,4):'';
+  var amt=fmt(ch.amount);
+  return '<!doctype html><html><head><meta charset="utf-8"><title>Cheque '+(esc(ch.no||''))+'</title><style>'
+    +'body{font-family:Arial,sans-serif;color:#172033;margin:30px}'
+    +'.chq{width:720px;border:1.5px solid #172033;border-radius:6px;padding:22px 26px;position:relative;box-sizing:border-box}'
+    +'.chq .bank{font-size:20px;font-weight:800}.chq .bank small{display:block;font-size:11px;color:#5b6b88;font-weight:400}'
+    +'.chq .date{position:absolute;top:22px;right:26px;border:1px solid #172033;padding:4px 10px;font-size:13px}'
+    +'.chq .row{margin:18px 0;font-size:14px}.chq .row b{border-bottom:1px solid #172033;padding:0 6px;font-size:15px}'
+    +'.chq .amt{position:absolute;top:96px;right:26px;border:1px solid #172033;padding:6px 10px;font-weight:800;font-size:15px}'
+    +'.chq .cross{position:absolute;top:58px;left:26px;font-size:11px;font-weight:700;color:#34465d;border-top:2px solid #34465d;border-bottom:2px solid #34465d;padding:2px 4px;transform:rotate(-8deg)}'
+    +'.chq .sign{margin-top:44px;text-align:right;font-size:12px;color:#5b6b88}.chq .sign b{display:block;border-top:1px solid #172033;width:200px;margin-left:auto;padding-top:4px;color:#172033}'
+    +'.chq .foot{margin-top:10px;font-size:11px;color:#6b7a90}'
+    +'</style></head><body><div class="chq">'
+    +'<div class="bank">'+esc(ch.bank||'Bank')+'<small>'+esc(co.companyName||'MAYAACC')+'</small></div>'
+    +'<div class="date">Date: '+esc(dmy)+'</div>'
+    +(ch.acPayee?'<div class="cross">A/c Payee</div>':'')
+    +'<div class="row">Pay <b>'+esc(ch.payee||'')+'</b> &nbsp; or '+(ch.bearer==='Bearer'?'Bearer':'Order')+'</div>'
+    +'<div class="amt">₹ '+esc(amt)+'</div>'
+    +'<div class="row">Rupees <b>'+esc(amountWords(ch.amount))+'</b></div>'
+    +'<div class="row">Cheque No. <b>'+esc(ch.no||'')+'</b></div>'
+    +'<div class="sign">Authorised Signatory<b>&nbsp;</b></div>'
+    +'</div><p class="foot">Printed from MAYAACC · Cheque Register</p>'
+    +'<script>window.onload=function(){window.print()}<\/script></body></html>';
+}
+function chequePrint(ch){
+  var w=null;
+  try{w=window.open('','_blank','width=860,height=640');}catch(e){}
+  if(!w){toast('Please allow popups to print the cheque.');return false;}
+  w.document.write(chequePrintHtml(ch));w.document.close();
+  return true;
+}
+function mayaChequePrint(prefill){
+  var banks=bankLedgers();
+  var ch=prefill||{};
+  var isEdit=!!ch.id;
+  var bankOpts=banks.map(function(l){return '<option value="'+esc(l.name)+'"'+(String(l.name)===String(ch.bank)?' selected':'')+'>'+esc(l.name)+'</option>';}).join('');
+  if(!bankOpts)bankOpts='<option value="">(No bank / cash ledger — create one in Masters → Ledger)</option>';
+  var body='<div class="maya-mod-field"><span>Bank / Cash account</span><select id="mch-bank">'+bankOpts+'</select></div>'
+    +'<div class="maya-mod-field"><span>Payee</span><input id="mch-payee" value="'+esc(ch.payee||'')+'" placeholder="Name of the person / party" autocomplete="off"></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px">'
+    +'<div class="maya-mod-field"><span>Date</span><input id="mch-date" type="date" value="'+esc(ch.date||new Date().toISOString().slice(0,10))+'"></div>'
+    +'<div class="maya-mod-field"><span>Amount (₹)</span><input id="mch-amount" type="number" min="0" step="0.01" value="'+esc(ch.amount!=null?ch.amount:'')+'" placeholder="0.00"></div></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px">'
+    +'<div class="maya-mod-field"><span>Cheque No.</span><input id="mch-no" value="'+esc(ch.no||'')+'" placeholder="e.g. 000123" autocomplete="off"></div>'
+    +'<div class="maya-mod-field"><span>Bearer / Order</span><select id="mch-bearer"><option'+(ch.bearer!=='Bearer'?' selected':'')+'>Order</option><option'+(ch.bearer==='Bearer'?' selected':'')+'>Bearer</option></select></div></div>'
+    +'<label style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><input id="mch-acpayee" type="checkbox"'+(ch.acPayee!==false?' checked':'')+'> A/c Payee (crossed cheque — deposits into the payee account only)</label>'
+    +(isEdit?'<div class="maya-mod-field"><span>Status</span><select id="mch-status"><option'+(ch.status==='Issued'?' selected':'')+'>Issued</option><option'+(ch.status==='Cleared'?' selected':'')+'>Cleared</option><option'+(ch.status==='Cancelled'?' selected':'')+'>Cancelled</option></select></div>':'')
+    +'<div class="maya-mod-err" id="mch-err"></div>'
+    +'<div class="maya-mod-note">Amount in words prints on the cheque automatically ('+(ch.amount?esc(amountWords(ch.amount)):'—')+'). The cheque is saved in the Cheque Register.</div>';
+  var foot='<span class="hint">Esc cancels</span>'
+    +(isEdit?'<button type="button" class="maya-mod-btn" data-act="print">Print again</button>':'')
+    +'<button type="button" class="maya-mod-btn" data-act="save">Save</button>'
+    +'<button type="button" class="maya-mod-btn pri" data-act="printsave">'+(isEdit?'Print & Save':'Print & Save')+'</button>';
+  var ov=modOpen('maya-chq','Cheque Printing','Banking',body,foot);
+  var save=function(doPrint){
+    var bank=$('mch-bank').value,payee=$('mch-payee').value.trim(),date=$('mch-date').value,amt=num($('mch-amount').value),no=$('mch-no').value.trim();
+    var err=$('mch-err');
+    if(!bank){err.textContent='Choose the bank / cash account.';return;}
+    if(!payee){err.textContent='Enter the payee name.';$('mch-payee').focus();return;}
+    if(!/^\d{4}-\d\d-\d\d$/.test(date)){err.textContent='Enter a valid date.';return;}
+    if(!(amt>0)){err.textContent='Enter an amount greater than zero.';$('mch-amount').focus();return;}
+    if(!no){err.textContent='Enter the cheque number.';$('mch-no').focus();return;}
+    var all=readCheques();
+    var rec={id:ch.id||('CHQ-'+Date.now()),no:no,date:date,bank:bank,payee:payee,amount:r2(amt),bearer:$('mch-bearer').value,acPayee:$('mch-acpayee').checked,status:isEdit?$('mch-status').value:'Issued',createdAt:ch.createdAt||new Date().toISOString()};
+    var ix=all.findIndex(function(x){return x.id===rec.id;});
+    if(ix>=0)all[ix]=rec;else all.push(rec);
+    writeCheques(all);
+    modClose('maya-chq');
+    toast('Cheque '+(isEdit?'updated':'saved')+' — '+(ch.no||no));
+    if(doPrint)chequePrint(rec);
+    if(window.mayaReportRefresh)try{window.mayaReportRefresh();}catch(e){}
+  };
+  ov.querySelector('[data-act="save"]').addEventListener('click',function(){save(false);});
+  ov.querySelector('[data-act="printsave"]').addEventListener('click',function(){save(true);});
+  var pr=ov.querySelector('[data-act="print"]');
+  if(pr)pr.addEventListener('click',function(){chequePrint(ch);});
+  setTimeout(function(){var f=$('mch-payee');if(f)f.focus();},20);
+}
+window.mayaChequePrint=mayaChequePrint;
+window.mayaCheques=function(){return readCheques();};
+
+/* ================= 4. VOUCHER CONFIGURATION (Tally shot 10) ================= */
+var VCH_OPTS=[
+ {k:'commonLedger',l:'Use common ledger account for item allocation',wired:false,why:'MAYAACC already books every item line to the one Sales / Purchase ledger in the voucher header, so a common ledger is how it works today.'},
+ {k:'descLedger',l:'Show description for ledger accounts',wired:false,why:'Ledger lines carry the voucher narration; a separate per-ledger description field is not built yet.'},
+ {k:'descItem',l:'Show description for stock items',wired:true,why:'Adds a Description box to each item row; the text is stored on the item and shown on the voucher detail.'},
+ {k:'modifyAll',l:'Modify all fields during voucher entry',wired:false,why:'No field is locked while altering a voucher in MAYAACC (only the number is locked in Auto numbering), so there is nothing to unlock.'},
+ {k:'compoundUnit',l:'Use compound units for stock items',wired:false,why:'Needs a compound-unit master (e.g. 1 box = 12 pcs) with conversion at entry — not built yet.'},
+ {k:'compoundDetails',l:'Show compound unit details',wired:false,why:'Depends on compound units (above).'},
+ {k:'bankDefault',l:'Use default bank / cash for payments',wired:true,why:'Prefills the Account field of a new Payment / Receipt / Contra voucher with the ledger named below.'},
+ {k:'bankRecon',l:'Bank reconciliation',wired:false,why:'Needs reconciled-voucher tracking; use Banking → Bank Statement (import and match) for now.'},
+ {k:'taxOnSubtotal',l:'Calculate tax on the subtotal',wired:false,why:'The tax engine computes GST per item line; changing the tax base would change GSTR-1 figures and needs engine rework.'}
+];
+function vchCfgKey(type){return 'mayaacc_vchcfg_'+cid()+'_'+String(type||'');}
+function mayaVchCfg(type){
+  var g={};try{g=B().voucherConfig(cid());}catch(e){}
+  var o=readLS(vchCfgKey(type),{});
+  return Object.assign({},g,o||{});
+}
+function mayaSaveVchCfg(type,obj){writeLS(vchCfgKey(type),obj||{});}
+window.mayaVchCfg=mayaVchCfg;
+window.mayaSaveVchCfg=mayaSaveVchCfg;
+function mayaVoucherConfig(type){
+  type=String(type||'Sales');
+  var cur=mayaVchCfg(type);
+  var rows=VCH_OPTS.map(function(o){
+    var on=!!cur[o.k];
+    return '<div class="maya-mod-row'+(on?' sel':'')+'" data-k="'+o.k+'" data-on="'+(on?'1':'0')+'"><span>'+esc(o.l)
+      +(o.wired?'':'<small>Saved, but no effect yet — '+esc(o.why)+'</small>')
+      +(o.wired?'<small>'+esc(o.why)+'</small>':'')
+      +'</span><span class="pill'+(on?' y':'')+'">'+(on?'Yes':'No')+'</span></div>';
+  }).join('');
+  var body='<div class="maya-mod-note">Options for <b>'+esc(type)+'</b> vouchers. Yes/No rows are clickable; options marked “no effect yet” are saved honestly and do nothing until their module is built.</div>'
+    +rows
+    +'<div class="maya-mod-field" style="margin-top:12px"><span>Default bank / cash ledger (used when “Use default bank / cash” is Yes)</span><input id="mvc-bank" value="'+esc(cur.bankDefaultLedger||'')+'" placeholder="e.g. HDFC Bank" autocomplete="off"><small>Only used for Payment / Receipt / Contra vouchers.</small></div>';
+  var foot='<span class="hint">Click a row to change Yes / No · Esc cancels</span><button type="button" class="maya-mod-btn pri" data-act="save">Accept</button>';
+  var ov=modOpen('maya-vcfg','Voucher Configuration',type,body,foot);
+  ov.querySelectorAll('.maya-mod-row').forEach(function(r){
+    r.addEventListener('click',function(){
+      var on=r.dataset.on!=='1';
+      r.dataset.on=on?'1':'0';r.classList.toggle('sel',on);
+      r.querySelector('.pill').textContent=on?'Yes':'No';r.querySelector('.pill').classList.toggle('y',on);
+    });
+  });
+  ov.querySelector('[data-act="save"]').addEventListener('click',function(){
+    var obj={};
+    ov.querySelectorAll('.maya-mod-row').forEach(function(r){obj[r.dataset.k]=r.dataset.on==='1';});
+    obj.bankDefaultLedger=$('mvc-bank').value.trim();
+    mayaSaveVchCfg(type,obj);
+    modClose('maya-vcfg');
+    toast(type+' options saved');
+  });
+}
+window.mayaVoucherConfig=mayaVoucherConfig;
+window.mayaVoucherConfigOpen=function(){
+  var n=$('mvtName');
+  var t=n&&n.value.trim()?n.value.trim():'Sales';
+  mayaVoucherConfig(t);
+};
+
+/* ================= 5. CONTACT / GST STATUS dialogs (sidebar S / V) ================= */
+function mayaContactDialog(name){
+  var l=null;try{l=B().find(cid(),name)||null;}catch(e){}
+  if(!l){toast('Ledger not found.');return;}
+  var row=function(k,v){return '<div style="display:flex;justify-content:space-between;gap:20px;padding:7px 0;border-bottom:1px solid #edf0f4"><span style="color:#5b6b88">'+esc(k)+'</span><strong>'+esc(v||'—')+'</strong></div>';};
+  var body=row('Ledger',l.name)+row('Under',l.under)+row('Phone',l.phone)+row('WhatsApp',l.whatsapp)+row('Email',l.email)
+    +row('Address',l.address)+row('State',l.state)+row('GSTIN',l.gstin)+row('PAN',l.pan)
+    +row('Bank',l.bankName)+row('Account No.',l.account)+row('Branch',l.branch)+row('IFSC',l.ifsc)
+    +row('Credit limit',l.creditLimit?('₹ '+fmt(l.creditLimit)):'')+row('Credit days',l.creditDays)
+    +row('Balance',function(){try{return B().balance(cid(),l.name).text;}catch(e){return '—';}}());
+  var ov=modOpen('maya-contact','Contact — '+l.name,'Ledger',body,'<button type="button" class="maya-mod-btn pri" data-act="ok">Close</button>');
+  ov.querySelector('[data-act="ok"]').addEventListener('click',function(){modClose('maya-contact');});
+}
+window.mayaContactDialog=mayaContactDialog;
+function mayaGstStatusDialog(name){
+  var l=null;try{l=B().find(cid(),name)||null;}catch(e){}
+  if(!l){toast('Ledger not found.');return;}
+  var cur=l.gstType||'unregistered';
+  var opts=[['unregistered','Unregistered'],['regular','Regular (GST registered)'],['composition','Composition'],['consumer','Consumer']];
+  var body='<div class="maya-mod-note">Sets the GST registration type of <b>'+esc(l.name)+'</b>. It decides whether this party appears in GSTR-1 B2B and how its invoices are classified.</div>'
+    +opts.map(function(o){return '<label class="maya-mod-row'+(cur===o[0]?' sel':'')+'"><span>'+esc(o[1])+'</span><input type="radio" name="mgs-type" value="'+o[0]+'"'+(cur===o[0]?' checked':'')+'></label>';}).join('');
+  var foot='<span class="hint">Esc cancels</span><button type="button" class="maya-mod-btn pri" data-act="save">Accept</button>';
+  var ov=modOpen('maya-gststat','Set GST Status',l.name,body,foot);
+  ov.querySelectorAll('.maya-mod-row').forEach(function(r){r.addEventListener('click',function(){ov.querySelectorAll('.maya-mod-row').forEach(function(x){x.classList.remove('sel');});r.classList.add('sel');var i=r.querySelector('input');if(i)i.checked=true;});});
+  ov.querySelector('[data-act="save"]').addEventListener('click',function(){
+    var v=(ov.querySelector('input[name="mgs-type"]:checked')||{}).value||cur;
+    var res=null;
+    try{res=B().saveMaster(cid(),'Ledger',l,{name:l.name,gstType:v});}catch(e){res=null;}
+    modClose('maya-gststat');
+    if(res&&res.ok)toast(l.name+' — GST status set to '+v);
+    else toast('Could not save the GST status'+(res&&res.error?(': '+res.error.msg):''));
+    if(window.mayaReportRefresh)try{window.mayaReportRefresh();}catch(e){}
+  });
+}
+window.mayaGstStatusDialog=mayaGstStatusDialog;
+
+/* ================= 6. BUDGETS master (F11 budgets) ================= */
+function budgetKey(){return 'mayaacc_budgets_'+cid();}
+function readBudgets(){return readLS(budgetKey(),{});}
+window.mayaBudgets=function(){return readBudgets();};
+function mayaSetBudgets(){
+  var ledgers=[];
+  try{ledgers=B().ledgers(cid()).filter(function(l){return l&&l.name;});}catch(e){}
+  var saved=readBudgets();
+  var rows=ledgers.map(function(l){
+    var v=saved[l.name];
+    return '<div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid #edf0f4"><span>'+esc(l.name)+' <small style="color:#7a89a5">'+esc(l.under||'')+'</small></span><input data-bud="'+esc(l.name)+'" type="number" min="0" step="1" value="'+(v!=null?esc(v):'')+'" placeholder="₹ / month" style="width:130px;height:30px;border:1px solid #aebbd0;border-radius:7px;padding:0 8px"></div>';
+  }).join('');
+  var body='<div class="maya-mod-note">Monthly budget per ledger (₹). The Budget Variance report compares the actual movement in a period with budget × months in the period.</div>'
+    +(rows||'<div>No ledgers yet.</div>');
+  var foot='<span class="hint">Leave blank for no budget</span><button type="button" class="maya-mod-btn pri" data-act="save">Save budgets</button>';
+  var ov=modOpen('maya-budgets','Set Budgets','Monthly, per ledger',body,foot);
+  ov.querySelector('[data-act="save"]').addEventListener('click',function(){
+    var out={};
+    ov.querySelectorAll('[data-bud]').forEach(function(i){var v=num(i.value);if(v>0)out[i.dataset.bud]=v;});
+    writeLS(budgetKey(),out);
+    modClose('maya-budgets');
+    toast('Budgets saved');
+    if(window.mayaReportRefresh)try{window.mayaReportRefresh();}catch(e){}
+  });
+}
+window.mayaSetBudgets=mayaSetBudgets;
+
+/* ================= 7. NEW REPORT VIEWS ================= */
+var MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function monthsBetween(from,to){
+  var out=[];if(!from||!to||from>to)return out;
+  var pad=function(n){return String(n).padStart(2,'0');};
+  var y=+from.slice(0,4),m=+from.slice(5,7)-1,ey=+to.slice(0,4),em=+to.slice(5,7)-1;
+  while(y<ey||(y===ey&&m<=em)){
+    var last=new Date(y,m+1,0).getDate(),a=y+'-'+pad(m+1)+'-01',b=y+'-'+pad(m+1)+'-'+pad(last);
+    out.push({label:MN[m]+' '+y,from:a<from?from:a,to:b>to?to:b});
+    m++;if(m>11){m=0;y++;}
+    if(out.length>60)break;
+  }
+  return out;
+}
+var DB_DR={Sales:1,Payment:1,Journal:1,'Debit Note':1,'Delivery Note':1,'Sales Order':1,'Physical Stock':1,'Stock Journal':1};
+function viewHead(cur,title,crumb){
+  var rc=RC(),st=rc.st;st.sel=[];
+  rc.$('mrp-title').textContent=title;
+  rc.$('mrp-crumb').textContent=crumb;
+  return {rc:rc,st:st};
+}
+function viewEmpty(msg){var rc=RC();rc.$('mrp-body').innerHTML='<div class="mrp-empty">'+msg+'</div>';}
+function dmy(s){return s?s.slice(8,10)+'-'+s.slice(5,7)+'-'+s.slice(0,4):'';}
+function feats(){try{return B().features(cid());}catch(e){return {};}}
+function liveV(v){return v&&!v.cancelled;}
+function inPeriod(v,from,to){return v.date>=from&&v.date<=to;}
+
+/* --- Exception Reports: the data-verification engine as a report --- */
+function viewExceptions(cur){
+  var h=viewHead(cur,'Exception Reports','Problems the verification engine found in this company · Enter opens the voucher / ledger');
+  var V=null;
+  try{V=window.MayaData&&window.MayaData.verify?window.MayaData.verify():null;}catch(e){V=null;}
+  if(!V||!V.list){viewEmpty('Verification is not available right now.');return;}
+  if(!V.list.length){viewEmpty('No exceptions — books are clean.<br>Checked '+V.stats.vouchers+' vouchers, '+V.stats.ledgers+' ledgers and '+V.stats.items+' stock items.');return;}
+  var html=V.list.map(function(x,i){
+    var sel=null;
+    if(x.ref&&x.ref.vid)sel={kind:'voucher',id:x.ref.vid};
+    else if(x.ref&&x.ref.master)sel={kind:'ledger',name:x.ref.master};
+    if(sel)h.st.sel.push(sel);else h.st.sel.push({kind:'none'});
+    var ix=h.st.sel.length-1;
+    return '<tr data-i="'+ix+'"><td>'+(x.sev==='error'?'<span class="mrp-chip bad">Error</span>':'<span class="mrp-chip warn">Warning</span>')+'</td><td>'+esc(x.title)+'</td><td>'+esc(x.detail||'')+'</td><td>'+esc(x.ref?x.ref.label||x.ref.master||'':'')+'</td></tr>';
+  }).join('');
+  h.rc.$('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Severity</th><th>Issue</th><th>Detail</th><th>Where</th></tr></thead><tbody>'+html+'</tbody></table>'
+    +'<div style="padding:8px 2px;color:#5b6b88;font-size:12px">'+V.errors+' error(s) · '+V.warnings+' warning(s) · Data Verification (Utilities) can fix most of these automatically.</div>';
+}
+
+/* --- Analysis & Verification: voucher-number gaps, duplicates, unbalanced, missing GSTIN --- */
+function analysisData(from,to){
+  var c=cid(),vs=[];
+  try{vs=B().vouchers(c).filter(liveV);}catch(e){}
+  var gaps=[],dups=[],unbal=[],noGstin=[];
+  var byType={};
+  vs.forEach(function(v){
+    var k=v.type+'|'+String(v.number);
+    if(!byType[v.type])byType[v.type]={serials:[],seen:{}};
+    var s=parseInt(String(v.number).replace(/[^0-9]/g,''),10);
+    if(isFinite(s))byType[v.type].serials.push(s);
+    if(byType[v.type].seen[k])dups.push(v);else byType[v.type].seen[k]=1;
+    var dr=0,cr=0;(v.entries||[]).forEach(function(e){dr+=num(e.dr);cr+=num(e.cr);});
+    if((v.entries||[]).length&&Math.abs(dr-cr)>0.005)unbal.push({v:v,dr:dr,cr:cr});
+    if(v.gst&&v.party){var l=null;try{l=B().find(c,v.party);}catch(e){}if(l&&l.state&&!l.gstin)noGstin.push(v);}
+  });
+  Object.keys(byType).forEach(function(t){
+    var ss=byType[t].serials.slice().sort(function(a,b){return a-b;});
+    if(ss.length<2)return;
+    var set={};ss.forEach(function(x){set[x]=1;});
+    for(var n=ss[0];n<ss[ss.length-1];n++){if(!set[n])gaps.push({type:t,serial:n});if(gaps.length>=50)break;}
+  });
+  return {gaps:gaps,dups:dups,unbal:unbal,noGstin:noGstin};
+}
+function viewAnalysis(cur){
+  var st0=RC().st;
+  var h=viewHead(cur,'Analysis & Verification','Voucher-number gaps, duplicate numbers, unbalanced vouchers and missing GSTIN · '+dmy(st0.from)+' to '+dmy(st0.to));
+  var A=analysisData(h.st.from,h.st.to);
+  var rows=[];
+  A.gaps.forEach(function(g){rows.push({sev:'Warning',check:'Missing voucher number',detail:g.type+' — serial '+g.serial+' was never used (gap in the numbering series).',ref:g.type+' '+g.serial,sel:{kind:'none'}});});
+  A.dups.forEach(function(v){rows.push({sev:'Warning',check:'Duplicate voucher number',detail:v.type+' no. '+v.number+' is used more than once.',ref:v.type+' '+v.number+' · '+dmy(v.date),sel:{kind:'voucher',id:v.id}});});
+  A.unbal.forEach(function(x){rows.push({sev:'Error',check:'Voucher is not balanced',detail:x.v.type+' '+x.v.number+' — Debit '+fmt(x.dr)+' and credit '+fmt(x.cr)+' differ.',ref:x.v.type+' '+x.v.number+' · '+dmy(x.v.date),sel:{kind:'voucher',id:x.v.id}});});
+  A.noGstin.forEach(function(v){rows.push({sev:'Warning',check:'GSTIN missing where required',detail:v.type+' '+v.number+' — party "'+v.party+'" has a State but no GSTIN, yet GST was charged.',ref:v.party,sel:{kind:'ledger',name:v.party}});});
+  if(!rows.length){viewEmpty('Nothing to verify — no gaps, duplicates, unbalanced vouchers or missing GSTINs in this company.');return;}
+  var html=rows.map(function(r){
+    h.st.sel.push(r.sel||{kind:'none'});
+    var ix=h.st.sel.length-1;
+    return '<tr data-i="'+ix+'"><td>'+(r.sev==='Error'?'<span class="mrp-chip bad">Error</span>':'<span class="mrp-chip warn">Warning</span>')+'</td><td>'+esc(r.check)+'</td><td>'+esc(r.detail)+'</td><td>'+esc(r.ref)+'</td></tr>';
+  }).join('');
+  h.rc.$('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Severity</th><th>Check</th><th>Detail</th><th>Where</th></tr></thead><tbody>'+html+'</tbody></table>';
+}
+
+/* --- Voucher Clarification: vouchers that need a human look --- */
+function viewClarify(cur){
+  var h=viewHead(cur,'Voucher Clarification','Optional, post-dated, cancelled and incomplete vouchers in the period · Enter opens the voucher');
+  var vs=[];
+  try{vs=B().vouchers(cid()).filter(function(v){return v&&inPeriod(v,h.st.from,h.st.to);});}catch(e){}
+  var rows=[];
+  vs.forEach(function(v){
+    var reasons=[];
+    if(v.optional)reasons.push('Optional');
+    if(v.postdated)reasons.push('Post-dated');
+    if(v.cancelled)reasons.push('Cancelled');
+    if(!v.narration)reasons.push('No narration');
+    if((v.type==='Sales'||v.type==='Purchase'||v.type==='Credit Note'||v.type==='Debit Note')&&!v.party)reasons.push('No party');
+    if(!reasons.length)return;
+    rows.push({v:v,reasons:reasons.join(', ')});
+  });
+  if(!rows.length){viewEmpty('Nothing needs clarification in this period.');return;}
+  var html=rows.map(function(r){
+    h.st.sel.push({kind:'voucher',id:r.v.id});
+    var ix=h.st.sel.length-1;
+    return '<tr data-i="'+ix+'"><td>'+esc(dmy(r.v.date))+'</td><td>'+esc(r.v.type)+'</td><td>'+esc(r.v.number)+'</td><td>'+esc(r.v.party||'—')+'</td><td class="r">'+fmt(r.v.total)+'</td><td>'+esc(r.reasons)+'</td></tr>';
+  }).join('');
+  h.rc.$('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Date</th><th>Vch Type</th><th>Vch No.</th><th>Party</th><th class="r">Amount</th><th>Needs attention</th></tr></thead><tbody>'+html+'</tbody></table>';
+}
+
+/* --- F8 Columnar: Day Book with months as columns --- */
+function viewDaybookCol(cur){
+  var h=viewHead(cur,'Day Book — Columnar','Voucher totals by type and month (F8 toggles back to the normal Day Book)');
+  var ms=monthsBetween(h.st.from,h.st.to);
+  var rows=[];
+  try{rows=B().dayBook(cid(),h.st.from,h.st.to);}catch(e){}
+  if(!ms.length||!rows.length){viewEmpty('No vouchers in this period.');return;}
+  var types=[];
+  rows.forEach(function(r){if(types.indexOf(r.type)<0)types.push(r.type);});
+  var cell={};
+  rows.forEach(function(r){
+    var m=r.date.slice(0,7),k=r.type+'|'+m;
+    if(!cell[k])cell[k]={dr:0,cr:0};
+    if(DB_DR[r.type])cell[k].dr+=num(r.amount);else cell[k].cr+=num(r.amount);
+  });
+  var head='<tr><th>Voucher Type</th>'+ms.map(function(m){return '<th class="r" colspan="2">'+esc(m.label)+'</th>';}).join('')+'<th class="r" colspan="2">Total</th></tr>'
+    +'<tr><th></th>'+ms.map(function(){return '<th class="r">Debit</th><th class="r">Credit</th>';}).join('')+'<th class="r">Debit</th><th class="r">Credit</th></tr>';
+  var tdr=0,tcr=0;
+  var body=types.map(function(t){
+    var tr='<tr><td>'+esc(t)+'</td>',td=0,tc=0;
+    ms.forEach(function(m){
+      var c=cell[t+'|'+m.from.slice(0,7)]||{dr:0,cr:0};
+      td+=c.dr;tc+=c.cr;
+      tr+='<td class="r">'+(c.dr?fmt(r2(c.dr)):'')+'</td><td class="r">'+(c.cr?fmt(r2(c.cr)):'')+'</td>';
+    });
+    tdr+=td;tcr+=tc;
+    return tr+'<td class="r">'+(td?fmt(r2(td)):'')+'</td><td class="r">'+(tc?fmt(r2(tc)):'')+'</td></tr>';
+  }).join('');
+  body+='<tr class="tot"><td>Grand Total</td>'+ms.map(function(m){
+    var d=0,cr=0;types.forEach(function(t){var c=cell[t+'|'+m.from.slice(0,7)]||{dr:0,cr:0};d+=c.dr;cr+=c.cr;});
+    return '<td class="r">'+(d?fmt(r2(d)):'')+'</td><td class="r">'+(cr?fmt(r2(cr)):'')+'</td>';
+  }).join('')+'<td class="r">'+fmt(r2(tdr))+'</td><td class="r">'+fmt(r2(tcr))+'</td></tr>';
+  h.rc.$('mrp-body').innerHTML='<table class="mrp-table"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>';
+}
+
+/* --- F8 Columnar: Ledger with months as columns --- */
+function viewLedgerCol(cur){
+  var name=cur.name||'';
+  var st0=RC().st;
+  var h=viewHead(cur,'Ledger — Columnar: '+name,'Monthly columns (F8 toggles back to the normal ledger) · '+dmy(st0.from)+' to '+dmy(st0.to));
+  var ms=monthsBetween(h.st.from,h.st.to);
+  if(!name){viewEmpty('Open a ledger first.');return;}
+  if(!ms.length){viewEmpty('Choose a period with at least one month.');return;}
+  var per=ms.map(function(m){
+    try{return B().ledgerVouchers(cid(),name,m.from,m.to);}catch(e){return null;}
+  });
+  if(!per.some(Boolean)){viewEmpty('No entries for '+name+' in this period.');return;}
+  var head='<tr><th>Particulars</th>'+ms.map(function(m){return '<th class="r" colspan="2">'+esc(m.label)+'</th>';}).join('')+'</tr>'
+    +'<tr><th></th>'+ms.map(function(){return '<th class="r">Debit</th><th class="r">Credit</th>';}).join('')+'</tr>';
+  function rowCells(get){
+    return per.map(function(L){
+      if(!L)return '<td class="r"></td><td class="r"></td>';
+      var v=get(L);
+      return '<td class="r">'+(v.dr?fmt(r2(v.dr)):'')+'</td><td class="r">'+(v.cr?fmt(r2(v.cr)):'')+'</td>';
+    }).join('');
+  }
+  var openRow='<tr><td>Opening Balance</td>'+per.map(function(L){
+    if(!L)return '<td class="r"></td><td class="r"></td>';
+    var o=num(L.open);
+    return '<td class="r">'+(o>0?fmt(o):'')+'</td><td class="r">'+(o<0?fmt(-o):'')+'</td>';
+  }).join('')+'</tr>';
+  var body=openRow
+    +'<tr><td>Debit (movement)</td>'+rowCells(function(L){return {dr:L.dr,cr:0};})+'</tr>'
+    +'<tr><td>Credit (movement)</td>'+rowCells(function(L){return {dr:0,cr:L.cr};})+'</tr>'
+    +'<tr class="tot"><td>Closing Balance</td>'+per.map(function(L){
+      if(!L)return '<td class="r"></td><td class="r"></td>';
+      var c=num(L.close);
+      return '<td class="r">'+(c>0?fmt(c):'')+'</td><td class="r">'+(c<0?fmt(-c):'')+'</td>';
+    }).join('')+'</tr>';
+  h.rc.$('mrp-body').innerHTML='<table class="mrp-table"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>';
+}
+
+/* --- H Change View: Day Book condensed by voucher type --- */
+function viewDaybookCond(cur){
+  var h=viewHead(cur,'Day Book — Condensed','One row per voucher type (H toggles back to the detailed Day Book)');
+  var rows=[];
+  try{rows=B().dayBook(cid(),h.st.from,h.st.to);}catch(e){}
+  if(!rows.length){viewEmpty('No vouchers in this period.');return;}
+  var by={};
+  rows.forEach(function(r){
+    if(!by[r.type])by[r.type]={n:0,dr:0,cr:0};
+    by[r.type].n++;
+    if(DB_DR[r.type])by[r.type].dr+=num(r.amount);else by[r.type].cr+=num(r.amount);
+  });
+  var td=0,tc=0;
+  var body=Object.keys(by).sort().map(function(t){
+    var b=by[t];td+=b.dr;tc+=b.cr;
+    return '<tr><td>'+esc(t)+'</td><td class="r">'+b.n+'</td><td class="r">'+(b.dr?fmt(r2(b.dr)):'')+'</td><td class="r">'+(b.cr?fmt(r2(b.cr)):'')+'</td></tr>';
+  }).join('');
+  body+='<tr class="tot"><td>Grand Total</td><td class="r">'+rows.length+'</td><td class="r">'+fmt(r2(td))+'</td><td class="r">'+fmt(r2(tc))+'</td></tr>';
+  h.rc.$('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Voucher Type</th><th class="r">Vouchers</th><th class="r">Debit</th><th class="r">Credit</th></tr></thead><tbody>'+body+'</tbody></table>';
+}
+
+/* --- F9 Ledger Vouchers — GST: the ledger's vouchers with tax split --- */
+function viewLedgerGst(cur){
+  var name=cur.name||'';
+  var st0=RC().st;
+  var h=viewHead(cur,'Ledger Vouchers — GST: '+name,'GST split of this ledger\u2019s vouchers · '+dmy(st0.from)+' to '+dmy(st0.to));
+  if(!name){viewEmpty('Open a ledger first.');return;}
+  var vs=[];
+  try{vs=B().vouchers(cid()).filter(function(v){return v&&inPeriod(v,h.st.from,h.st.to)&&!v.cancelled&&(v.party===name||(v.entries||[]).some(function(e){return e.ledger===name;}));});}catch(e){}
+  vs.sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0;});
+  if(!vs.length){viewEmpty('No vouchers for '+name+' in this period.');return;}
+  var tt=0,tx=0,cg=0,sg=0,ig=0;
+  var body=vs.map(function(v){
+    h.st.sel.push({kind:'voucher',id:v.id});
+    var ix=h.st.sel.length-1;
+    var taxable=v.gst?num(v.gst.taxable):0;
+    var lines=(v.gst&&v.gst.lines)||[];
+    var c=0,s=0,i=0;
+    lines.forEach(function(l){if(l.nature==='CGST')c+=num(l.amount);else if(l.nature==='SGST')s+=num(l.amount);else if(l.nature==='IGST')i+=num(l.amount);});
+    tt+=taxable;cg+=c;sg+=s;ig+=i;tx+=num(v.total);
+    return '<tr data-i="'+ix+'"><td>'+esc(dmy(v.date))+'</td><td>'+esc(v.type)+'</td><td>'+esc(v.number)+'</td><td class="r">'+(taxable?fmt(taxable):'')+'</td><td class="r">'+(c?fmt(c):'')+'</td><td class="r">'+(s?fmt(s):'')+'</td><td class="r">'+(i?fmt(i):'')+'</td><td class="r">'+fmt(v.total)+'</td></tr>';
+  }).join('');
+  body+='<tr class="tot"><td colspan="3">Total</td><td class="r">'+fmt(r2(tt))+'</td><td class="r">'+fmt(r2(cg))+'</td><td class="r">'+fmt(r2(sg))+'</td><td class="r">'+fmt(r2(ig))+'</td><td class="r">'+fmt(r2(tx))+'</td></tr>';
+  h.rc.$('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Date</th><th>Vch Type</th><th>Vch No.</th><th class="r">Taxable</th><th class="r">CGST</th><th class="r">SGST</th><th class="r">IGST</th><th class="r">Total</th></tr></thead><tbody>'+body+'</tbody></table>';
+}
+
+/* --- F7 GST Info: the ledger's GST details + period tax totals --- */
+function viewGstInfo(cur){
+  var name=cur.name||'';
+  var st0=RC().st;
+  var h=viewHead(cur,'GST Info: '+name,'Registration details and tax totals as on '+dmy(st0.to));
+  var l=null;try{l=B().find(cid(),name)||null;}catch(e){}
+  if(!l){viewEmpty('Ledger not found.');return;}
+  var vs=[];
+  try{vs=B().vouchers(cid()).filter(function(v){return v&&v.date<=h.st.to&&!v.cancelled&&(v.party===name||(v.entries||[]).some(function(e){return e.ledger===name;}));});}catch(e){}
+  var tx=0,cg=0,sg=0,ig=0;
+  vs.forEach(function(v){
+    if(!v.gst)return;
+    tx+=num(v.gst.taxable);
+    (v.gst.lines||[]).forEach(function(x){if(x.nature==='CGST')cg+=num(x.amount);else if(x.nature==='SGST')sg+=num(x.amount);else if(x.nature==='IGST')ig+=num(x.amount);});
+  });
+  var bal='—';try{bal=B().balance(cid(),name).text;}catch(e){}
+  var row=function(k,v){return '<tr><td>'+esc(k)+'</td><td>'+esc(v==null||v===''?'—':String(v))+'</td></tr>';};
+  h.rc.$('mrp-body').innerHTML='<table class="mrp-table"><tbody>'
+    +row('Ledger',l.name)+row('Under',l.under)+row('GST registration type',l.gstType||'unregistered')
+    +row('GSTIN',l.gstin)+row('PAN',l.pan)+row('State',l.state)
+    +row('Current balance',bal)
+    +row('Taxable value (all vouchers to date)',fmt(r2(tx)))
+    +row('CGST',fmt(r2(cg)))+row('SGST',fmt(r2(sg)))+row('IGST',fmt(r2(ig)))
+    +row('Vouchers counted',String(vs.length))
+    +'</tbody></table>'
+    +'<div style="padding:8px 2px;color:#5b6b88;font-size:12px">Change the registration type from the sidebar (V · Set GST Status). It decides whether this party appears in GSTR-1 B2B.</div>';
+}
+
+/* --- Cheque Register --- */
+function viewChequeReg(cur){
+  var h=viewHead(cur,'Cheque Register','All cheques printed from MAYAACC · click Open to re-print or change the status');
+  var all=readCheques().slice().sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0;});
+  if(!all.length){viewEmpty('No cheques yet.<br>Print one from Banking → Cheque Printing.');return;}
+  var body=all.map(function(ch){
+    h.st.sel.push({kind:'none'});
+    return '<tr><td>'+esc(ch.no||'')+'</td><td>'+esc(dmy(ch.date))+'</td><td>'+esc(ch.bank||'')+'</td><td>'+esc(ch.payee||'')+'</td><td class="r">'+fmt(ch.amount)+'</td><td>'+esc(ch.status||'Issued')+'</td><td><button type="button" class="maya-mod-btn" data-chq="'+esc(ch.id)+'">Open</button></td></tr>';
+  }).join('');
+  h.rc.$('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Cheque No.</th><th>Date</th><th>Bank</th><th>Payee</th><th class="r">Amount</th><th>Status</th><th></th></tr></thead><tbody>'+body+'</tbody></table>';
+  h.rc.$('mrp-body').querySelectorAll('[data-chq]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var ch=readCheques().find(function(x){return x.id===b.dataset.chq;});
+      if(ch)mayaChequePrint(ch);
+    });
+  });
+}
+
+/* --- Post-dated Summary --- */
+function viewPostdated(cur){
+  var h=viewHead(cur,'Post-dated Summary','Vouchers dated after today that are marked Post-Dated · Enter opens the voucher');
+  var vs=[];
+  try{vs=B().vouchers(cid()).filter(function(v){return v&&v.postdated&&!v.cancelled;});}catch(e){}
+  vs.sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0;});
+  if(!vs.length){viewEmpty('No post-dated vouchers.');return;}
+  var today=new Date().toISOString().slice(0,10);
+  var body=vs.map(function(v){
+    h.st.sel.push({kind:'voucher',id:v.id});
+    var ix=h.st.sel.length-1;
+    return '<tr data-i="'+ix+'"><td>'+esc(dmy(v.date))+'</td><td>'+esc(v.type)+'</td><td>'+esc(v.number)+'</td><td>'+esc(v.party||'—')+'</td><td class="r">'+fmt(v.total)+'</td><td>'+(v.date>today?'Pending':'Due')+'</td></tr>';
+  }).join('');
+  h.rc.$('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Date</th><th>Vch Type</th><th>Vch No.</th><th>Party</th><th class="r">Amount</th><th>Status</th></tr></thead><tbody>'+body+'</tbody></table>';
+}
+
+/* --- Cost Centre summary --- */
+function viewCostCentre(cur){
+  var st0=RC().st;
+  var h=viewHead(cur,'Cost Centre Summary','Vouchers grouped by cost centre · '+dmy(st0.from)+' to '+dmy(st0.to));
+  var F=feats();
+  if(!F.costCentres){
+    viewEmpty('Cost centres are switched OFF in Company Features (F11).<br><br><button type="button" class="maya-mod-btn pri" id="mcc-open-f11">Open Company Features (F11)</button>');
+    var b=$('mcc-open-f11');if(b)b.addEventListener('click',function(){if(typeof window.mayaCompanyFeatures==='function')window.mayaCompanyFeatures();});
+    return;
+  }
+  var vs=[];
+  try{vs=B().vouchers(cid()).filter(function(v){return v&&inPeriod(v,h.st.from,h.st.to)&&!v.cancelled;});}catch(e){}
+  var by={};
+  vs.forEach(function(v){
+    var k=v.costCentre||'(not assigned)';
+    if(!by[k])by[k]={n:0,total:0};
+    by[k].n++;by[k].total+=num(v.total);
+  });
+  var keys=Object.keys(by).sort();
+  if(!keys.length){viewEmpty('No vouchers in this period.');return;}
+  var body=keys.map(function(k){
+    return '<tr><td>'+esc(k)+'</td><td class="r">'+by[k].n+'</td><td class="r">'+fmt(r2(by[k].total))+'</td></tr>';
+  }).join('');
+  var tot=keys.reduce(function(a,k){return a+by[k].total;},0);
+  body+='<tr class="tot"><td>Total</td><td class="r">'+vs.length+'</td><td class="r">'+fmt(r2(tot))+'</td></tr>';
+  h.rc.$('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Cost Centre</th><th class="r">Vouchers</th><th class="r">Amount</th></tr></thead><tbody>'+body+'</tbody></table>'
+    +'<div style="padding:8px 2px;color:#5b6b88;font-size:12px">Set the cost centre on a voucher from its Narration row (Cost Centre box) while entering it. Masters → Create → Cost Centre defines the list.</div>';
+}
+
+/* --- TDS / TCS summaries (F11 switches) --- */
+function offView(cur,title,feature){
+  viewHead(cur,title,'');
+  viewEmpty(feature+' is switched OFF in Company Features (F11).<br><br><button type="button" class="maya-mod-btn pri" id="mtds-open-f11">Open Company Features (F11)</button>');
+  var b=$('mtds-open-f11');if(b)b.addEventListener('click',function(){if(typeof window.mayaCompanyFeatures==='function')window.mayaCompanyFeatures();});
+}
+function viewTdsSum(cur){
+  var F=feats();
+  if(!F.tds){offView(cur,'TDS Summary','TDS');return;}
+  var cfg=F.tdsCfg||{rate:10,section:'194C'};
+  var rate=num(cfg.rate)||0;
+  var st0=RC().st;
+  var h=viewHead(cur,'TDS Summary','TDS @ '+rate+'% (section '+String(cfg.section||'')+') computed on payments in the period · '+dmy(st0.from)+' to '+dmy(st0.to));
+  var vs=[];
+  try{vs=B().vouchers(cid()).filter(function(v){return v&&v.type==='Payment'&&inPeriod(v,h.st.from,h.st.to)&&!v.cancelled;});}catch(e){}
+  var by={};
+  vs.forEach(function(v){
+    (v.entries||[]).forEach(function(e){
+      if(!(num(e.dr)>0))return;
+      var l=null;try{l=B().find(cid(),e.ledger);}catch(e){}
+      var k='';try{k=B().kind(cid(),l);}catch(e){}
+      if(k==='bank'||k==='cash')return;
+      if(!by[e.ledger])by[e.ledger]=0;
+      by[e.ledger]+=num(e.dr);
+    });
+  });
+  var keys=Object.keys(by).sort();
+  if(!keys.length){viewEmpty('No payments in this period.');return;}
+  var totBase=0,totTds=0;
+  var body=keys.map(function(k){
+    h.st.sel.push({kind:'ledger',name:k});
+    var ix=h.st.sel.length-1;
+    var tds=r2(by[k]*rate/100);totBase+=by[k];totTds+=tds;
+    return '<tr data-i="'+ix+'"><td>'+esc(k)+'</td><td class="r">'+fmt(r2(by[k]))+'</td><td class="r">'+fmt(tds)+'</td></tr>';
+  }).join('');
+  body+='<tr class="tot"><td>Total</td><td class="r">'+fmt(r2(totBase))+'</td><td class="r">'+fmt(r2(totTds))+'</td></tr>';
+  h.rc.$('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Party paid</th><th class="r">Payments (base)</th><th class="r">TDS @ '+rate+'%</th></tr></thead><tbody>'+body+'</tbody></table>'
+    +'<div style="padding:8px 2px;color:#5b6b88;font-size:12px">TDS is computed on payments made; deduction at voucher entry is not built yet — use this summary for your challan. Rate / section are set in Company Features (F11) → TDS details.</div>';
+}
+function viewTcsSum(cur){
+  var F=feats();
+  if(!F.tcs){offView(cur,'TCS Summary','TCS');return;}
+  var cfg=F.tcsCfg||{rate:1,section:'206C',threshold:0};
+  var rate=num(cfg.rate)||0,thr=num(cfg.threshold)||0;
+  var st0=RC().st;
+  var h=viewHead(cur,'TCS Summary','TCS @ '+rate+'% (section '+String(cfg.section||'')+') on sales above ₹ '+fmt(thr)+' in the period · '+dmy(st0.from)+' to '+dmy(st0.to));
+  var vs=[];
+  try{vs=B().vouchers(cid()).filter(function(v){return v&&v.type==='Sales'&&inPeriod(v,h.st.from,h.st.to)&&!v.cancelled&&num(v.total)>thr;});}catch(e){}
+  var by={};
+  vs.forEach(function(v){if(!by[v.party])by[v.party]=0;by[v.party]+=num(v.total);});
+  var keys=Object.keys(by).sort();
+  if(!keys.length){viewEmpty('No sales above the TCS threshold in this period.');return;}
+  var totBase=0,totTcs=0;
+  var body=keys.map(function(k){
+    h.st.sel.push({kind:'ledger',name:k});
+    var ix=h.st.sel.length-1;
+    var tcs=r2(by[k]*rate/100);totBase+=by[k];totTcs+=tcs;
+    return '<tr data-i="'+ix+'"><td>'+esc(k)+'</td><td class="r">'+fmt(r2(by[k]))+'</td><td class="r">'+fmt(tcs)+'</td></tr>';
+  }).join('');
+  body+='<tr class="tot"><td>Total</td><td class="r">'+fmt(r2(totBase))+'</td><td class="r">'+fmt(r2(totTcs))+'</td></tr>';
+  h.rc.$('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Party</th><th class="r">Sales</th><th class="r">TCS @ '+rate+'%</th></tr></thead><tbody>'+body+'</tbody></table>'
+    +'<div style="padding:8px 2px;color:#5b6b88;font-size:12px">TCS is computed on sales; collection at voucher entry is not built yet — use this summary for your return. Rate / section / threshold are set in Company Features (F11) → TCS details.</div>';
+}
+
+/* --- Budget variance --- */
+function viewBudgets(cur){
+  var F=feats();
+  if(!F.budgets){offView(cur,'Budget Variance','Budgets');return;}
+  var st0=RC().st;
+  var h=viewHead(cur,'Budget Variance','Actual movement vs budget (monthly budget × months in the period) · '+dmy(st0.from)+' to '+dmy(st0.to));
+  var saved=readBudgets();
+  var names=Object.keys(saved).sort();
+  if(!names.length){
+    viewEmpty('No budgets set yet.<br><br><button type="button" class="maya-mod-btn pri" id="mbud-set">Set budgets</button>');
+    var b=$('mbud-set');if(b)b.addEventListener('click',function(){mayaSetBudgets();});
+    return;
+  }
+  var T=null;
+  try{T=B().trialBalance(cid(),h.st.from,h.st.to);}catch(e){}
+  var rowBy={};
+  if(T)(T.groups||[]).forEach(function(g){(g.rows||[]).forEach(function(r){rowBy[r.name]=r;});});
+  var nMonths=Math.max(1,monthsBetween(h.st.from,h.st.to).length);
+  var body=names.map(function(n){
+    var r=rowBy[n];
+    var actual=r?r2(Math.abs(num(r.dr)-num(r.cr))):0;
+    var budget=r2(num(saved[n])*nMonths);
+    var variance=r2(budget-actual);
+    h.st.sel.push({kind:'ledger',name:n});
+    var ix=h.st.sel.length-1;
+    return '<tr data-i="'+ix+'"><td>'+esc(n)+'</td><td class="r">'+fmt(budget)+'</td><td class="r">'+fmt(actual)+'</td><td class="r">'+fmt(variance)+'</td></tr>';
+  }).join('');
+  h.rc.$('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Ledger</th><th class="r">Budget ('+nMonths+' month'+(nMonths>1?'s':'')+')</th><th class="r">Actual</th><th class="r">Variance (Budget − Actual)</th></tr></thead><tbody>'+body+'</tbody></table>'
+    +'<div style="padding:8px 2px;color:#5b6b88;font-size:12px"><button type="button" class="maya-mod-btn" id="mbud-set2">Set budgets</button></div>';
+  var b2=$('mbud-set2');if(b2)b2.addEventListener('click',function(){mayaSetBudgets();});
+}
+
+/* ================= 8. COLUMNAR TOGGLE (F8) ================= */
+function mayaToggleColumnar(cur){
+  if(!cur)return;
+  if(cur.view==='daybook')window.mayaOpenReportView('daybookcol',{});
+  else if(cur.view==='daybookcol')window.mayaOpenReportView('daybook',{});
+  else if(cur.view==='ledger')window.mayaOpenReportView('ledgercol',{name:cur.name});
+  else if(cur.view==='ledgercol')window.mayaOpenReportView('ledger',{name:cur.name});
+  else toast('Columnar view applies to Day Book and Ledger reports.');
+}
+window.mayaToggleColumnar=mayaToggleColumnar;
+
+/* ================= 9. REGISTER VIEWS ================= */
+try{
+  if(window.MayaMoreViews){
+    window.MayaMoreViews.exceptions=viewExceptions;
+    window.MayaMoreViews.analysis=viewAnalysis;
+    window.MayaMoreViews.clarify=viewClarify;
+    window.MayaMoreViews.daybookcol=viewDaybookCol;
+    window.MayaMoreViews.ledgercol=viewLedgerCol;
+    window.MayaMoreViews.daybookcond=viewDaybookCond;
+    window.MayaMoreViews.ledgergst=viewLedgerGst;
+    window.MayaMoreViews.gstinfo=viewGstInfo;
+    window.MayaMoreViews.chequereg=viewChequeReg;
+    window.MayaMoreViews.postdated=viewPostdated;
+    window.MayaMoreViews.costcentre=viewCostCentre;
+    window.MayaMoreViews.tdssum=viewTdsSum;
+    window.MayaMoreViews.tcssum=viewTcsSum;
+    window.MayaMoreViews.budgets=viewBudgets;
+  }
+  if(window.MayaMoreMeta){
+    window.MayaMoreMeta.gstinfo={asOnly:true};
+  }
+}catch(e){}
+
+/* ================= 10. TEST HOOKS ================= */
+window.__mayaMod={
+  open:modOpen,
+  toggleColumnar:mayaToggleColumnar,
+  amountWords:amountWords,
+  calcEval:calcEval,
+  chequeCount:function(){return readCheques().length;},
+  exceptionCount:function(){try{return window.MayaData.verify().list.length;}catch(e){return -1;}},
+  analysisData:function(from,to){return analysisData(from,to);},
+  monthsBetween:monthsBetween
+};
+})();
+</script>
+
 </body>
 </html>
