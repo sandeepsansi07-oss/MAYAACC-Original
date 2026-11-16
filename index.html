@@ -15298,8 +15298,12 @@ body.workspace-mode #dashboard .gateway-main{overflow-y:auto}
 <script id="mayaacc-desktop-sync">
 /* MAYAACC Desktop data safety — PC folder copy of all data.
    Every change to mayaacc_* localStorage keys is auto-saved (debounced)
-   to Documents/MAYAACC-Data/mayaacc-data.json on this PC.
+   to Documents/MAYAACC-Data/mayaacc-data.json on this PC — the SAME file
+   is overwritten in place every time (tmp file + rename), exactly like
+   Tally: no new files are created in that folder for the company data.
    If the app storage is ever empty on start, it is restored from that file.
+   A status bar at the bottom always shows where the data is saved,
+   when it was last saved, and an Open Folder button.
    This script exists ONLY in the desktop copy — the web file is untouched. */
 (function(){
   'use strict';
@@ -15314,13 +15318,100 @@ body.workspace-mode #dashboard .gateway-main{overflow-y:auto}
     } catch(e){}
     return out;
   }
-  var timer = null, dirty = false;
+  var timer = null, dirty = false, lastSavedAt = null, saveFailed = false;
+  var savePath = 'Documents\\MAYAACC-Data\\mayaacc-data.json';
+
+  /* ---- visible save status bar ---- */
+  var barEl = null, stateEl = null, pathEl = null, timeEl = null, openBtn = null;
+  function fmtTime(d){ try{ return d.toLocaleTimeString('en-IN',{hour12:false}); }catch(e){ return ''; } }
+  function buildBar(){
+    if(barEl || !document.body) return;
+    var css = [
+      '#maya-savebar{position:fixed;left:0;right:0;bottom:0;z-index:900;display:flex;align-items:center;gap:10px;padding:0 12px;height:30px;background:#172033;color:#c7d2e4;font:12px/1.4 system-ui,Segoe UI,Arial,sans-serif;box-shadow:0 -2px 10px rgba(10,25,60,.18)}',
+      '#maya-savebar .st{font-weight:700;white-space:nowrap}',
+      '#maya-savebar .st.ok{color:#4ade80}',
+      '#maya-savebar .st.busy{color:#fbbf24}',
+      '#maya-savebar .st.bad{color:#f87171}',
+      '#maya-savebar .pth{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#9fb0c9}',
+      '#maya-savebar .tm{white-space:nowrap;color:#9fb0c9}',
+      '#maya-savebar button{border:1px solid #3b4a63;background:#24344f;color:#dbe4f2;border-radius:6px;padding:3px 9px;font:inherit;cursor:pointer;white-space:nowrap}',
+      '#maya-savebar button:hover{background:#2e4066}',
+      'body.maya-savebar{padding-bottom:30px}'
+    ].join('\n');
+    var st = document.createElement('style');
+    st.id = 'maya-savebar-css'; st.textContent = css;
+    document.head.appendChild(st);
+    barEl = document.createElement('div');
+    barEl.id = 'maya-savebar';
+    barEl.innerHTML = '<span class="st" id="maya-save-state"></span>'
+      + '<span class="pth" id="maya-save-path"></span>'
+      + '<span class="tm" id="maya-save-time"></span>'
+      + '<button type="button" id="maya-save-open">Open Folder</button>';
+    document.body.appendChild(barEl);
+    document.body.classList.add('maya-savebar');
+    stateEl = document.getElementById('maya-save-state');
+    pathEl = document.getElementById('maya-save-path');
+    timeEl = document.getElementById('maya-save-time');
+    openBtn = document.getElementById('maya-save-open');
+    openBtn.addEventListener('click', function(){
+      try{ var d = D(); if(d && d.openDataFolder) d.openDataFolder(); }catch(e){}
+    });
+    try{
+      var d = D();
+      if(d && d.getDataFolder){
+        d.getDataFolder().then(function(dir){
+          if(dir){ savePath = dir + '\\mayaacc-data.json'; if(pathEl) pathEl.textContent = 'Data: ' + savePath; }
+        }).catch(function(){});
+      }
+    }catch(e){}
+    updateBar();
+  }
+  function updateBar(){
+    if(!barEl) return;
+    if(pathEl) pathEl.textContent = 'Data: ' + savePath;
+    if(!D()){
+      stateEl.textContent = '● Preview — PC folder save EXE me hoga';
+      stateEl.className = 'st busy';
+      if(timeEl) timeEl.textContent = '';
+      if(openBtn) openBtn.style.display = 'none';
+      return;
+    }
+    if(openBtn) openBtn.style.display = '';
+    if(saveFailed){
+      stateEl.textContent = '● Save failed';
+      stateEl.className = 'st bad';
+    } else if(dirty){
+      stateEl.textContent = '● Saving…';
+      stateEl.className = 'st busy';
+    } else if(lastSavedAt){
+      stateEl.textContent = '● Saved ✓';
+      stateEl.className = 'st ok';
+    } else {
+      stateEl.textContent = '● Ready';
+      stateEl.className = 'st ok';
+    }
+    if(timeEl) timeEl.textContent = lastSavedAt ? ('Last saved: ' + fmtTime(lastSavedAt)) : '';
+  }
   function saveNow(){
-    var d = D(); if(!d) return;
-    try { d.saveSnapshot({ savedAt: new Date().toISOString(), keys: collect() }); dirty = false; } catch(e){}
+    var d = D(); if(!d){ updateBar(); return; }
+    try {
+      var p = d.saveSnapshot({ savedAt: new Date().toISOString(), keys: collect() });
+      dirty = false; saveFailed = false;
+      if(p && typeof p.then === 'function'){
+        p.then(function(ok){
+          if(ok){ lastSavedAt = new Date(); saveFailed = false; }
+          else { saveFailed = true; }
+          updateBar();
+        }).catch(function(){ saveFailed = true; updateBar(); });
+      } else {
+        lastSavedAt = new Date();
+      }
+    } catch(e){ saveFailed = true; }
+    updateBar();
   }
   function markDirty(){
-    dirty = true;
+    dirty = true; saveFailed = false;
+    updateBar();
     if (timer) clearTimeout(timer);
     timer = setTimeout(saveNow, 1500);
   }
@@ -15351,24 +15442,40 @@ body.workspace-mode #dashboard .gateway-main{overflow-y:auto}
   document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'hidden' && dirty) saveNow(); });
   window.addEventListener('pagehide', function(){ if (dirty) saveNow(); });
   setInterval(function(){ if (dirty) saveNow(); }, 30000);
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', restoreIfEmpty);
-  else restoreIfEmpty();
+  function boot(){ buildBar(); restoreIfEmpty(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();
 </script>
 
 <script id="mayaacc-desktop-login">
-/* MAYAACC Desktop (Original) — app mode.
-   The desktop app is an app, not a website: no landing page
-   (Home / Features / Plans / About, hero, plans) before login.
-   It opens straight to the Login window. If the login window is
-   closed without logging in, it opens again. After logout the
-   login window opens again instead of the landing page.
+/* MAYAACC Desktop (Original) — app mode, NO login screen.
+   App seedha khulta hai — login/register ka koi screen nahi.
+   FIRST RUN: jab is PC pe koi account nahi hai, ek nayi setup
+   screen aati hai — "Create your username & password". Uske baad
+   app seedha Select Company par khulta hai.
+   SECURITY (F3 Company menu > Password Security): ON ho to company
+   kholne par username + password manga jata hai, OFF ho to company
+   seedha workspace me khul jati hai. Setting badalne (OFF karne)
+   ke liye password dena padta hai. Password sirf is PC pe save
+   hota hai (salted SHA-256 hash, server nahi hai).
    The login card is also restyled to match the app icon. */
 (function(){
   'use strict';
+  /* Hide the landing page at parse time, before first paint, so it never flashes. */
+  try{
+    var _bs=document.createElement('style');
+    _bs.id='maya-desktop-boot-hide';
+    _bs.textContent='.hero,.features,.cta,.public-about,header,footer,.public-footer{display:none!important}';
+    document.head.appendChild(_bs);
+  }catch(e){}
   function hasSession(){
     try{ return !!JSON.parse(localStorage.getItem('mayaacc_session')||'null'); }
     catch(e){ return false; }
+  }
+  function getSession(){
+    try{ return JSON.parse(localStorage.getItem('mayaacc_session')||'null'); }
+    catch(e){ return null; }
   }
   /* Same hiding the app itself does after login (hidePublicSite). */
   function hideLanding(){
@@ -15376,10 +15483,362 @@ body.workspace-mode #dashboard .gateway-main{overflow-y:auto}
       .forEach(function(x){ x.style.display='none'; });
     var h=document.querySelector('header'); if(h) h.style.display='none';
     document.body.classList.add('workspace-mode');
+    var bs=document.getElementById('maya-desktop-boot-hide');
+    if(bs) bs.remove();
   }
-  function openLogin(){
-    if(!hasSession() && typeof window.showAuth==='function') window.showAuth('login');
+  function users(){
+    try{ return JSON.parse(localStorage.getItem('mayaacc_users')||'[]'); }
+    catch(e){ return []; }
   }
+  function saveUsers(a){ try{ localStorage.setItem('mayaacc_users', JSON.stringify(a)); return true; }catch(e){ return false; } }
+  function ensureSession(){
+    var s=getSession(); if(s) return s;
+    var u=users()[0]; if(!u) return null;
+    s={id:u.id, name:u.name, email:u.email, plan:u.plan||'free'};
+    try{ localStorage.setItem('mayaacc_session', JSON.stringify(s)); }catch(e){}
+    return s;
+  }
+  function ownerMatches(c,u){ return !!u && (c.ownerId===u.id || c.ownerUserId===u.id || c.ownerEmail===u.email); }
+  function allCompanies(){
+    try{ return JSON.parse(localStorage.getItem('mayaacc_companies')||'[]'); }
+    catch(e){ return []; }
+  }
+  function myCompanies(){
+    var u=getSession(); if(!u) return [];
+    return allCompanies().filter(function(c){ return ownerMatches(c,u); });
+  }
+  /* ---- security setting + password check (same hash as the original login) ---- */
+  function getSecurity(){
+    try{
+      var s=JSON.parse(localStorage.getItem('mayaacc_security')||'null');
+      if(s && typeof s.enabled==='boolean') return s;
+    }catch(e){}
+    return {enabled:true};
+  }
+  function setSecurity(en){
+    try{ localStorage.setItem('mayaacc_security', JSON.stringify({enabled:!!en})); }catch(e){}
+  }
+  var unlocked=false;
+  function newSalt(){
+    try{ return Array.from(crypto.getRandomValues(new Uint8Array(12))).map(function(b){ return b.toString(16).padStart(2,'0'); }).join(''); }
+    catch(e){ return String(Date.now()); }
+  }
+  async function hashPw(pw,salt){
+    if(!(window.crypto && crypto.subtle && window.TextEncoder)) return null;
+    var buf=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(salt+':'+pw));
+    return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+  }
+  async function checkPassword(user, pw){
+    if(!user) return false;
+    if(user.pwHash){
+      var h=await hashPw(pw, user.salt);
+      return !!h && h===user.pwHash;
+    }
+    if(user.password){ return user.password===pw; }
+    return false;
+  }
+  function findUserByName(v){
+    v=(v||'').trim().toLowerCase(); if(!v) return null;
+    return users().find(function(u){
+      return (u.name||'').trim().toLowerCase()===v
+        || (u.email||'').toLowerCase()===v
+        || (u.email||'').split('@')[0].toLowerCase()===v;
+    }) || null;
+  }
+  function toast(m){ try{ if(window.mayaToast) window.mayaToast(m); else alert(m); }catch(e){} }
+
+  /* ---- shared pop-up styles ---- */
+  function popCss(){
+    if(document.getElementById('maya-pop-css')) return;
+    var css=[
+      '.maya-ov{display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,rgba(23,42,84,.78),rgba(37,99,235,.55));backdrop-filter:blur(8px)}',
+      '.maya-ov.on{display:flex}',
+      '.maya-card{width:min(440px,100%);background:#fff;border-radius:22px;border:1px solid #e6ebf2;box-shadow:0 30px 80px rgba(10,25,60,.35);padding:30px 30px 26px;overflow:hidden;position:relative}',
+      '.maya-card:before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:linear-gradient(90deg,#1d4ed8,#3b82f6,#22d3ee)}',
+      '.maya-brand{display:flex;align-items:center;gap:12px;margin:2px 0 4px}',
+      '.maya-mark{width:46px;height:46px;flex:0 0 46px;border-radius:13px;background:linear-gradient(135deg,#1e40af,#2563eb 55%,#0ea5e9);color:#fff;font-size:26px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(37,99,235,.4)}',
+      '.maya-brand b{font-size:19px;letter-spacing:.02em;color:#172033}',
+      '.maya-brand small{display:block;font-size:11px;color:#687286;font-weight:600;letter-spacing:.06em}',
+      '.maya-card h2{font-size:23px;margin:0 0 7px;color:#172033}',
+      '.maya-card .muted{color:#778195;font-size:13px;line-height:1.5;margin:0 0 20px}',
+      '.maya-field{margin:12px 0}',
+      '.maya-field label{display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:#172033}',
+      '.maya-field input{width:100%;padding:12px 13px;border:1px solid #dce1e9;border-radius:11px;outline:none;font-size:14px;box-sizing:border-box}',
+      '.maya-field input:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.15)}',
+      '.maya-err{display:none;color:#b02a2a;font-size:12px;margin:10px 0 0}',
+      '.maya-btn{width:100%;padding:13px;border:0;border-radius:11px;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:14px}',
+      '.maya-btn.ghost{background:#fff;color:#172033;border:1px solid #dce1e9;margin-top:10px}',
+      '.maya-note{font-size:11px;color:#8a93a2;margin-top:14px;text-align:center}',
+      '.maya-status{font-size:13px;line-height:1.6;color:#4f596a;background:#f2f4f8;border-radius:10px;padding:12px 14px;margin:0 0 6px}',
+      '.maya-status b{color:#172033}'
+    ].join('\n');
+    var st=document.createElement('style');
+    st.id='maya-pop-css'; st.textContent=css;
+    document.head.appendChild(st);
+  }
+  function showErr(id, msg){
+    var e=document.getElementById(id);
+    if(e){ e.style.display='block'; e.textContent=msg; }
+  }
+  function hideErr(id){
+    var e=document.getElementById(id);
+    if(e){ e.style.display='none'; e.textContent=''; }
+  }
+
+  /* ---- NEW setup screen: Create your username & password (first run only) ---- */
+  function buildSetupScreen(){
+    if(document.getElementById('maya-setup-screen')) return;
+    popCss();
+    var d=document.createElement('div');
+    d.id='maya-setup-screen'; d.className='maya-ov';
+    d.innerHTML='<div class="maya-card" role="dialog" aria-label="Create your account">'
+      +'<div class="maya-brand"><div class="maya-mark">M</div><div><b>MAYAACC</b><small>SMART ACCOUNTING</small></div></div>'
+      +'<h2>Create your account</h2>'
+      +'<p class="muted">First time setup — choose a username and password for this PC.</p>'
+      +'<div class="maya-field"><label>Username *</label><input id="maya-setup-user" placeholder="e.g. Sandeep" autocomplete="off"></div>'
+      +'<div class="maya-field"><label>Password *</label><input id="maya-setup-pass" type="password" placeholder="Minimum 6 characters"></div>'
+      +'<div class="maya-field"><label>Confirm Password *</label><input id="maya-setup-confirm" type="password" placeholder="Re-enter password"></div>'
+      +'<div class="maya-err" id="maya-setup-err" role="alert"></div>'
+      +'<button class="maya-btn" id="maya-setup-create" type="button">Create Account &amp; Continue</button>'
+      +'<div class="maya-note">Your data stays on this PC. Password yaad rakhna — server nahi hai, bhool gaye to reset nahi hoga.</div>'
+      +'</div>';
+    document.body.appendChild(d);
+    d.addEventListener('keydown', function(e){
+      if(e.key==='Enter'){ e.preventDefault(); createAccount(); }
+    });
+    document.getElementById('maya-setup-create').addEventListener('click', createAccount);
+  }
+  function showSetupScreen(){
+    var d=document.getElementById('maya-setup-screen');
+    if(d){ d.classList.add('on'); hideErr('maya-setup-err'); var f=document.getElementById('maya-setup-user'); if(f) f.focus(); }
+  }
+  function hideSetupScreen(){
+    var d=document.getElementById('maya-setup-screen');
+    if(d) d.classList.remove('on');
+  }
+  async function createAccount(){
+    var nameEl=document.getElementById('maya-setup-user');
+    var pwEl=document.getElementById('maya-setup-pass');
+    var cfEl=document.getElementById('maya-setup-confirm');
+    var name=(nameEl?nameEl.value:'').trim();
+    var pass=pwEl?pwEl.value:'';
+    var conf=cfEl?cfEl.value:'';
+    hideErr('maya-setup-err');
+    if(name.length<2){ showErr('maya-setup-err','Please choose a username (at least 2 characters).'); if(nameEl) nameEl.focus(); return; }
+    if(!/^[A-Za-z0-9 _.-]+$/.test(name)){ showErr('maya-setup-err','Username can only have letters, numbers, spaces, dots and dashes.'); if(nameEl) nameEl.focus(); return; }
+    if(pass.length<6){ showErr('maya-setup-err','Password must be at least 6 characters.'); if(pwEl) pwEl.focus(); return; }
+    if(conf!==pass){ showErr('maya-setup-err','Passwords do not match.'); if(cfEl) cfEl.focus(); return; }
+    var email=name.toLowerCase().replace(/\s+/g,'')+'@mayaacc.local';
+    var list=users();
+    if(list.some(function(u){ return (u.email||'').toLowerCase()===email || (u.name||'').trim().toLowerCase()===name.toLowerCase(); })){
+      showErr('maya-setup-err','This username is already taken.'); if(nameEl) nameEl.focus(); return;
+    }
+    var salt=newSalt();
+    var h=await hashPw(pass, salt);
+    var rec={id:'USR-'+Date.now(), name:name, email:email, plan:'free', createdAt:new Date().toISOString()};
+    if(h){ rec.salt=salt; rec.pwHash=h; } else { rec.password=pass; }
+    list.push(rec);
+    if(!saveUsers(list)){ showErr('maya-setup-err','Could not save the account on this PC.'); return; }
+    ensureSession();
+    unlocked=true;
+    hideSetupScreen();
+    routeAfterAuth();
+  }
+
+  /* ---- Unlock prompt: company kholne se pehle (security ON ho to) ---- */
+  var pendingUnlock=null;
+  function buildUnlockScreen(){
+    if(document.getElementById('maya-unlock-screen')) return;
+    popCss();
+    var d=document.createElement('div');
+    d.id='maya-unlock-screen'; d.className='maya-ov';
+    d.innerHTML='<div class="maya-card" role="dialog" aria-label="Unlock company">'
+      +'<div class="maya-brand"><div class="maya-mark">M</div><div><b>MAYAACC</b><small>SMART ACCOUNTING</small></div></div>'
+      +'<h2 id="maya-unlock-title">Unlock Company</h2>'
+      +'<p class="muted" id="maya-unlock-sub">Enter your username and password to open this company.</p>'
+      +'<div class="maya-field"><label>Username *</label><input id="maya-unlock-user" autocomplete="off"></div>'
+      +'<div class="maya-field"><label>Password *</label><input id="maya-unlock-pass" type="password" placeholder="Your password"></div>'
+      +'<div class="maya-err" id="maya-unlock-err" role="alert"></div>'
+      +'<button class="maya-btn" id="maya-unlock-go" type="button">Unlock &amp; Open</button>'
+      +'<button class="maya-btn ghost" id="maya-unlock-cancel" type="button">Cancel</button>'
+      +'</div>';
+    document.body.appendChild(d);
+    d.addEventListener('keydown', function(e){
+      if(e.key==='Enter'){ e.preventDefault(); doUnlock(); }
+      if(e.key==='Escape'){ e.preventDefault(); cancelUnlock(); }
+    });
+    document.getElementById('maya-unlock-go').addEventListener('click', doUnlock);
+    document.getElementById('maya-unlock-cancel').addEventListener('click', cancelUnlock);
+  }
+  function askUnlock(id, done){
+    buildUnlockScreen();
+    var c=allCompanies().find(function(x){ return x.id===id; });
+    var t=document.getElementById('maya-unlock-title');
+    if(t) t.textContent=c ? ('Unlock — '+c.companyName) : 'Unlock Company';
+    var u=document.getElementById('maya-unlock-user');
+    var s=getSession();
+    if(u) u.value=s ? (s.name||'') : '';
+    var p=document.getElementById('maya-unlock-pass');
+    if(p) p.value='';
+    hideErr('maya-unlock-err');
+    pendingUnlock={id:id, done:done};
+    var d=document.getElementById('maya-unlock-screen');
+    if(d){ d.classList.add('on'); if(p) p.focus(); }
+  }
+  function hideUnlockScreen(){
+    var d=document.getElementById('maya-unlock-screen');
+    if(d) d.classList.remove('on');
+  }
+  async function doUnlock(){
+    var uEl=document.getElementById('maya-unlock-user');
+    var pEl=document.getElementById('maya-unlock-pass');
+    var name=uEl?uEl.value:'';
+    var pw=pEl?pEl.value:'';
+    hideErr('maya-unlock-err');
+    var user=findUserByName(name);
+    var ok=user && await checkPassword(user, pw);
+    if(!ok){
+      showErr('maya-unlock-err','Username ya password galat hai.');
+      if(pEl){ pEl.value=''; pEl.focus(); }
+      return;
+    }
+    hideUnlockScreen();
+    unlocked=true;
+    var p=pendingUnlock; pendingUnlock=null;
+    if(p) p.done(true);
+  }
+  function cancelUnlock(){
+    hideUnlockScreen();
+    var p=pendingUnlock; pendingUnlock=null;
+    if(p) p.done(false);
+  }
+
+  /* ---- F3 Company menu > Password Security dialog ---- */
+  function buildSecurityDialog(){
+    if(document.getElementById('maya-security-dialog')) return;
+    popCss();
+    var d=document.createElement('div');
+    d.id='maya-security-dialog'; d.className='maya-ov';
+    d.innerHTML='<div class="maya-card" role="dialog" aria-label="Password security">'
+      +'<div class="maya-brand"><div class="maya-mark">M</div><div><b>MAYAACC</b><small>SMART ACCOUNTING</small></div></div>'
+      +'<h2>Password Security</h2>'
+      +'<p class="muted">Company kholne par password manga jaye ya nahi, yahan se chuno.</p>'
+      +'<div class="maya-status" id="maya-sec-status"></div>'
+      +'<div class="maya-field"><label>Password *</label><input id="maya-sec-pass" type="password" placeholder="Apna password likho (OFF karne ke liye)"></div>'
+      +'<div class="maya-err" id="maya-sec-err" role="alert"></div>'
+      +'<button class="maya-btn" id="maya-sec-toggle" type="button">Turn OFF</button>'
+      +'<button class="maya-btn ghost" id="maya-sec-close" type="button">Close</button>'
+      +'</div>';
+    document.body.appendChild(d);
+    d.addEventListener('keydown', function(e){
+      if(e.key==='Enter'){ e.preventDefault(); toggleSecurity(); }
+      if(e.key==='Escape'){ e.preventDefault(); hideSecurityDialog(); }
+    });
+    document.getElementById('maya-sec-toggle').addEventListener('click', toggleSecurity);
+    document.getElementById('maya-sec-close').addEventListener('click', hideSecurityDialog);
+  }
+  function refreshSecurityDialog(){
+    var sec=getSecurity();
+    var st=document.getElementById('maya-sec-status');
+    if(st) st.innerHTML=sec.enabled
+      ? '<b>Security: ON</b> — company kholne par username + password manga jayega.'
+      : '<b>Security: OFF</b> — company seedha workspace me khul jayegi, password nahi manga jayega.';
+    var btn=document.getElementById('maya-sec-toggle');
+    if(btn) btn.textContent=sec.enabled ? 'Turn OFF' : 'Turn ON';
+    var pw=document.getElementById('maya-sec-pass');
+    if(pw){ pw.value=''; pw.placeholder=sec.enabled ? 'Apna password likho (OFF karne ke liye)' : 'Password ki zaroorat nahi'; }
+    hideErr('maya-sec-err');
+  }
+  function openSecurityDialog(){
+    buildSecurityDialog();
+    refreshSecurityDialog();
+    var d=document.getElementById('maya-security-dialog');
+    if(d) d.classList.add('on');
+  }
+  function hideSecurityDialog(){
+    var d=document.getElementById('maya-security-dialog');
+    if(d) d.classList.remove('on');
+  }
+  async function toggleSecurity(){
+    var sec=getSecurity();
+    hideErr('maya-sec-err');
+    if(sec.enabled){
+      /* OFF karne ke liye password zaroori — warna koi bhi lock hata dega. */
+      var pwEl=document.getElementById('maya-sec-pass');
+      var pw=pwEl?pwEl.value:'';
+      var s=getSession();
+      var user=s ? users().find(function(u){ return u.id===s.id || u.email===s.email; }) : users()[0];
+      var ok=user && await checkPassword(user, pw);
+      if(!ok){
+        showErr('maya-sec-err','Password galat hai — security OFF nahi hui.');
+        if(pwEl){ pwEl.value=''; pwEl.focus(); }
+        return;
+      }
+      setSecurity(false);
+      refreshSecurityDialog();
+      toast('Security OFF — company seedha khul jayegi.');
+    }else{
+      setSecurity(true);
+      refreshSecurityDialog();
+      toast('Security ON — company kholne par password manga jayega.');
+    }
+  }
+
+  /* ---- gate: company tab khule jab security ON ho aur unlock na hua ho ---- */
+  function wrapCompanyOpen(){
+    if(typeof window.showCompanyWorkspace!=='function' || window.showCompanyWorkspace.__mayaGate) return;
+    var orig=window.showCompanyWorkspace;
+    var gated=function(id){
+      if(!getSecurity().enabled || unlocked){ return orig(id); }
+      askUnlock(id, function(ok){ if(ok){ try{ orig(id); }catch(e){} } });
+    };
+    gated.__mayaGate=true;
+    window.showCompanyWorkspace=gated;
+  }
+
+  /* ---- F3 Company menu me "Password Security" item jodo ---- */
+  function addSecurityMenuItem(){
+    if(typeof window.mayaCompanyMenu!=='function' || window.mayaCompanyMenu.__mayaSec) return;
+    var origMenu=window.mayaCompanyMenu;
+    var wrapped=function(){
+      var r=origMenu.apply(this, arguments);
+      try{
+        var el=document.getElementById('mcm');
+        if(el && !el.querySelector('[data-maya-security]')){
+          var div=document.createElement('div');
+          div.setAttribute('data-maya-security','1');
+          div.innerHTML='<span><b>P</b>assword Security</span><kbd>'+(getSecurity().enabled?'ON':'OFF')+'</kbd>';
+          div.addEventListener('click', function(){
+            try{ window.mayaCompanyMenu(); }catch(e){}
+            setTimeout(openSecurityDialog, 30);
+          });
+          el.appendChild(div);
+        }
+      }catch(e){}
+      return r;
+    };
+    wrapped.__mayaSec=true;
+    window.mayaCompanyMenu=wrapped;
+  }
+
+  /* ---- startup routing: seedha Select Company / workspace, login screen nahi ---- */
+  function routeAfterAuth(){
+    hideLanding();
+    var mine=myCompanies();
+    if(mine.length===1){
+      if(typeof window.openCompany==='function') window.openCompany(mine[0].id);
+      else if(typeof window.showCompanySelect==='function') window.showCompanySelect();
+    }else if(typeof window.showCompanySelect==='function'){
+      window.showCompanySelect();
+    }
+  }
+  function routeStartup(){
+    hideLanding();
+    if(users().length===0){ buildSetupScreen(); showSetupScreen(); return; }
+    ensureSession();
+    routeAfterAuth();
+  }
+
   function beautify(){
     var css=[
       '.auth-overlay{background:linear-gradient(135deg,rgba(23,42,84,.78),rgba(37,99,235,.55));backdrop-filter:blur(8px)}',
@@ -15393,8 +15852,11 @@ body.workspace-mode #dashboard .gateway-main{overflow-y:auto}
       '.auth-field input{padding:12px 13px;border-radius:11px}',
       '.auth-field input:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.15)}',
       '.auth-submit{padding:13px;border-radius:11px;background:linear-gradient(135deg,#1d4ed8,#2563eb);font-size:15px}',
-      '.auth-tabs{border-radius:11px}',
-      '.google-btn{border-radius:11px}'
+      '.auth-tabs{border-radius:11px;grid-template-columns:1fr}',
+      '.google-btn{border-radius:11px}',
+      '#registerTab{display:none!important}',
+      '#nameField,#confirmField{display:none!important}',
+      '.auth-card .or,.auth-card .google-btn{display:none!important}'
     ].join('\n');
     if(!document.getElementById('maya-desktop-login-css')){
       var st=document.createElement('style');
@@ -15407,6 +15869,14 @@ body.workspace-mode #dashboard .gateway-main{overflow-y:auto}
       brand.innerHTML='<div class="maya-login-mark">M</div><div><b>MAYAACC</b><small>SMART ACCOUNTING</small></div>';
       card.insertBefore(brand, card.firstChild);
     }
+    var em=document.getElementById('authEmail');
+    if(em){
+      em.placeholder='Username or email';
+      var lab=em.closest('.auth-field') && em.closest('.auth-field').querySelector('label');
+      if(lab) lab.textContent='Username *';
+    }
+    var note=document.querySelector('#authOverlay .auth-note');
+    if(note) note.textContent='Your data stays on this PC. Sign in with your username and password.';
   }
   function wrapOnce(name, after){
     var fn=window[name];
@@ -15417,22 +15887,1824 @@ body.workspace-mode #dashboard .gateway-main{overflow-y:auto}
   }
   function arm(){
     beautify();
-    /* Login band ho to wapas khul jaye (Esc / bahar click / X) — sirf tab jab login nahi hua. */
-    wrapOnce('closeAuth', function(){ setTimeout(openLogin, 30); });
-    /* Logout ke baad landing nahi, seedha login. */
-    wrapOnce('logoutMaya', function(){ setTimeout(function(){ hideLanding(); openLogin(); }, 30); });
-    /* Home wapas jane par bhi landing nahi. */
-    wrapOnce('showHome', function(){ setTimeout(function(){ hideLanding(); openLogin(); }, 30); });
-    /* App khulte hi: landing chhupao; login nahi hai to login window kholo. */
-    setTimeout(function(){
-      hideLanding();
-      openLogin();
-    }, 150);
+    buildSetupScreen(); buildUnlockScreen(); buildSecurityDialog();
+    wrapCompanyOpen();
+    addSecurityMenuItem();
+    /* Logout = lock + wapas Select Company par (login screen nahi). */
+    wrapOnce('logoutMaya', function(){ setTimeout(function(){ unlocked=false; routeStartup(); }, 30); });
+    wrapOnce('showHome', function(){ setTimeout(function(){ routeStartup(); }, 30); });
+    setTimeout(function(){ routeStartup(); }, 0);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', arm);
   else arm();
 })();
 </script>
 
+
+<script id="mayaacc-print-system">
+/* MAYAACC Print System — Tally-style printing with templates.
+   - Print command opens a dialog with Print / Preview / Configuration
+     (like Tally), reachable from the voucher list (Print Vouchers),
+     Ctrl+P on an open voucher, and P on a voucher in a report.
+   - Configuration (copies, paper size, orientation, margins, header /
+     footer / logo / terms / words, colour) is saved per company and
+     ACTUALLY changes the output (page size, margins, hidden blocks).
+     Real printer selection happens in the system print dialog that
+     opens when you press Print — browsers/Electron do not let a web
+     page list printers itself.
+   - Preview shows the document with the selected template; the left
+     sidebar lists all 8 templates — click one to switch instantly.
+   - Sale & Credit Note keep the Invoice Designer's 8 templates
+     (choosing one here also updates the Designer). Every other
+     voucher type (Purchase, Receipt, Payment, Contra, Journal,
+     Debit Note, Stock Journal) gets the same 8 templates, rendered
+     by the voucher renderer below, in the same visual family.
+   - Templates + configuration are wired into Print, Preview and
+     PDF save (including the old Save PDF path, via mayaInvoiceHtml).
+   - Global default template: Classic Corporate (id 1, chosen by
+     Sandeep) is stored once in localStorage (mayaacc_tpl_default)
+     and every template lookup falls back to it when no per-type
+     choice exists; per-type choices still win for that type only.
+     The default is marked with a "Default" badge in the dialog
+     (sidebar + home screen) and in the Invoice Designer.
+   - REPORT MODE: the same dialog also prints reports (Trial Balance,
+     P&L, Balance Sheet, Ledger, Day Book, registers, GST reports,
+     ...). openReportDialog(report) puts the dialog in report mode:
+     the sidebar then lists templates for THAT report's family
+     (Ledger / Statement / Register / GST / Stock — see the
+     print-reports snippet, window.__mayaPrintReport), Preview /
+     Print / Save PDF use the luxury report renderer, and the
+     WhatsApp action is hidden (it is bill-specific). Reports keep
+     their own print config (same per-company settings).
+   Wiring notes: printVoucher/savePdf/makePdf live inside the
+   mayaacc-iox IIFE, so they cannot be wrapped from here. Instead
+   this block wraps the globals that reach them: window.mayaPrintInvoice
+   (Ctrl+P, report detail P), window.mayaInvoiceHtml (old PDF path),
+   window.__mayaModalKey (Enter / Alt+S in the Print Vouchers list)
+   and captures clicks on the list's Print / Save PDF buttons. */
+(function(){
+'use strict';
+/* ---------- small helpers (own copies — the originals live in IIFEs) ---------- */
+var $=function(id){ return document.getElementById(id); };
+var B=function(){ return window.MayaBooks; };
+var I=window.__mayaInv;
+if(!I||!B()) return;
+var esc=I.esc, fmt=I.fmt, dmy=I.dmy, num=I.num, words=I.words;
+var cid=function(){ try{ return B().cid(); }catch(e){ return ''; } };
+var companyOf=function(){ try{ return (B().companyOf&&B().companyOf(B().cid()))||{}; }catch(e){ return {}; } };
+var toast=function(m){ try{ if(window.mayaToast) window.mayaToast(m); else alert(m); }catch(e){} };
+var INV_TYPES=['Sales','Purchase','Credit Note','Debit Note'];
+var isInv=function(t){ return INV_TYPES.indexOf(t)>=0; };
+var isSalesSide=function(t){ return t==='Sales'||t==='Credit Note'; };
+var TITLES={Sales:'TAX INVOICE',Purchase:'PURCHASE VOUCHER','Credit Note':'CREDIT NOTE','Debit Note':'DEBIT NOTE',
+  Receipt:'RECEIPT VOUCHER',Payment:'PAYMENT VOUCHER',Contra:'CONTRA VOUCHER',Journal:'JOURNAL VOUCHER',
+  'Stock Journal':'STOCK JOURNAL','Delivery Note':'DELIVERY NOTE','Receipt Note':'RECEIPT NOTE',
+  'Sales Order':'SALES ORDER','Purchase Order':'PURCHASE ORDER'};
+var COPIES=['Original for Recipient','Duplicate for Transporter','Triplicate for Supplier'];
+var PARTY_LABEL={Purchase:'Supplier', 'Debit Note':'Supplier', Sales:'Buyer (Bill to)', 'Credit Note':'Buyer (Bill to)'};
+
+/* ---------- print configuration (per company, persisted) ---------- */
+var PAPERS={A4:[210,297],A5:[148,210],Letter:[216,279]};
+var MARGINS={narrow:8,normal:12,wide:20};
+var DEF_CFG={copies:1,paper:'A4',orientation:'portrait',margin:'normal',
+  showHeader:true,showFooter:true,showLogo:true,showTerms:true,showWords:true,colour:true};
+function cfgKey(){ return 'mayaacc_print_cfg_'+cid(); }
+function tplKey(){ return 'mayaacc_print_tpl_'+cid(); }
+function readLS(k,d){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+function writeLS(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } }
+function loadPrintCfg(){
+  var c=readLS(cfgKey(),null)||{}, o={};
+  Object.keys(DEF_CFG).forEach(function(k){ o[k]=(c[k]===undefined?DEF_CFG[k]:c[k]); });
+  o.copies=Math.max(1,Math.min(3,parseInt(o.copies,10)||1));
+  if(!PAPERS[o.paper]) o.paper='A4';
+  if(o.orientation!=='landscape') o.orientation='portrait';
+  if(!MARGINS[o.margin]) o.margin='normal';
+  return o;
+}
+function savePrintCfg(c){ return writeLS(cfgKey(),c); }
+function loadTplMap(){ return readLS(tplKey(),null)||{}; }
+function saveTplMap(m){ return writeLS(tplKey(),m); }
+/* ---------- GLOBAL DEFAULT TEMPLATE (Classic Corporate, id 1) ----------
+   Chosen by Sandeep: ONE default, saved once, so nobody has to save or
+   pick a template again and again. Stored in localStorage
+   (mayaacc_tpl_default); every template lookup below falls back to it
+   when no per-voucher-type choice exists. A per-type choice (sidebar /
+   Designer) still wins for that type only. */
+var TPL_DEFAULT_KEY='mayaacc_tpl_default';
+var TPL_DEFAULT_ID=1; /* 1 = Classic Corporate */
+function getTplDefault(){
+  try{
+    var n=parseInt(localStorage.getItem(TPL_DEFAULT_KEY),10);
+    if(n>=1&&n<=8) return n;
+  }catch(e){}
+  return TPL_DEFAULT_ID;
+}
+function seedTplDefault(){
+  try{ if(localStorage.getItem(TPL_DEFAULT_KEY)===null) localStorage.setItem(TPL_DEFAULT_KEY,String(TPL_DEFAULT_ID)); }catch(e){}
+}
+/* "Default" badge on the Invoice Designer's template card. The Designer
+   renders its own cards (original code), so a CSS rule on the card's
+   data-tpl attribute marks the default — it survives every re-render. */
+function defaultBadgeCss(){
+  if(document.getElementById('maya-tpl-default-css')) return;
+  var n=getTplDefault();
+  var css='#mayaInvDesigner .invd-card[data-tpl="'+n+'"] strong::after{content:"DEFAULT";display:inline-block;margin-left:6px;font-size:9px;font-weight:700;color:#fff;background:#1d4ed8;border-radius:8px;padding:2px 6px;vertical-align:2px}';
+  var st=document.createElement('style'); st.id='maya-tpl-default-css'; st.textContent=css;
+  document.head.appendChild(st);
+}
+/* Sale & Credit Note share the Invoice Designer's template choice. */
+function tplFor(type){
+  if(isSalesSide(type)){ try{ var g=I.loadCfg(); var t=parseInt(g.tpl,10); return (t>=1&&t<=8)?t:getTplDefault(); }catch(e){ return getTplDefault(); } }
+  var m=loadTplMap(), n=parseInt(m[type],10); return (n>=1&&n<=8)?n:getTplDefault();
+}
+function setTplFor(type,id){
+  id=Math.max(1,Math.min(8,parseInt(id,10)||1));
+  if(isSalesSide(type)){ try{ var g=I.loadCfg(); g.tpl=id; I.saveCfg(g); }catch(e){} return; }
+  var m=loadTplMap(); m[type]=id; saveTplMap(m);
+}
+/* Seed the global default template (Classic Corporate) once, and mark
+   it in the Invoice Designer. NOTE: this must run AFTER the var
+   assignments above (TPL_DEFAULT_KEY / TPL_DEFAULT_ID) have executed
+   — var declarations hoist but their assignments do not. */
+seedTplDefault();
+defaultBadgeCss();
+function dimsFor(cfg){
+  var p=PAPERS[cfg.paper]||PAPERS.A4, w=p[0], h=p[1];
+  return cfg.orientation==='landscape'?[h,w]:[w,h];
+}
+/* The old PDF writer (makePdf0) only knows A4 / A5L / A5P page codes. */
+function pdfPaperCode(cfg){
+  if(cfg.paper==='A5') return cfg.orientation==='landscape'?'A5L':'A5P';
+  return 'A4';
+}
+function pdfDims(cfg){
+  return {A4:[210,297],A5L:[210,148],A5P:[148,210]}[pdfPaperCode(cfg)]||[210,297];
+}
+/* CSS that makes the configuration actually affect the output:
+   page size + margins resize the .pg page; toggles hide blocks. */
+function pageCss(cfg,dims){
+  dims=dims||dimsFor(cfg);
+  var w=dims[0], h=dims[1], m=MARGINS[cfg.margin]||12;
+  var paper=cfg.paper+(cfg.orientation==='landscape'?' landscape':' portrait');
+  var s='@page{size:'+paper+';margin:0}';
+  s+='.pg{width:'+(w-2*m)+'mm!important;min-height:'+(h-2*m)+'mm!important;padding:'+m+'mm!important;box-sizing:border-box}';
+  s+='.sheet{min-height:0!important}';
+  if(!cfg.showHeader) s+='.vhd{display:none!important}.nm,.lgi,.mono,.mono2,.strip,.ids,.co5,.pills,.idl,.co4 .cl,.blk1,.ctr,.side,.top8 .hl{display:none!important}';
+  if(!cfg.showFooter) s+='.vfoot .ftline{display:none!important}.ft,.ft3,.ft6{display:none!important}';
+  if(!cfg.showLogo) s+='.vlogo,.lgi,.mono,.mono2{display:none!important}';
+  if(!cfg.showTerms) s+='.vterms,.tm{display:none!important}';
+  if(!cfg.showWords) s+='.vwords{display:none!important}';
+  if(!cfg.colour) s+='body{filter:grayscale(1)!important}';
+  return s;
+}
+/* Insert extra CSS into a finished HTML document (before </head>). */
+function injectCss(html,css){
+  if(!css) return html;
+  if(html.indexOf('</head>')>=0) return html.replace('</head>','<style>'+css+'</style></head>');
+  return html;
+}
+/* Duplicate the .pg page blocks N times (for copies on the Sales path). */
+function duplicatePages(html,n){
+  if(n<=1) return html;
+  var m=html.match(/<div class="pg">[\s\S]*<\/div>\s*<\/body>/);
+  if(!m) return html;
+  var block=m[0].replace(/\s*<\/body>$/,'');
+  var rep=''; for(var i=0;i<n;i++) rep+=block;
+  return html.replace(m[0],rep+'</body>');
+}
+
+/* ---------- PDF writer (own copy — the original lives in an IIFE) ---------- */
+var wait=function(ms){ return new Promise(function(r){ setTimeout(r,ms); }); };
+function safeName(s){ return String(s==null?'':s).replace(/[^\w.\-]+/g,'_').replace(/^_+|_+$/g,'')||'voucher'; }
+async function htmlToCanvas2(html,wPx){
+  var f=document.createElement('iframe');
+  f.style.cssText='position:fixed;left:-99999px;top:0;width:'+wPx+'px;height:100px;border:0';
+  document.body.appendChild(f);
+  try{
+    await new Promise(function(r){ f.onload=r; f.srcdoc=html; });
+    await wait(250);
+    var d=f.contentDocument, h=Math.max(d.documentElement.scrollHeight,d.body.scrollHeight,200);
+    var xml=new XMLSerializer().serializeToString(d.documentElement);
+    var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+wPx+'" height="'+h+'"><foreignObject width="100%" height="100%">'+xml+'</foreignObject></svg>';
+    var img=new Image();
+    await new Promise(function(ok,no){ img.onload=ok; img.onerror=function(){ no(new Error('render')); }; img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg); });
+    var k=2, cv=document.createElement('canvas');
+    cv.width=wPx*k; cv.height=h*k;
+    var g=cv.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height); g.drawImage(img,0,0,cv.width,cv.height);
+    cv.toDataURL('image/jpeg',.5); return cv;
+  }finally{ f.remove(); }
+}
+function pdfFromCanvas2(cv,wmm,hmm){
+  var W=wmm*72/25.4, H=hmm*72/25.4, ph=Math.round(cv.width*hmm/wmm), pages=[];
+  var n=Math.max(1,Math.ceil((cv.height-12)/ph)); if(n>8) n=8;
+  for(var i=0;i<n;i++){
+    var p=document.createElement('canvas'); p.width=cv.width; p.height=ph;
+    var g=p.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,p.width,p.height);
+    g.drawImage(cv,0,i*ph,cv.width,ph,0,0,cv.width,ph);
+    var b=atob(p.toDataURL('image/jpeg',.92).split(',')[1]), u=new Uint8Array(b.length);
+    for(var q=0;q<b.length;q++) u[q]=b.charCodeAt(q);
+    pages.push({u:u,w:p.width,h:p.height});
+  }
+  var enc=new TextEncoder(), parts=[], offs=[], len=0;
+  var push=function(x){ if(typeof x==='string') x=enc.encode(x); parts.push(x); len+=x.length; };
+  var obj=function(id,body){ offs[id]=len; push(id+' 0 obj\n'+body+'\nendobj\n'); };
+  push('%PDF-1.4\n');
+  obj(1,'<< /Type /Catalog /Pages 2 0 R >>');
+  obj(2,'<< /Type /Pages /Kids ['+pages.map(function(x,i){ return (3+i*3)+' 0 R'; }).join(' ')+'] /Count '+pages.length+' >>');
+  pages.forEach(function(pg,i){
+    var a=3+i*3, c=a+1, mm=a+2, s='q '+W.toFixed(2)+' 0 0 '+H.toFixed(2)+' 0 0 cm /Im0 Do Q';
+    obj(a,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+W.toFixed(2)+' '+H.toFixed(2)+'] /Resources << /XObject << /Im0 '+mm+' 0 R >> >> /Contents '+c+' 0 R >>');
+    obj(c,'<< /Length '+s.length+' >>\nstream\n'+s+'\nendstream');
+    offs[mm]=len; push(mm+' 0 obj\n<< /Type /XObject /Subtype /Image /Width '+pg.w+' /Height '+pg.h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+pg.u.length+' >>\nstream\n'); push(pg.u); push('\nendstream\nendobj\n');
+  });
+  var total=3+pages.length*3, xr=len, t='xref\n0 '+total+'\n0000000000 65535 f \n';
+  for(var i=1;i<total;i++) t+=String(offs[i]).padStart(10,'0')+' 00000 n \n';
+  push(t+'trailer\n<< /Size '+total+' /Root 1 0 R >>\nstartxref\n'+xr+'\n%%EOF');
+  return new Blob(parts,{type:'application/pdf'});
+}
+function printHtmlDoc2(html){
+  var f=document.createElement('iframe');
+  f.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
+  document.body.appendChild(f);
+  var d=f.contentWindow.document; d.open(); d.write(html); d.close();
+  setTimeout(function(){ try{ f.contentWindow.focus(); f.contentWindow.print(); }catch(e){} },300);
+  setTimeout(function(){ try{ f.remove(); }catch(e){} },120000);
+}
+async function makePdf2(vid){
+  var c=cid(), v=B().voucherById(c,vid);
+  if(!v) throw new Error('Voucher not found');
+  var cfg=loadPrintCfg(), doc=buildDoc(v,{forPdf:false});
+  var dims=dimsFor(cfg);
+  var cv=await htmlToCanvas2(doc.html,Math.round(dims[0]*3.7795));
+  return {blob:pdfFromCanvas2(cv,dims[0],dims[1]),
+    name:safeName(v.type)+'_'+safeName(String(v.number||''))+'_'+safeName(v.party||'')+'.pdf'};
+}
+async function savePdf2(vid){
+  toast('Preparing PDF…');
+  try{
+    var p=await makePdf2(vid);
+    var a=document.createElement('a'); a.href=URL.createObjectURL(p.blob); a.download=p.name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500);
+    toast('PDF saved: '+p.name); return p;
+  }catch(e){ toast('The PDF could not be created: '+(e.message||e)); return null; }
+}
+
+/* ---------- voucher document renderer (all types, 8 templates) ---------- */
+function tplStyle(id){
+  var t=I.TPL.find(function(x){ return x.id===id; })||I.TPL[0];
+  return t.d;
+}
+function tplName(id){
+  var t=I.TPL.find(function(x){ return x.id===id; })||I.TPL[0];
+  return t.name;
+}
+function partyOf(v){
+  try{ return (v.party&&B().find)?(B().find(cid(),v.party)||{}):{}; }catch(e){ return {}; }
+}
+function sjSidesLocal(v){
+  if(v&&(v.src||v.dst)) return {src:v.src||[],dst:v.dst||[]};
+  var src=[], dst=[];
+  ((v&&v.items)||[]).forEach(function(i){
+    if(i.kind==='transfer'){ src.push({name:i.name,godown:i.from,qty:i.qty}); dst.push({name:i.name,godown:i.to,qty:i.qty,amount:null}); }
+    else if(i.kind==='in'){ dst.push({name:i.name,godown:i.to,qty:i.qty,amount:null}); }
+    else if(i.kind==='out'){ src.push({name:i.name,godown:i.from,qty:i.qty}); }
+  });
+  return {src:src,dst:dst};
+}
+function entriesRows(v){
+  return (v.entries||[]).map(function(e){
+    return {ledger:e.ledger||'', dr:num(e.dr), cr:num(e.cr)};
+  });
+}
+function invItemsTable(M){
+  var rows=M.items.map(function(it,n){
+    var amt=num(it.amount);
+    return '<tr><td class="cn">'+(n+1)+'</td><td>'+esc(it.name)+'</td><td>'+esc(it.hsn||'')+'</td>'
+      +'<td class="n">'+esc(it.qty)+(it.per?' '+esc(it.per):'')+'</td>'
+      +'<td class="n">'+fmt(num(it.rate))+'</td>'
+      +'<td class="n">'+(num(it.gst)?(it.gst+'%'):'')+'</td>'
+      +'<td class="n b">'+fmt(amt)+'</td></tr>';
+  }).join('');
+  var qs=M.items.reduce(function(a,i){ return a+num(i.qty); },0);
+  var head='<tr><th class="cn">Sr.</th><th>Description of Goods</th><th>HSN/SAC</th><th class="n">Quantity</th><th class="n">Rate</th><th class="n">GST %</th><th class="n">Amount</th></tr>';
+  var foot='<tr class="tot"><td colspan="3">TOTAL</td><td class="n">'+qs+'</td><td></td><td></td><td class="n">'+fmt(M.items.reduce(function(a,i){ return a+num(i.amount); },0))+'</td></tr>';
+  return '<div class="itw"><table class="it"><thead>'+head+'</thead><tbody>'+rows+'<tr class="fill"><td colspan="7"></td></tr>'+foot+'</tbody></table></div>';
+}
+function invTotalsHtml(M){
+  var rows=[['Taxable Value',M.taxable]];
+  if(M.gstOn){
+    if(M.inter) rows.push(['IGST',M.taxBy.IGST]);
+    else{ rows.push(['CGST',M.taxBy.CGST]); rows.push(['SGST',M.taxBy.SGST]); }
+    if(M.taxBy.Cess) rows.push(['Cess',M.taxBy.Cess]);
+  }
+  if(Math.abs(M.round)>=0.005) rows.push(['Round Off',M.round]);
+  var hs='';
+  if(M.gstOn&&M.hsn&&M.hsn.length){
+    hs='<table class="hs"><thead><tr><th>HSN/SAC</th><th class="n">Taxable</th>'
+      +(M.inter?'<th class="n">IGST %</th><th class="n">IGST</th>':'<th class="n">CGST %</th><th class="n">CGST</th><th class="n">SGST %</th><th class="n">SGST</th>')
+      +'<th class="n">Total Tax</th></tr></thead><tbody>'
+      +M.hsn.map(function(h){
+        return '<tr><td>'+esc(h.hsn)+'</td><td class="n">'+fmt(h.taxable)+'</td>'
+        +(M.inter?'<td class="n">'+h.rate+'%</td><td class="n">'+fmt(h.igst)+'</td>'
+          :'<td class="n">'+(h.rate/2)+'%</td><td class="n">'+fmt(h.cgst)+'</td><td class="n">'+(h.rate/2)+'%</td><td class="n">'+fmt(h.sgst)+'</td>')
+        +'<td class="n b">'+fmt(h.igst+h.cgst+h.sgst+h.cessAmt)+'</td></tr>';
+      }).join('')+'</tbody></table>';
+  }
+  return {rows:rows, hs:hs};
+}
+function entriesTable(v){
+  var rows=entriesRows(v), totDr=0, totCr=0;
+  var body=rows.map(function(e,n){
+    totDr+=e.dr; totCr+=e.cr;
+    return '<tr><td class="cn">'+(n+1)+'</td><td>'+esc(e.ledger)+'</td><td class="n">'+(e.dr?fmt(e.dr):'')+'</td><td class="n">'+(e.cr?fmt(e.cr):'')+'</td></tr>';
+  }).join('');
+  var foot='<tr class="tot"><td colspan="2">TOTAL</td><td class="n">'+fmt(totDr)+'</td><td class="n">'+fmt(totCr)+'</td></tr>';
+  return {html:'<div class="itw"><table class="it"><thead><tr><th class="cn">Sr.</th><th>Particulars</th><th class="n">Debit</th><th class="n">Credit</th></tr></thead><tbody>'+body+'<tr class="fill"><td colspan="4"></td></tr>'+foot+'</tbody></table></div>',
+    total:Math.max(totDr,totCr)};
+}
+function sjTables(v){
+  var sd=sjSidesLocal(v);
+  var tbl=function(list,title){
+    var rows=list.map(function(i,n){
+      return '<tr><td class="cn">'+(n+1)+'</td><td>'+esc(i.name||'')+'</td><td>'+esc(i.godown||'')+'</td><td class="n">'+esc(i.qty==null?'':i.qty)+'</td><td class="n">'+(i.rate!=null&&i.rate!==''?fmt(num(i.rate)):'')+'</td><td class="n">'+(i.amount!=null&&i.amount!==''?fmt(num(i.amount)):'')+'</td></tr>';
+    }).join('');
+    var tq=list.reduce(function(a,i){ return a+num(i.qty); },0);
+    var ta=list.reduce(function(a,i){ return a+(i.amount==null?'':num(i.amount)); },0);
+    return '<div class="lbl" style="margin:8px 0 4px">'+esc(title)+'</div>'
+      +'<div class="itw"><table class="it"><thead><tr><th class="cn">Sr.</th><th>Item</th><th>Godown</th><th class="n">Qty</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>'+rows
+      +'<tr class="tot"><td colspan="3">TOTAL</td><td class="n">'+tq+'</td><td></td><td class="n">'+(ta?fmt(ta):'')+'</td></tr></tbody></table></div>';
+  };
+  return tbl(sd.src,'Source (Out)')+tbl(sd.dst,'Destination (In)');
+}
+/* One shared document structure; the 8 skins below restyle it. */
+function sheetHtml(v,M,cfg,dg,copyLabel){
+  var co=companyOf(), d=tplStyle(tplFor(v.type));
+  var title=TITLES[v.type]||(String(v.type||'Voucher').toUpperCase()+' VOUCHER');
+  var pl=partyOf(v);
+  var name=(dg.co&&dg.co.printName)||co.legalName||co.companyName||'';
+  var addr=[(dg.co&&dg.co.address)||co.address,[co.state,co.pin].filter(Boolean).join(' - ')].filter(Boolean).join(', ');
+  var ids=[['GSTIN/UIN',co.gstin],['Udyam Reg. No.',(dg.co&&dg.co.udyam)||co.udyam||''],['PAN',co.pan]].filter(function(x){ return x[1]; });
+  var contact=[co.mobile?'Ph: '+co.mobile:'',co.email].filter(Boolean);
+  var ini=name.split(/\s+/).filter(Boolean).slice(0,2).map(function(w){ return w.charAt(0); }).join('').toUpperCase()||'CO';
+  var A=dg.assets||{};
+  var logo=cfg.showLogo?(A.logo?'<img class="vlogo lgi" src="'+A.logo+'" alt="">':'<div class="vlogo mono">'+esc(ini)+'</div>'):'';
+  var isInvV=isInv(v.type);
+  var bodyHtml='', totRows=[], totVal=num(v.total), wordsTxt='', hsHtml='';
+  if(isInvV){
+    bodyHtml=invItemsTable(M);
+    var T=invTotalsHtml(M); totRows=T.rows; hsHtml=T.hs; totVal=M.total;
+    wordsTxt=cfg.showWords?words(M.total):'';
+  }else if(v.type==='Stock Journal'){
+    bodyHtml=sjTables(v); totRows=[]; totVal=0; wordsTxt='';
+  }else{
+    var ET=entriesTable(v); bodyHtml=ET.html; totRows=[]; totVal=ET.total;
+    wordsTxt=cfg.showWords?words(ET.total):'';
+  }
+  var tots='<div class="tots">'
+    +totRows.map(function(r){ return '<div><span>'+esc(r[0])+'</span><span>'+fmt(r[1])+'</span></div>'; }).join('')
+    +'<div class="gt"><span>Total</span><span>&#8377; '+fmt(totVal)+'</span></div></div>';
+  var partyLabel=PARTY_LABEL[v.type]||'Party';
+  var partyCard='<div class="card"><div class="lbl">'+esc(partyLabel)+'</div><div class="in"><div class="pn">'+esc(v.party||'')+'</div>'
+    +(pl.address?'<div>'+esc(pl.address)+'</div>':'')
+    +(pl.gstin?'<div class="sm"><b>GSTIN/UIN:</b> '+esc(pl.gstin)+'</div>':'')
+    +((pl.state||pl.phone)?'<div class="sm">'+[pl.state?'State: '+esc(pl.state):'',pl.phone?'Contact: '+esc(pl.phone):''].filter(Boolean).join(' &middot; ')+'</div>':'')
+    +'</div></div>';
+  var meta='<div class="mc big"><div class="lbl">'+esc(v.type==='Sales'?'Invoice No.':'Voucher No.')+'</div><b>'+esc(v.number||'')+'</b></div>'
+    +'<div class="mc big"><div class="lbl">Dated</div><b>'+esc(dmy(v.date))+'</b></div>'
+    +(v.reference?'<div class="mc"><div class="lbl">Reference</div><b>'+esc(typeof v.reference==='object'?(v.reference.no||v.reference.number||''):v.reference)+'</b></div>':'');
+  var termsTxt=dg.terms||'';
+  var bankRows=[];
+  var bk=dg.bank||{};
+  [['Bank',bk.name],['A/C Name',bk.holder],['A/C No.',bk.acc],['IFSC',bk.ifsc],['Branch',bk.branch],['UPI',bk.upi]].forEach(function(x){ if(x[1]) bankRows.push(x); });
+  var bankHtml=bankRows.length?'<div class="bk"><div><div class="lbl">Company\'s Bank Details</div><div class="kv">'+bankRows.map(function(x){ return '<span>'+x[0]+'</span><b>'+esc(x[1])+'</b>'; }).join('')+'</div></div></div>':'';
+  var stamp=A.stamp?'<img class="stp" src="'+A.stamp+'" alt="">':'';
+  var sign=A.sign?'<img class="sgi" src="'+A.sign+'" alt="">':'';
+  var signHtml='<div class="sgb"><div class="fo">For <b>'+esc(name)+'</b></div><div class="ss">'+stamp+sign+'</div><div class="ln">Authorised Signatory</div></div>';
+  var sideBar='<aside class="vside"><div>'+logo+'<div class="nm">'+esc(name)+'</div></div><div class="hr"></div>'
+    +'<div class="sb"><div class="lbl">Address</div><div>'+esc(addr)+'</div></div>'
+    +ids.map(function(x){ return '<div class="sb"><div class="lbl">'+esc(x[0])+'</div><div class="b">'+esc(x[1])+'</div></div>'; }).join('')
+    +(contact.length?'<div class="sb"><div class="lbl">Contact</div><div>'+contact.map(esc).join('<br>')+'</div></div>':'')
+    +(bankHtml?'<div class="hr"></div>'+bankHtml:'')
+    +(cfg.showTerms&&termsTxt?'<div class="hr"></div><div class="sm">'+esc(termsTxt).replace(/\n/g,'<br>')+'</div>':'')
+    +'</aside>';
+  return '<div class="vmain"><div class="vhd"><div class="vco">'+logo+'<div><div class="nm">'+esc(name)+'</div><div>'+esc(addr)+'</div>'
+    +ids.map(function(x){ return '<div><b>'+esc(x[0])+':</b> '+esc(x[1])+'</div>'; }).join('')
+    +(contact.length?'<div>'+esc(contact.join('  ·  '))+'</div>':'')+'</div></div>'
+    +'<div class="vtt"><div class="ttl">'+esc(title)+'</div><div class="cp">'+esc(copyLabel||'')+'</div></div></div>'
+    +'<div class="vmeta">'+meta+'</div>'
+    +'<div class="vpr">'+partyCard+'</div>'
+    +'<div class="grow">'+bodyHtml+'</div>'
+    +'<div class="r2"><div class="col">'
+    +(wordsTxt?'<div class="vwords wbox"><div class="lbl">Amount (in words)</div><div class="wd">'+esc(wordsTxt)+'</div></div>':'')
+    +hsHtml+'</div><div>'+tots+'</div></div>'
+    +'<div class="r3">'
+    +(cfg.showTerms&&termsTxt?'<div class="vterms keep"><div class="lbl">Terms &amp; Conditions</div><div class="pre sm">'+esc(termsTxt)+'</div></div>':'')
+    +bankHtml+signHtml+'</div>'
+    +'<div class="vfoot"><div class="ftline">'+esc(dg.decl||'')+(dg.decl&&dg.footer?' ':'')+esc(dg.footer||'')+'</div></div></div>'
+    +sideBar;
+}
+function vcss(d,cfg){
+  var a=cfg.colour?d.accent:'#444444', tx=d.text, bd=cfg.colour?d.border:'#999999',
+      dk=d.dark||'#1f2d3d', a2=cfg.colour?(d.accent2||'#ff6b3d'):'#777777',
+      hf=d.hfont||d.font, L=d.layout, fs=d.fs||10.5;
+  function tint(h,p){ h=String(h||'#000000').replace('#',''); if(h.length===3) h=h.split('').map(function(c){ return c+c; }).join('');
+    var n=parseInt(h,16)||0, r=[(n>>16)&255,(n>>8)&255,n&255];
+    return '#'+r.map(function(v){ return Math.max(0,Math.min(255,Math.round(v+(255-v)*(1-p)))).toString(16).padStart(2,'0'); }).join(''); }
+  var lt=tint(a,.08), lt2=tint(a,.16), mu=tint(tx,.62), soft=tint(bd,.5);
+  var c='*{box-sizing:border-box}html,body{margin:0;padding:0}body{font-family:'+d.font+';color:'+tx+';font-size:'+fs+'px;line-height:1.45;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+   +'@page{size:210mm 297mm;margin:0}.pg{width:210mm;min-height:296mm;margin:0 auto;position:relative;page-break-after:always;background:#fff}.pg:last-child{page-break-after:auto}'
+   +'.sheet{min-height:296mm;display:flex;flex-direction:column}.sheet>*{flex:none}.sheet>.grow{flex:1 1 auto}'
+   +'.vmain{display:flex;flex-direction:column;flex:1 1 auto;min-width:0}.vmain>*{flex:none}.vmain>.grow{flex:1 1 auto}.grow{display:flex;flex-direction:column;min-height:0}.grow>.itw{flex:1 1 auto}'
+   +'.mu{color:'+mu+'}.b{font-weight:700}.sm{font-size:.84em}.pre{white-space:pre-line}.n{text-align:right}.r{text-align:right}'
+   +'.lbl{font-size:.74em;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:'+a+'}'
+   +'.kv{display:grid;grid-template-columns:auto 1fr;column-gap:10px;row-gap:2px;align-items:baseline}.kv>span{color:'+mu+';white-space:nowrap}.kv>b{font-weight:600}'
+   +'.mc{padding:5px 8px;min-width:0}.mc .lbl{color:'+mu+';font-size:.68em}.mc b{display:block;font-weight:600}.mc.big b{font-size:1.15em;font-weight:700}'
+   +'.nm{font-size:'+(d.nameFs||20)+'px;font-weight:700;line-height:1.15;font-family:'+hf+'}.ttl{font-size:'+(d.titleFs||22)+'px;font-family:'+hf+'}'
+   +'.vhd{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:16px 24px 12px;border-bottom:2px solid '+a+'}'
+   +'.vco{display:flex;gap:12px;align-items:flex-start;min-width:0}.vlogo{flex:none}.vlogo.lgi{max-height:52px;max-width:26mm;object-fit:contain}'
+   +'.vlogo.mono{width:50px;height:50px;border:2px solid '+a+';color:'+a+';border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700}'
+   +'.vtt{text-align:right}.vtt .ttl{font-weight:700;letter-spacing:2px;color:'+a+'}.cp{color:'+mu+';font-size:.8em;margin-top:4px}'
+   +'.vmeta{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;padding:10px 24px;border-bottom:1px solid '+bd+'}'
+   +'.vpr{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:12px;padding:12px 24px 0}'
+   +'.card{border:1px solid '+bd+'}.card>.lbl{display:block;background:'+lt+';padding:4px 10px}.card .in{padding:8px 10px;display:flex;flex-direction:column;gap:2px}.pn{font-weight:700;font-size:1.15em}'
+   +'.grow{padding:12px 24px 0}'
+   +'table.it{width:100%;border-collapse:collapse}table.it thead{display:table-header-group}table.it tr{page-break-inside:avoid;break-inside:avoid}'
+   +'table.it th{font-size:.8em;text-align:left;padding:7px 5px;font-weight:700;white-space:nowrap;letter-spacing:.03em;background:'+a+';color:#fff}'
+   +'table.it td{padding:7px 5px;vertical-align:top;border-bottom:1px solid '+soft+'}table.it .n{text-align:right;white-space:nowrap}table.it .cn{text-align:center;white-space:nowrap}'
+   +'table.it tr.tot td{background:'+lt+';border-top:1px solid '+bd+';border-bottom:0;font-weight:700}'
+   +'table.hs{width:100%;border-collapse:collapse;font-size:.84em;margin-top:8px}table.hs th{font-size:.9em;font-weight:700;padding:4px 6px;text-align:left;background:'+lt2+'}table.hs td{padding:4px 6px;border-bottom:1px solid '+soft+'}table.hs .n{text-align:right}'
+   +'.tots>div{display:flex;justify-content:space-between;gap:12px;padding:4px 10px;border-bottom:1px solid '+soft+'}.tots .gt{font-weight:800;font-size:1.25em;text-transform:uppercase;background:'+a+';color:#fff;border:0}'
+   +'.wd{font-weight:700;margin-top:2px}.wbox{background:'+lt+';padding:8px 10px}.r2{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;align-items:start;padding:12px 24px 0}.r2>.col{display:flex;flex-direction:column;gap:8px}'
+   +'.r3{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:12px;align-items:stretch;padding:12px 24px}.r3>div{min-width:0;border:1px solid '+bd+';padding:8px 10px}'
+   +'.bk{display:flex;gap:10px;align-items:center;justify-content:space-between}.bk .kv>b{overflow-wrap:anywhere}'
+   +'.sgb{display:flex;flex-direction:column;align-items:center;gap:2px;break-inside:avoid;height:100%}.sgb .fo{align-self:flex-start;font-size:.84em}.sgb .ln{border-top:1px solid '+tx+';width:100%;text-align:center;padding-top:2px;font-size:.84em;margin-top:auto}'
+   +'.ss{position:relative;height:70px;width:150px;margin:0 auto}.ss .stp{position:absolute;left:2px;top:0;max-height:68px;max-width:28mm;object-fit:contain;opacity:.92;transform:rotate(-6deg)}.ss .sgi{position:absolute;left:46px;top:18px;max-width:30mm;max-height:48px;object-fit:contain}'
+   +'.vfoot{padding:8px 24px 14px;font-size:.8em;color:'+mu+'}.vside{display:none}';
+  var skins={
+   L1:'.vhd{background:'+a+';color:#fff;border-bottom:0;padding:20px 28px}.vhd .ttl{color:#fff}.vhd .cp{color:#fff;opacity:.85}.vhd .vlogo.mono{border-color:#fff;color:#fff}.vmeta,.vpr,.grow,.r2,.r3{padding-left:28px;padding-right:28px}.vfoot{padding-left:28px;padding-right:28px}',
+   L2:'.sheet{flex-direction:row}.sheet>.vmain{flex:1 1 auto;min-width:0}.vside{display:flex;flex-direction:column;gap:12px;width:214px;flex:none;background:'+a+';color:#fff;padding:26px 18px}.vside .lbl{color:#fff;opacity:.85}.vside .nm{color:#fff}.vside .vlogo.mono{border-color:#fff;background:#fff;color:'+a+'}.vside .hr{border-top:1px solid rgba(255,255,255,.35)}.vside .bk{flex-direction:column;align-items:flex-start}.sheet>.vside{order:-1}.vhd .vco{display:none}.vhd{border-bottom:3px solid '+a+';padding:22px 24px 10px}.vhd .ttl{color:'+a+'}',
+   L3:'.vhd{background:'+dk+';color:#f4efe4;border-bottom:4px solid '+a+';padding:22px 28px 16px}.vhd .ttl{color:'+a+'}.vhd .cp{color:#f4efe4;opacity:.85}.vhd .vlogo.mono{border-color:'+a+';color:'+a+'}.card{background:#faf6ee}.vmeta,.vpr,.grow,.r2,.r3{padding-left:28px;padding-right:28px}.vfoot{padding-left:28px;padding-right:28px}table.it th{background:'+dk+';color:'+a+'}table.it tbody tr:nth-child(odd) td{background:#faf6ee}.tots .gt{background:'+dk+';color:'+a+'}',
+   L4:'.sheet{border:1.5px solid '+tx+'}.vhd{border-bottom:1px solid '+tx+';padding:10px 14px}.vmeta{border-bottom:1px solid '+tx+';padding:8px 14px}.vpr{padding:10px 14px 0}.grow{padding:10px 14px 0}.r2{padding:10px 14px 0;gap:0;border-bottom:1px solid '+tx+'}.r2>.col{border-right:1px solid '+tx+';gap:0}.r3{padding:0;gap:0;border-bottom:1px solid '+tx+'}.r3>div{border:0;padding:8px 12px}.r3>div+div{border-left:1px solid '+tx+'}.vfoot{padding:8px 14px}table.it th{background:#e6e6e6;color:'+tx+';border-bottom:1px solid '+tx+'}table.it td{border-right:1px solid #c8c8c8}table.it tr.tot td{background:#f2f2f2}.tots .gt{background:#e6e6e6;color:'+tx+'}',
+   L5:'.vhd{border-bottom:0;padding:28px 32px 0}.vtt{text-align:left}.vtt .ttl{font-weight:300;letter-spacing:-1px}.vmeta{border-bottom:0;padding:14px 32px 0}.vpr{padding:14px 32px 0}.grow{padding:14px 32px 0}.r2{padding:14px 32px 0;gap:28px}.r3{padding:14px 32px;border-top:1px solid '+bd+'}.r3>div{border:0;padding:0}.vfoot{padding:8px 32px 20px}table.it th{background:transparent;color:'+tx+';border-bottom:1.5px solid '+tx+'}table.it tr.tot td{border-top:1.5px solid '+tx+'}.tots .gt{border-top:1.5px solid '+tx+';background:transparent;color:'+tx+'}.tots .gt span:last-child{border-bottom:3px solid '+a+'}',
+   L6:'.vhd{display:grid;grid-template-columns:1.45fr 1fr;padding:0;border-bottom:0}.vco{background:'+a+';color:#fff;padding:24px 22px 18px 28px}.vco .nm{color:#fff}.vco .vlogo.mono{border-color:#fff;color:#fff}.vtt{background:'+lt+';padding:24px 22px 18px;display:flex;flex-direction:column;justify-content:center}.vtt .ttl{color:'+a+'}.vmeta,.vpr,.grow,.r2,.r3{padding-left:28px;padding-right:28px}.vfoot{padding-left:28px;padding-right:28px}.card{border-radius:10px;background:'+lt+'}.card>.lbl{background:transparent}.itw{border-radius:10px;overflow:hidden;border:1px solid '+bd+'}',
+   L7:'.sheet{border:1.5px solid '+a+';padding:6px;background:#fbf8f1}.vhd{flex-direction:column;align-items:center;text-align:center;border-bottom:0;padding:16px 12px 0}.vco{flex-direction:column;align-items:center;text-align:center}.vco .nm{font-family:'+hf+';font-size:28px}.vtt .ttl{color:'+a+'}.vtt .ttl::before,.vtt .ttl::after{content:"";display:inline-block;width:60px;border-top:1px solid '+a+';vertical-align:middle;margin:0 12px}.vmeta,.vpr,.grow,.r2,.r3{padding-left:16px;padding-right:16px}.vfoot{padding-left:16px;padding-right:16px}.itw{background:#fff;border:1px solid '+a+'}table.it th{background:'+a+';color:#fbf8f1}.wd{font-family:'+hf+';font-size:1.35em}',
+   L8:'.vhd{padding:24px 28px 12px}.vmeta,.vpr,.grow,.r2,.r3{padding-left:28px;padding-right:28px}.vfoot{padding-left:28px;padding-right:28px}.vlogo.mono{border-radius:14px;background:'+dk+';color:#fff;border-color:'+dk+'}.tots{display:flex;gap:8px}.tots>div{flex:1;background:#f4f6f9;border-radius:12px;padding:8px 12px;border-bottom:0;flex-direction:column;gap:2px}.tots>div span:first-child{font-size:.68em;color:'+mu+';text-transform:uppercase;letter-spacing:.08em;font-weight:700}.tots>div span:last-child{font-size:1.3em;font-weight:800}.tots .gt{flex:1.7;background:'+a+';color:#fff}.tots .gt span:first-child{color:#fff;opacity:.95}.tots .gt span:last-child{font-size:1.7em}'
+  };
+  return c+(skins[L]||skins.L1);
+}
+/* Build the full printable document for one voucher.
+   Sales & Credit Note use the Invoice Designer engine (unchanged);
+   every other type uses the voucher renderer above. */
+function buildDoc(v,opts){
+  opts=opts||{};
+  var cfg=loadPrintCfg();
+  var dims=opts.dims||dimsFor(cfg);
+  var copies=opts.copies!=null?opts.copies:(opts.forPdf?1:cfg.copies);
+  if(isInv(v.type)&&isSalesSide(v.type)){
+    var g=I.loadCfg(), M=I.model(cid(),v);
+    var html=I.render(g,g.tpl,M,{copies:1});
+    html=injectCss(html,pageCss(cfg,dims));
+    html=duplicatePages(html,copies);
+    return {html:html, paper:cfg.paper, dims:dims, tpl:g.tpl, sales:true};
+  }
+  var tplId=tplFor(v.type);
+  var dg={}; try{ dg=I.loadCfg(); }catch(e){ dg={}; }
+  var d=tplStyle(tplId);
+  var pages='';
+  for(var i=0;i<copies;i++){
+    var sheet=sheetHtml(v,isInv(v.type)?I.model(cid(),v):null,cfg,dg,COPIES[i]||'');
+    pages+='<div class="pg"><div class="sheet '+d.layout+'">'+sheet+'</div></div>';
+  }
+  var title=TITLES[v.type]||(String(v.type||'Voucher').toUpperCase()+' VOUCHER');
+  var html='<!doctype html><html><head><meta charset="utf-8"><title>'+esc(title+' '+(v.number||''))+'</title><style>'+vcss(d,cfg)+pageCss(cfg,dims)+'</style></head><body>'+pages+'</body></html>';
+  return {html:html, paper:cfg.paper, dims:dims, tpl:tplId, sales:false};
+}
+
+/* ---------- Tally-style print dialog ---------- */
+var cur={vid:null, v:null, view:'home', mode:'voucher', report:null};
+function dlgCss(){
+  if($('maya-print-css')) return;
+  var css=[
+   '#maya-print-dialog{position:fixed;inset:0;z-index:2147483000;display:none;align-items:center;justify-content:center;background:rgba(23,32,51,.5);backdrop-filter:blur(6px);font:13px/1.45 system-ui,"Segoe UI",Arial,sans-serif;color:#172033}',
+   '#maya-print-dialog.on{display:flex}',
+   '.mpd-box{width:min(1060px,96vw);max-height:94vh;display:flex;flex-direction:column;background:#fff;border-radius:18px;box-shadow:0 30px 80px rgba(10,25,60,.4);overflow:hidden}',
+   '.mpd-head{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid #e6ebf2;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff}',
+   '.mpd-head h2{margin:0;font-size:18px}.mpd-head small{display:block;font-size:12px;opacity:.9;font-weight:600}',
+   '.mpd-head .sp{flex:1}.mpd-x{border:1px solid rgba(255,255,255,.5);background:transparent;color:#fff;border-radius:9px;padding:7px 12px;font:inherit;font-weight:700;cursor:pointer}',
+   '.mpd-actions{display:flex;gap:10px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid #e6ebf2;background:#f7f9fc}',
+   '.mpd-act{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:150px;flex:1;border:1px solid #d5dce8;border-radius:12px;background:#fff;padding:12px 14px;cursor:pointer;font:inherit;text-align:left}',
+   '.mpd-act:hover{border-color:#2563eb;box-shadow:0 2px 10px rgba(37,99,235,.15)}',
+   '.mpd-act.on{border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.25)}',
+   '.mpd-act b{font-size:14px}.mpd-act span{font-size:11px;color:#687286}.mpd-act .ic{font-size:20px}',
+   '.mpd-body{flex:1;min-height:0;overflow:auto}',
+   '.mpd-view{display:none}.mpd-view.on{display:block}',
+   '.mpd-home{padding:18px 20px}',
+   '.mpd-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}',
+   '.mpd-sum .cell{border:1px solid #e6ebf2;border-radius:10px;padding:10px 12px;background:#fbfcfe}',
+   '.mpd-sum .lbl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#687286}',
+   '.mpd-sum .val{font-size:15px;font-weight:700;margin-top:2px}',
+   '.mpd-note{font-size:12px;color:#687286;background:#f1f4fa;border-radius:8px;padding:9px 12px;margin-top:12px}',
+   '#mpd-preview.on{display:flex;min-height:0}',
+   '#mpd-tpls{width:250px;flex:none;border-right:1px solid #e6ebf2;background:#f7f9fc;padding:12px;overflow:auto}',
+   '#mpd-tpls h3{margin:2px 0 2px;font-size:13px}#mpd-tpls p{margin:0 0 10px;font-size:11px;color:#687286}',
+   '.mpd-tpl{display:block;width:100%;text-align:left;border:1px solid #d5dce8;border-radius:10px;background:#fff;padding:9px 11px;margin-bottom:8px;cursor:pointer;font:inherit}',
+   '.mpd-tpl:hover{border-color:#2563eb}.mpd-tpl.on{border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.25)}',
+   '.mpd-tpl b{display:block;font-size:13px}.mpd-tpl span{font-size:11px;color:#687286}',
+   '.mpd-tpl .sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:6px}',
+   '.mpd-def{display:inline-block;margin-left:6px;font-size:10px;font-weight:700;color:#fff;background:#1d4ed8;border-radius:8px;padding:1px 7px;vertical-align:1px}',
+   '#mpd-prevwrap{flex:1;overflow:auto;padding:16px;background:#dfe5ee;min-width:0}',
+   '#mpd-frame{display:block;margin:0 auto;background:#fff;box-shadow:0 6px 28px rgba(20,32,60,.25);border:0}',
+   '.mpd-cfg{padding:18px 20px;max-width:640px}',
+   '.mpd-f{display:grid;grid-template-columns:170px 1fr;gap:8px 12px;align-items:center;margin-bottom:10px}',
+   '.mpd-f label{font-weight:700;font-size:12px;color:#34425b}',
+   '.mpd-f input[type=number],.mpd-f select{width:100%;border:1px solid #b9c4d6;border-radius:7px;padding:7px 9px;font:inherit;background:#fff}',
+   '.mpd-f input[type=checkbox]{width:18px;height:18px}',
+   '.mpd-foot{display:flex;align-items:center;gap:10px;padding:11px 20px;border-top:1px solid #e6ebf2;background:#fff}',
+   '.mpd-foot .sp{flex:1}.mpd-foot span{font-size:12px;color:#687286}',
+   '.mpd-btn{border:1px solid #b9c4d6;border-radius:9px;background:#fff;padding:9px 16px;font:inherit;font-weight:700;cursor:pointer}',
+   '.mpd-btn.pri{background:#2563eb;border-color:#2563eb;color:#fff}'
+  ].join('\n');
+  var st=document.createElement('style'); st.id='maya-print-css'; st.textContent=css;
+  document.head.appendChild(st);
+}
+function buildDialog(){
+  if($('maya-print-dialog')) return;
+  dlgCss();
+  var d=document.createElement('div');
+  d.id='maya-print-dialog'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true');
+  d.innerHTML='<div class="mpd-box">'
+   +'<div class="mpd-head"><div><h2 id="mpd-title">Print</h2><small id="mpd-sub"></small></div><div class="sp"></div><button class="mpd-x" id="mpd-close" type="button">✕ Close (Esc)</button></div>'
+   +'<div class="mpd-actions">'
+   +'<button class="mpd-act" data-mpd="print" type="button"><span class="ic">🖨️</span><b>Print</b><span>Send to printer</span></button>'
+   +'<button class="mpd-act" data-mpd="preview" type="button"><span class="ic">👁️</span><b>Preview</b><span>See it before printing</span></button>'
+   +'<button class="mpd-act" data-mpd="config" type="button"><span class="ic">⚙️</span><b>Configuration</b><span>Paper, copies, margins…</span></button>'
+   +'<button class="mpd-act" data-mpd="pdf" type="button"><span class="ic">⬇️</span><b>Save PDF</b><span>Download the bill as PDF</span></button>'
+   +'<button class="mpd-act" data-mpd="wa" type="button"><span class="ic">💬</span><b>WhatsApp</b><span>Send the bill</span></button>'
+   +'</div>'
+   +'<div class="mpd-body">'
+   +'<div id="mpd-home" class="mpd-view on"></div>'
+   +'<div id="mpd-preview" class="mpd-view"><aside id="mpd-tpls"></aside><div id="mpd-prevwrap"><iframe id="mpd-frame" title="Print preview"></iframe></div></div>'
+   +'<div id="mpd-config" class="mpd-view"></div>'
+   +'</div>'
+   +'<div class="mpd-foot"><span id="mpd-hint"></span><span class="sp"></span><button id="mpd-primary" class="mpd-btn pri" type="button">Print</button></div>'
+   +'</div>';
+  document.body.appendChild(d);
+  $('mpd-close').addEventListener('click',closeDialog);
+  $('mpd-primary').addEventListener('click',function(){ if(cur.view==='config') saveConfigForm(); else doPrint(); });
+  d.querySelectorAll('[data-mpd]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var k=b.getAttribute('data-mpd');
+      if(k==='print') doPrint();
+      else if(k==='preview') showView('preview');
+      else if(k==='config') showView('config');
+      else if(k==='pdf') doPdf();
+      else if(k==='wa') doWa();
+    });
+  });
+}
+function isDialogOpen(){
+  var d=$('maya-print-dialog');
+  return !!(d&&d.classList.contains('on'));
+}
+function showView(name){
+  cur.view=name;
+  ['home','preview','config'].forEach(function(v){
+    var el=$('mpd-'+v); if(el) el.classList.toggle('on',v===name);
+  });
+  document.querySelectorAll('#maya-print-dialog [data-mpd]').forEach(function(b){
+    b.classList.toggle('on',b.getAttribute('data-mpd')===name);
+  });
+  var prim=$('mpd-primary');
+  if(prim) prim.textContent=name==='config'?'Save Configuration':(name==='preview'?'Print':'Print');
+  if(name==='preview') renderPreview();
+  if(name==='config') renderConfigForm();
+}
+function openPrintDialog(vid){
+  var c=cid(), v=B().voucherById(c,vid);
+  if(!v){ toast('Voucher not found.'); return; }
+  buildDialog();
+  cur.mode='voucher'; cur.report=null;
+  var waBtn=document.querySelector('#maya-print-dialog [data-mpd="wa"]');
+  if(waBtn) waBtn.style.display='';
+  cur.vid=vid; cur.v=v;
+  var title=(TITLES[v.type]||(String(v.type||'Voucher').toUpperCase()+' VOUCHER'));
+  $('mpd-title').textContent='Print — '+title;
+  $('mpd-sub').textContent='No. '+(v.number||'')+' · '+dmy(v.date)+(v.party?' · '+v.party:'');
+  renderHome();
+  showView('home');
+  $('maya-print-dialog').classList.add('on');
+  $('mpd-hint').textContent='Tip: Preview me sidebar se template badlo, Configuration me paper/copies set karo.';
+}
+function closeDialog(){
+  var d=$('maya-print-dialog');
+  if(d) d.classList.remove('on');
+  cur.vid=null; cur.v=null; cur.mode='voucher'; cur.report=null;
+  var waBtn=document.querySelector('#maya-print-dialog [data-mpd="wa"]');
+  if(waBtn) waBtn.style.display='';
+}
+/* Report mode: the same dialog, but for a report document instead of a
+   voucher. The report renderer/templates live in the print-reports
+   snippet (window.__mayaPrintReport); this dialog only hosts them. */
+function openReportDialog(report){
+  var R=window.__mayaPrintReport;
+  if(!report||!R||typeof R.buildReportDoc!=='function'){ toast('Report print is not available right now.'); return; }
+  buildDialog();
+  cur.mode='report'; cur.report=report; cur.vid=null; cur.v=null;
+  var waBtn=document.querySelector('#maya-print-dialog [data-mpd="wa"]');
+  if(waBtn) waBtn.style.display='none';
+  $('mpd-title').textContent='Print — '+report.title;
+  $('mpd-sub').textContent=report.crumb||'';
+  renderHome();
+  showView('home');
+  $('maya-print-dialog').classList.add('on');
+  $('mpd-hint').textContent='Tip: Preview me sidebar se is report ka template badlo, Configuration me paper/copies set karo.';
+}
+function renderHome(){
+  if(cur.mode==='report'&&cur.report){ renderReportHome(); return; }
+  var v=cur.v; if(!v) return;
+  var cfg=loadPrintCfg();
+  var amt=num(v.total)>0?'₹ '+fmt(v.total):(v.type==='Stock Journal'?'Stock only':'—');
+  $('mpd-home').innerHTML='<h3 style="margin:0 0 4px">What would you like to do?</h3>'
+   +'<p style="margin:0;color:#687286">Choose Print, Preview or Configuration — just like Tally.</p>'
+   +'<div class="mpd-sum">'
+   +'<div class="cell"><div class="lbl">Voucher</div><div class="val">'+esc(v.type||'')+'</div></div>'
+   +'<div class="cell"><div class="lbl">Number</div><div class="val">'+esc(v.number||'')+'</div></div>'
+   +'<div class="cell"><div class="lbl">Date</div><div class="val">'+esc(dmy(v.date))+'</div></div>'
+   +'<div class="cell"><div class="lbl">Party</div><div class="val">'+esc(v.party||'—')+'</div></div>'
+   +'<div class="cell"><div class="lbl">Amount</div><div class="val">'+amt+'</div></div>'
+   +'<div class="cell"><div class="lbl">Template</div><div class="val">'+esc(tplName(tplFor(v.type)))+(tplFor(v.type)===getTplDefault()?' <span class="mpd-def">Default</span>':'')+'</div></div>'
+   +'</div>'
+   +'<div class="mpd-note">Current print settings: <b>'+esc(cfg.paper)+' · '+(cfg.orientation==='landscape'?'Landscape':'Portrait')+' · '+cfg.copies+' cop'+(cfg.copies>1?'ies':'y')+' · '+(cfg.margin==='narrow'?'Narrow':cfg.margin==='wide'?'Wide':'Normal')+' margins</b>. '
+   +'Printer ka chunaav system print dialog me hota hai jo Print dabane par khulta hai.</div>';
+}
+function renderReportHome(){
+  var r=cur.report, R=window.__mayaPrintReport;
+  if(!r) return;
+  var cfg=loadPrintCfg();
+  var tplId=R?R.tplForReport(r.family):1;
+  var tplName=R?R.tplNameReport(r.family,tplId):'Template '+tplId;
+  $('mpd-home').innerHTML='<h3 style="margin:0 0 4px">What would you like to do?</h3>'
+   +'<p style="margin:0;color:#687286">Choose Print, Preview or Configuration — just like Tally.</p>'
+   +'<div class="mpd-sum">'
+   +'<div class="cell"><div class="lbl">Report</div><div class="val">'+esc(r.title||'')+'</div></div>'
+   +'<div class="cell"><div class="lbl">Period</div><div class="val">'+esc(r.crumb||'—')+'</div></div>'
+   +'<div class="cell"><div class="lbl">Template</div><div class="val">'+esc(tplName)+(tplId===1?' <span class="mpd-def">Default</span>':'')+'</div></div>'
+   +'<div class="cell"><div class="lbl">Rows</div><div class="val">'+(r.rows||0)+'</div></div>'
+   +'</div>'
+   +'<div class="mpd-note">Current print settings: <b>'+esc(cfg.paper)+' · '+(cfg.orientation==='landscape'?'Landscape':'Portrait')+' · '+cfg.copies+' cop'+(cfg.copies>1?'ies':'y')+' · '+(cfg.margin==='narrow'?'Narrow':cfg.margin==='wide'?'Wide':'Normal')+' margins</b>. '
+   +'Printer ka chunaav system print dialog me hota hai jo Print dabane par khulta hai.</div>';
+}
+function renderPreview(){
+  if(cur.mode==='report'&&cur.report){ renderReportPreview(); return; }
+  var v=cur.v; if(!v) return;
+  var active=tplFor(v.type);
+  $('mpd-tpls').innerHTML='<h3>Templates — '+esc(v.type)+'</h3><p>Click a template to switch instantly.</p>'
+   +I.TPL.map(function(t){
+      return '<button type="button" class="mpd-tpl'+(t.id===active?' on':'')+'" data-tpl="'+t.id+'"><b><span class="sw" style="background:'+t.d.accent+'"></span>'+esc(t.name)+(t.id===getTplDefault()?'<span class="mpd-def">Default</span>':'')+'</b><span>'+esc(t.note||'')+'</span></button>';
+    }).join('');
+  $('mpd-tpls').querySelectorAll('[data-tpl]').forEach(function(b){
+    b.addEventListener('click',function(){
+      setTplFor(v.type,parseInt(b.getAttribute('data-tpl'),10));
+      renderPreview();
+      renderHome();
+      toast('Template changed: '+tplName(tplFor(v.type)));
+    });
+  });
+  var doc=buildDoc(v,{});
+  var frame=$('mpd-frame');
+  frame.removeAttribute('srcdoc');
+  frame.srcdoc=doc.html;
+  frame.onload=function(){
+    try{
+      var wrap=$('mpd-prevwrap'), w=wrap.clientWidth-16;
+      var dims=doc.dims, pxW=Math.round(dims[0]*3.7795), pxH=Math.round(dims[1]*3.7795);
+      var s=Math.min(1,w/pxW);
+      frame.style.width=pxW+'px'; frame.style.height=pxH+'px';
+      frame.style.transform='scale('+s+')'; frame.style.transformOrigin='0 0';
+      wrap.style.height=Math.round(pxH*s)+'px';
+    }catch(e){}
+  };
+}
+/* Report preview: the sidebar lists templates for THIS report's family
+   (Ledger / Statement / Register / GST / Stock — different names and
+   styles per page), and the preview renders the luxury report layout. */
+function renderReportPreview(){
+  var r=cur.report, R=window.__mayaPrintReport;
+  if(!r||!R) return;
+  var list=R.templatesFor(r.family), active=R.tplForReport(r.family);
+  $('mpd-tpls').innerHTML='<h3>Templates — '+esc(R.familyLabel(r.family))+'</h3><p>Is report ke templates. Click to switch instantly.</p>'
+   +list.map(function(t){
+      return '<button type="button" class="mpd-tpl'+(t.id===active?' on':'')+'" data-tpl="'+t.id+'"><b><span class="sw" style="background:'+R.tplAccent(t)+'"></span>'+esc(t.name)+(t.id===1?'<span class="mpd-def">Default</span>':'')+'</b><span>'+esc(t.note||'')+'</span></button>';
+    }).join('');
+  $('mpd-tpls').querySelectorAll('[data-tpl]').forEach(function(b){
+    b.addEventListener('click',function(){
+      R.setTplForReport(r.family,parseInt(b.getAttribute('data-tpl'),10));
+      renderReportPreview();
+      renderHome();
+      toast('Template changed: '+R.tplNameReport(r.family,R.tplForReport(r.family)));
+    });
+  });
+  var doc=R.buildReportDoc(r,{});
+  var frame=$('mpd-frame');
+  frame.removeAttribute('srcdoc');
+  frame.srcdoc=doc.html;
+  frame.onload=function(){
+    try{
+      var wrap=$('mpd-prevwrap'), w=wrap.clientWidth||800;
+      var dims=doc.dims, pxW=Math.round(dims[0]*3.7795);
+      var s=Math.max(0.1,Math.min(1,(w-16)/pxW));
+      frame.style.width=pxW+'px';
+      var h=200;
+      try{ var fd=frame.contentDocument; h=Math.max(fd.documentElement.scrollHeight,fd.body?fd.body.scrollHeight:0,200); }catch(e2){}
+      h=Math.min(h,6000);
+      frame.style.height=h+'px';
+      frame.style.transform='scale('+s+')'; frame.style.transformOrigin='0 0';
+      wrap.style.height=Math.round(h*s)+'px';
+    }catch(e){}
+  };
+}
+function renderConfigForm(){
+  var cfg=loadPrintCfg();
+  var chk=function(k){ return cfg[k]?' checked':''; };
+  $('mpd-config').innerHTML='<div class="mpd-cfg"><h3 style="margin:0 0 12px">Print Configuration</h3>'
+   +'<div class="mpd-f"><label for="mpc-copies">Number of copies</label><input id="mpc-copies" type="number" min="1" max="3" value="'+cfg.copies+'"></div>'
+   +'<div class="mpd-f"><label for="mpc-paper">Paper size</label><select id="mpc-paper">'
+   +['A4','A5','Letter'].map(function(p){ return '<option value="'+p+'"'+(cfg.paper===p?' selected':'')+'>'+p+'</option>'; }).join('')+'</select></div>'
+   +'<div class="mpd-f"><label for="mpc-ori">Orientation</label><select id="mpc-ori">'
+   +'<option value="portrait"'+(cfg.orientation==='portrait'?' selected':'')+'>Portrait</option>'
+   +'<option value="landscape"'+(cfg.orientation==='landscape'?' selected':'')+'>Landscape</option></select></div>'
+   +'<div class="mpd-f"><label for="mpc-margin">Margins</label><select id="mpc-margin">'
+   +'<option value="narrow"'+(cfg.margin==='narrow'?' selected':'')+'>Narrow (8 mm)</option>'
+   +'<option value="normal"'+(cfg.margin==='normal'?' selected':'')+'>Normal (12 mm)</option>'
+   +'<option value="wide"'+(cfg.margin==='wide'?' selected':'')+'>Wide (20 mm)</option></select></div>'
+   +'<div class="mpd-f"><label>Print company header</label><input id="mpc-header" type="checkbox"'+chk('showHeader')+'></div>'
+   +'<div class="mpd-f"><label>Print footer (declaration)</label><input id="mpc-footer" type="checkbox"'+chk('showFooter')+'></div>'
+   +'<div class="mpd-f"><label>Print company logo</label><input id="mpc-logo" type="checkbox"'+chk('showLogo')+'></div>'
+   +'<div class="mpd-f"><label>Print terms &amp; conditions</label><input id="mpc-terms" type="checkbox"'+chk('showTerms')+'></div>'
+   +'<div class="mpd-f"><label>Amount in words</label><input id="mpc-words" type="checkbox"'+chk('showWords')+'></div>'
+   +'<div class="mpd-f"><label>Print in colour</label><input id="mpc-colour" type="checkbox"'+chk('colour')+'></div>'
+   +'<div class="mpd-note">Settings are saved for this company and apply to Print, Preview and PDF save. '
+   +'Printer (kaunsa printer, kitni copies system dialog se) ka chunaav Print dabane par khulne wale system dialog me hota hai — browser/Electron page ko printer list nahi deta.</div>'
+   +'<div style="margin-top:14px;display:flex;gap:10px"><button class="mpd-btn pri" id="mpc-save" type="button">Save Configuration</button><button class="mpd-btn" id="mpc-reset" type="button">Reset to Defaults</button></div></div>';
+  $('mpc-save').addEventListener('click',saveConfigForm);
+  $('mpc-reset').addEventListener('click',function(){
+    savePrintCfg(Object.assign({},DEF_CFG));
+    renderConfigForm(); renderHome();
+    toast('Print configuration reset to defaults.');
+  });
+}
+function saveConfigForm(){
+  var g=function(id){ var el=$(id); return el?el.value:''; };
+  var c={
+    copies:Math.max(1,Math.min(3,parseInt(g('mpc-copies'),10)||1)),
+    paper:g('mpc-paper')||'A4',
+    orientation:g('mpc-ori')||'portrait',
+    margin:g('mpc-margin')||'normal',
+    showHeader:!!($('mpc-header')&&$('mpc-header').checked),
+    showFooter:!!($('mpc-footer')&&$('mpc-footer').checked),
+    showLogo:!!($('mpc-logo')&&$('mpc-logo').checked),
+    showTerms:!!($('mpc-terms')&&$('mpc-terms').checked),
+    showWords:!!($('mpc-words')&&$('mpc-words').checked),
+    colour:!!($('mpc-colour')&&$('mpc-colour').checked)
+  };
+  savePrintCfg(c);
+  renderHome();
+  if(cur.view==='preview') renderPreview();
+  toast('Print configuration saved.');
+}
+function doPrint(){
+  if(cur.mode==='report'&&cur.report){
+    var R=window.__mayaPrintReport; if(!R) return;
+    try{ var doc=R.buildReportDoc(cur.report,{}); printHtmlDoc2(doc.html); toast('Sent to printer…'); }
+    catch(e){ toast('Could not print: '+(e.message||e)); }
+    return;
+  }
+  var v=cur.v; if(!v) return;
+  try{
+    var doc=buildDoc(v,{});
+    printHtmlDoc2(doc.html);
+    toast('Sent to printer…');
+  }catch(e){ toast('Could not print: '+(e.message||e)); }
+}
+function doPdf(){
+  if(cur.mode==='report'&&cur.report){
+    var R=window.__mayaPrintReport;
+    if(R&&typeof R.savePdf==='function') R.savePdf(cur.report);
+    return;
+  }
+  if(cur.vid) savePdf2(cur.vid);
+}
+function doWa(){
+  var v=cur.v; if(!v) return;
+  if(!v.party){ toast('This voucher has no party to send it to.'); return; }
+  var L={}; try{ L=B().find(cid(),v.party)||{}; }catch(e){}
+  var n=String(L.whatsapp||L.phone||'').replace(/\D/g,'').replace(/^0+/,'');
+  if(n.length<10){ toast('No mobile number is saved in the ledger of "'+v.party+'". Save it in the ledger first.'); return; }
+  if(n.length===10) n='91'+n;
+  var co=companyOf().companyName||'us';
+  var msg='Dear '+(v.party||'')+'\nPlease find '+v.type+' No. '+v.number+' dated '+dmy(v.date)+' for *₹ '+fmt(v.total||0)+'* from '+co+'.\nThank you.';
+  try{ window.open('https://wa.me/'+n+'?text='+encodeURIComponent(msg),'_blank'); }catch(e){}
+  toast('WhatsApp opened for '+v.party+'. Attach the PDF from Save PDF if needed.');
+}
+
+/* ---------- reach the Print Vouchers list (mio overlay) ---------- */
+function isPrnOpen(){
+  var ov=$('miox-ov');
+  if(!ov||!ov.classList.contains('on')) return false;
+  var h=ov.querySelector('.mio-top h3');
+  return !!(h&&h.textContent.trim()==='Print Vouchers');
+}
+function prnSelectedVoucher(){
+  var ov=$('miox-ov'); if(!ov) return null;
+  var tr=ov.querySelector('tr.sel'); if(!tr) return null;
+  var tds=tr.querySelectorAll('td'); if(tds.length<4) return null;
+  var type=tds[1].textContent.trim(), number=tds[2].textContent.trim();
+  var vs=[]; try{ vs=B().vouchers(cid())||[]; }catch(e){}
+  return vs.find(function(v){ return v&&v.type===type&&String(v.number)===number; })||null;
+}
+
+/* ---------- wiring ---------- */
+if(typeof window.mayaPrintInvoice==='function'&&!window.mayaPrintInvoice.__mayaPrintDlg){
+  var origPrintInvoice=window.mayaPrintInvoice;
+  var wrappedPrint=function(id){ openPrintDialog(id); };
+  wrappedPrint.__mayaPrintDlg=true; wrappedPrint.__mayaOrig=origPrintInvoice;
+  window.mayaPrintInvoice=wrappedPrint;
+}
+if(typeof window.mayaInvoiceHtml==='function'&&!window.mayaInvoiceHtml.__mayaPrintDlg){
+  var origInvoiceHtml=window.mayaInvoiceHtml;
+  var wrappedHtml=function(id){
+    var v=null; try{ v=B().voucherById(cid(),id); }catch(e){}
+    if(!v) return null;
+    var cfg=loadPrintCfg(), dims=pdfDims(cfg);
+    if(isInv(v.type)&&isSalesSide(v.type)){
+      var h=origInvoiceHtml(id); if(!h) return null;
+      return {html:injectCss(duplicatePages(h.html,1),pageCss(cfg,dims)), paper:pdfPaperCode(cfg)};
+    }
+    var doc=buildDoc(v,{dims:dims,forPdf:true});
+    return {html:doc.html, paper:pdfPaperCode(cfg)};
+  };
+  wrappedHtml.__mayaPrintDlg=true; wrappedHtml.__mayaOrig=origInvoiceHtml;
+  window.mayaInvoiceHtml=wrappedHtml;
+}
+if(window.__mayaModalKey&&!window.__mayaModalKey.__mayaPrintDlg){
+  var prevModal=window.__mayaModalKey;
+  var wrappedModal=function(e){
+    try{
+      if(isDialogOpen()){
+        /* The dialog is modal: swallow other modal keys (including
+           Enter inside its own inputs, so the Print Vouchers list
+           behind it cannot fire), but let the browser's default
+           typing/focus behaviour through (return 1, not 2). */
+        if(e.key==='Escape'){ closeDialog(); return 2; }
+        return 1;
+      }
+      if(isPrnOpen()){
+        var k=e.key, lk=String(k).toLowerCase();
+        var tag=(e.target&&e.target.tagName)||'';
+        if(k==='Enter'&&tag!=='BUTTON'&&tag!=='INPUT'&&tag!=='TEXTAREA'&&tag!=='SELECT'){
+          var v1=prnSelectedVoucher(); if(v1){ openPrintDialog(v1.id); return 2; }
+        }
+        if(e.altKey&&lk==='s'){
+          var v2=prnSelectedVoucher(); if(v2){ savePdf2(v2.id); return 2; }
+        }
+      }
+    }catch(err){}
+    return prevModal?prevModal(e):0;
+  };
+  wrappedModal.__mayaPrintDlg=true;
+  window.__mayaModalKey=wrappedModal;
+}
+document.addEventListener('click',function(e){
+  try{
+    var a=e.target&&e.target.closest?e.target.closest('[data-act="pPrint"],[data-act="pPdf"]'):null;
+    if(!a||!isPrnOpen()) return;
+    var v=prnSelectedVoucher(); if(!v) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    if(a.getAttribute('data-act')==='pPrint') openPrintDialog(v.id);
+    else savePdf2(v.id);
+  }catch(err){}
+},true);
+
+/* ---------- public API (used by tests and future code) ---------- */
+window.mayaPrintDialog=openPrintDialog;
+window.mayaVoucherHtml=function(vid){
+  var v=null; try{ v=B().voucherById(cid(),vid); }catch(e){}
+  if(!v) return null;
+  var d=buildDoc(v,{});
+  return {html:d.html, paper:d.paper};
+};
+window.__mayaPrint={
+  open:openPrintDialog, openReport:openReportDialog, close:closeDialog, buildDoc:buildDoc,
+  loadCfg:loadPrintCfg, saveCfg:savePrintCfg, tplFor:tplFor, setTplFor:setTplFor, tplDefault:getTplDefault,
+  tplName:tplName, templates:I.TPL, dimsFor:dimsFor, pageCss:pageCss,
+  makePdf:makePdf2, savePdf:savePdf2, printHtml:printHtmlDoc2
+};
+})();
+</script>
+<!-- ============================================================
+MAYAACC Print Fix 2 (2026-11-16)
+Fixes the 4 print problems Sandeep reported after the Tally-style
+print system (print-template-snippet.html):
+
+1. INVOICE DESIGNER HAS NO EFFECT.
+   Root cause (two parts):
+   (a) The Designer only persisted the template choice on explicit
+       Save (Ctrl+S / #invdSave). Clicking a template card only set
+       the in-memory cfg.tpl + a dirty flag, so closing the Designer
+       without saving (confirm "Discard unsaved design changes?")
+       threw the choice away.
+   (b) loadCfg() discarded a saved tpl unless tv===2:
+       `tpl: fresh ? (c.tpl||1) : 1` — so a config saved in the old
+       format (tv=1) with tpl=5 was read back as tpl=1.
+   Fix: every template-card click now saves immediately
+   (loadCfg -> tpl=id, tv=2 -> saveCfg), and a one-time migration
+   rewrites stored configs that have a valid tpl (1-8) but tv!==2.
+   The print system already reads I.loadCfg().tpl for Sales, so the
+   Designer choice now drives Sales voucher print/preview/PDF, the
+   Sale Register bill print and the print dialog's template.
+   (Global default, added later: when no template was ever saved,
+   loadCfg falls back to mayaacc_tpl_default — Classic Corporate,
+   id 1 — via the wrapped loadCfg below.)
+
+2. SALES REGISTER Ctrl+P PRINTS THE WRONG THING.
+   Root cause: the __mayaModalKey wrapper (print system) called
+   MayaPrint.report() whenever the reports overlay was open — it
+   printed the current #mrp-body (register / ledger details) and
+   never looked at the selected voucher row.
+   Fix: a new outermost __mayaModalKey wrapper intercepts Ctrl+P:
+   if the print dialog is open -> delegate; else if the reports
+   overlay is open and a voucher detail is open (or a voucher row
+   is selected in a register / Day Book) -> open the print dialog
+   for THAT voucher; else if the Print Vouchers list has a row
+   selected -> dialog for that voucher; otherwise fall through to
+   the old behaviour (report print). Applies to every register
+   (Sales, Purchase, ...) because they all share MayaReportCtx.st.
+
+3. PRINT BUTTON ON EVERY SCREEN.
+   A "Print Page (Ctrl+P)" button is added to the persistent top bar
+   (see 4) plus a "Print" button in each screen's own header:
+   reports header (#mrp-top), voucher entry header (#mve-top),
+   company select / setup / view, and the master overlays
+   (Group, Ledger, Stock Item, Unit, Godown, Cost Centre,
+   Voucher Type, Tax/GST) and the full-screen screens
+   (Payroll, BOM, dashboard, help, etc.). The button calls
+   mayaPrintCurrent(), which routes to the print dialog when a
+   document (voucher/bill) is involved, or prints a clean copy of
+   the current view otherwise.
+
+4. WORKSPACE TOP TABS ALWAYS VISIBLE.
+   Root cause: .gateway-top (Company, Data, Exchange, Go To, Import,
+   Export, Share, Print, Help) lived INSIDE #dashboard, and
+   hideAllPages() hides #dashboard whenever any other screen opens,
+   so the tabs vanished on every screen except the dashboard.
+   Fix: the .gateway-top node is MOVED into a new fixed bar
+   #maya-topbar (z-index just below the print dialog) that is shown
+   whenever the app is in workspace mode (and no setup/unlock screen
+   is open). Full-screen overlays/sections are shifted down by the
+   bar's measured height (CSS var --maya-topbar-h). Nav clicks are
+   gated while a blocking modal (master form, backup, etc.) is open,
+   and F3 now opens the Company menu from any workspace screen.
+   The bar also carries the new "Print Page (Ctrl+P)" button.
+
+DO NOT break: the 8 working voucher types, Save PDF, WhatsApp,
+reports export, the print dialog + configuration + templates,
+the redesign flows (setup screen, unlock prompt, F3 Password
+Security) and the save bar.
+============================================================= -->
+<style id="mayaacc-print-fix2-css">
+/* --- persistent top bar (fix 4) --- */
+#maya-topbar{position:fixed;top:0;left:0;right:0;z-index:2147482800;display:none}
+#maya-topbar .gateway-top{width:100%;box-sizing:border-box}
+#mcm{z-index:2147482900!important}
+body.maya-topbar-on #dashboard{padding-top:var(--maya-topbar-h,48px)}
+body.maya-topbar-on #companySelect,
+body.maya-topbar-on #companySetup,
+body.maya-topbar-on #companyView{padding-top:var(--maya-topbar-h,48px)}
+body.maya-topbar-on #mayaacc-reports-overlay,
+body.maya-topbar-on #mayaacc-voucher-entry-overlay,
+body.maya-topbar-on #mayaInvDesigner,
+body.maya-topbar-on #mdb-ov,
+body.maya-topbar-on #mdt-ov,
+body.maya-topbar-on #mxc-ov,
+body.maya-topbar-on #mhp-ov,
+body.maya-topbar-on #mpy-ov,
+body.maya-topbar-on #mbm-ov,
+body.maya-topbar-on #miox-ov,
+body.maya-topbar-on #mayaacc-group-overlay,
+body.maya-topbar-on #mayaacc-ledger-overlay,
+body.maya-topbar-on #mayaacc-stock-overlay,
+body.maya-topbar-on #mayaacc-unit-overlay,
+body.maya-topbar-on #mayaacc-godown-overlay,
+body.maya-topbar-on #mayaacc-cost-centre-overlay,
+body.maya-topbar-on #mayaacc-voucher-type-overlay,
+body.maya-topbar-on #mayaacc-alter-other,
+body.maya-topbar-on #mayaacc-sound-settings,
+body.maya-topbar-on #mayaacc-backup,
+body.maya-topbar-on #mayaacc-tax-gst-overlay,
+body.maya-topbar-on #mayaacc-alter-group-form,
+body.maya-topbar-on #mcf-ov{top:var(--maya-topbar-h,48px)!important}
+body.maya-topbar-on #mayaacc-voucher-type-config{top:var(--maya-topbar-h,48px)!important;height:calc(100% - var(--maya-topbar-h,48px))!important}
+@media print{#maya-topbar{display:none!important}}
+/* --- per-screen Print buttons (fix 3) --- */
+.maya-print-btn{border:1px solid #b9c4d6;border-radius:8px;background:#fff;padding:7px 12px;font:700 12px system-ui,"Segoe UI",Arial,sans-serif;color:#22304d;cursor:pointer;white-space:nowrap}
+.maya-print-btn:hover{border-color:#2563eb;box-shadow:0 2px 8px rgba(37,99,235,.15)}
+#mrp-top .maya-print-btn,#mve-top .maya-print-btn{height:30px;padding:0 12px}
+#maya-topbar-print{background:#2563eb!important;color:#fff!important;border:1px solid #2563eb!important;border-radius:6px!important}
+#maya-topbar-print:hover{background:#1d4ed8!important}
+</style>
+<script id="mayaacc-print-fix2">
+(function(){
+'use strict';
+/* ---------------- helpers ---------------- */
+var $=function(id){return document.getElementById(id);};
+var B=function(){return window.MayaBooks;};
+var I=window.__mayaInv;
+var PRINT=window.__mayaPrint;
+var cid=function(){try{return B().cid();}catch(e){return '';}};
+var toastDiv=null;
+var toast=function(m){
+  try{if(window.mayaToast){window.mayaToast(m);return;}}catch(e){}
+  try{
+    if(!toastDiv){
+      toastDiv=document.createElement('div');
+      toastDiv.id='maya-fix2-toast';
+      toastDiv.style.cssText='position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:2147483640;background:#1d2d42;color:#fff;padding:10px 16px;border-radius:9px;font:600 13px system-ui,Segoe UI,Arial,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.3);display:none;max-width:88vw;text-align:center';
+      document.body.appendChild(toastDiv);
+    }
+    toastDiv.textContent=m;toastDiv.style.display='block';
+    clearTimeout(toast._t);toast._t=setTimeout(function(){if(toastDiv)toastDiv.style.display='none';},2600);
+  }catch(e2){}
+};
+/* an element is "open" the same way the app's own busy() checks it */
+var isOpenEl=function(el){
+  if(!el)return false;
+  if(el.classList.contains('on')||el.classList.contains('is-open'))return true;
+  if(el.getAttribute('aria-hidden')==='true')return false;
+  try{return getComputedStyle(el).display!=='none';}catch(e){return false;}
+};
+var isPrintDialogOpen=function(){return isOpenEl($('maya-print-dialog'));};
+var openBillDialog=function(vid){
+  if(!vid)return false;
+  if(PRINT&&typeof PRINT.open==='function'){try{PRINT.open(vid);return true;}catch(e){}}
+  if(typeof window.mayaPrintDialog==='function'){try{window.mayaPrintDialog(vid);return true;}catch(e){}}
+  toast('Print is not available right now.');
+  return false;
+};
+
+/* ============================================================
+FIX 1 — Invoice Designer template choice auto-saves + migration
+============================================================ */
+var invKey=function(){return 'mayaacc_invdesign_'+cid();};
+var migrateInvCfg=function(){
+  if(!I||typeof I.loadCfg!=='function'||typeof I.saveCfg!=='function')return;
+  try{
+    var raw=localStorage.getItem(invKey());if(!raw)return;
+    var c=JSON.parse(raw);
+    if(c&&typeof c.tpl==='number'&&c.tpl>=1&&c.tpl<=8&&c.tv!==2){
+      c.tv=2;localStorage.setItem(invKey(),JSON.stringify(c));
+    }
+  }catch(e){}
+};
+var designerSave=function(id){
+  if(!I||typeof I.loadCfg!=='function'||typeof I.saveCfg!=='function')return false;
+  try{var g=I.loadCfg();g.tpl=id;g.tv=2;I.saveCfg(g);return true;}catch(e){return false;}
+};
+var tplName=function(id){
+  try{
+    var arr=I&&I.TPL;
+    if(arr){for(var i=0;i<arr.length;i++){if(arr[i]&&arr[i].id===id)return arr[i].name||('Template '+id);}}
+  }catch(e){}
+  return 'Template '+id;
+};
+/* CAPTURE-phase click on a Designer template card: it must run BEFORE the
+   Designer's own panel handler, because that handler calls panel() which
+   re-renders #invdPanel and detaches the clicked card — after that,
+   closest('#mayaInvDesigner [data-tpl]') no longer matches (the ancestor
+   is gone). In capture phase the card is still in the DOM. The Designer
+   then sets its in-memory tpl to the same value, so both agree. */
+document.addEventListener('click',function(e){
+  try{
+    if(!I)return;
+    var t=e.target;if(!t||typeof t.closest!=='function')return;
+    var card=t.closest('#mayaInvDesigner [data-tpl]');
+    if(!card)return;
+    var id=parseInt(card.getAttribute('data-tpl'),10);
+    if(!(id>=1&&id<=8))return;
+    if(designerSave(id))toast('Template saved: '+tplName(id)+' — bills will print with this design.');
+  }catch(err){}
+},true);
+/* Also wrap loadCfg itself: any reader (print system, dialog, preview)
+   that loads the config triggers the migration first, so an old-format
+   config with a saved tpl is honoured even if it was written after the
+   app started. migrateInvCfg reads localStorage directly, so there is
+   no recursion here. And when no template choice was ever saved, the
+   returned tpl falls back to the GLOBAL DEFAULT (Classic Corporate,
+   id 1) instead of the hardcoded 1, so one default rules everywhere. */
+if(I&&typeof I.loadCfg==='function'&&!I.loadCfg.__mayaPrintFix2){
+  var origLoadCfg=I.loadCfg;
+  var wrappedLoadCfg=function(){
+    migrateInvCfg();
+    var out=origLoadCfg.apply(this,arguments);
+    try{
+      var raw=localStorage.getItem(invKey());
+      var c=raw?JSON.parse(raw):null;
+      var hasTpl=c&&typeof c.tpl==='number'&&c.tpl>=1&&c.tpl<=8;
+      if(!hasTpl){
+        var d=1;
+        try{ if(window.__mayaPrint&&typeof window.__mayaPrint.tplDefault==='function') d=window.__mayaPrint.tplDefault(); }catch(e2){}
+        out.tpl=d;
+      }
+    }catch(e){}
+    return out;
+  };
+  wrappedLoadCfg.__mayaPrintFix2=true;
+  I.loadCfg=wrappedLoadCfg;
+}
+
+/* ============================================================
+FIX 2 — the voucher selected in a register / list
+============================================================ */
+var selectedRegisterVoucherId=function(){
+  /* fast path: the reports engine's own selection state */
+  try{
+    var ctx=window.MayaReportCtx;
+    if(ctx&&ctx.st&&ctx.st.sel&&ctx.st.sel.length){
+      var it=ctx.st.sel[ctx.st.idx];
+      if(it&&it.kind==='voucher'&&it.id)return it.id;
+    }
+  }catch(e){}
+  /* DOM fallback: selected row of the register table */
+  try{
+    var tr=document.querySelector('#mrp-body tr.sel');
+    if(!tr)return null;
+    var tds=tr.querySelectorAll('td');if(!tds.length)return null;
+    var title=(($('mrp-title')||{}).textContent)||'';
+    var head=document.querySelector('#mrp-body thead tr');
+    var hasType=head&&/Vch Type/.test(head.textContent);
+    var type=null,number=null;
+    if(hasType&&tds.length>=4){type=tds[2].textContent.trim();number=tds[3].textContent.trim();}
+    else{
+      var m=title.match(/^(.+?) Register/);
+      if(!m)return null;
+      type=m[1].trim();number=tds.length>=3?tds[2].textContent.trim():'';
+    }
+    if(!type||!number)return null;
+    var vs=[];try{vs=B().vouchers(cid())||[];}catch(e2){}
+    for(var i=0;i<vs.length;i++){
+      var v=vs[i];
+      if(v&&!v.cancelled&&v.type===type&&String(v.number)===number)return v.id;
+    }
+  }catch(e){}
+  return null;
+};
+var prnListSelectedVoucherId=function(){
+  try{
+    var ov=$('miox-ov');
+    if(!ov||!ov.classList.contains('on'))return null;
+    var h=ov.querySelector('.mio-top h3');
+    if(!h||h.textContent.trim()!=='Print Vouchers')return null;
+    var tr=ov.querySelector('tr.sel');if(!tr)return null;
+    var tds=tr.querySelectorAll('td');if(tds.length<4)return null;
+    var type=tds[1].textContent.trim(),number=tds[2].textContent.trim();
+    var vs=[];try{vs=B().vouchers(cid())||[];}catch(e){}
+    for(var i=0;i<vs.length;i++){
+      var v=vs[i];
+      if(v&&!v.cancelled&&v.type===type&&String(v.number)===number)return v.id;
+    }
+  }catch(e){}
+  return null;
+};
+
+/* ============================================================
+PRINT ROUTER — what "Print" means on the current screen
+============================================================ */
+var printElement=function(el,title){
+  try{
+    if(window.MayaPrint&&window.MayaPrint.doc&&window.MayaPrint.clean){
+      var cl=window.MayaPrint.clean(el);
+      window.MayaPrint.doc(title||'Print','',cl.innerHTML);
+      return true;
+    }
+  }catch(e){}
+  try{window.print();return true;}catch(e2){return false;}
+};
+var visibleSection=function(){
+  var ids=['dashboard','companySelect','companySetup','companyView'];
+  for(var i=0;i<ids.length;i++){
+    var el=$(ids[i]);if(!el)continue;
+    try{if(getComputedStyle(el).display!=='none')return el;}catch(e){}
+  }
+  return null;
+};
+var TOP_OVERLAYS=['mayaacc-reports-overlay','mayaacc-voucher-entry-overlay','mayaInvDesigner','mdb-ov','mdt-ov','mxc-ov','mhp-ov','mpy-ov','mbm-ov','miox-ov','mayaacc-group-overlay','mayaacc-ledger-overlay','mayaacc-stock-overlay','mayaacc-unit-overlay','mayaacc-godown-overlay','mayaacc-cost-centre-overlay','mayaacc-voucher-type-overlay','mayaacc-voucher-type-config','mayaacc-alter-other','mayaacc-sound-settings','mayaacc-backup','mayaacc-tax-gst-overlay','mayaacc-alter-group-form','mcf-ov','msj-ov'];
+var topmostOverlay=function(){
+  var best=null,bestZ=-1;
+  for(var i=0;i<TOP_OVERLAYS.length;i++){
+    var el=$(TOP_OVERLAYS[i]);if(!el||!isOpenEl(el))continue;
+    var z=0;try{z=parseInt((getComputedStyle(el).zIndex||'0'),10)||0;}catch(e){}
+    if(z>=bestZ){bestZ=z;best=el;}
+  }
+  return best;
+};
+function mayaPrintCurrent(){
+  try{
+    if(isPrintDialogOpen())return;
+    /* 1. Invoice Designer: its own Print Preview (uses the live template) */
+    var invd=$('mayaInvDesigner');
+    if(invd&&isOpenEl(invd)){
+      var pp=$('invdPrint');if(pp){pp.click();return;}
+    }
+    /* 2. Stock Journal overlay sits inside the voucher entry overlay */
+    var msj=$('msj-ov');
+    if(msj&&isOpenEl(msj)){printElement(msj,'Stock Journal');return;}
+    /* 3. Voucher entry: print dialog for the voucher being entered */
+    var mve=$('mayaacc-voucher-entry-overlay');
+    if(mve&&isOpenEl(mve)&&window.__mayaEntryVid){openBillDialog(window.__mayaEntryVid);return;}
+    /* 4. Reports overlay: a selected/open bill first, else the report */
+    var ro=$('mayaacc-reports-overlay');
+    if(ro&&isOpenEl(ro)){
+      var dt=$('mrp-detail');
+      if(dt&&!dt.hidden&&window.__mayaDetailVid){openBillDialog(window.__mayaDetailVid);return;}
+      var vid=selectedRegisterVoucherId();
+      if(vid){openBillDialog(vid);return;}
+      if(window.MayaPrint&&window.MayaPrint.report){window.MayaPrint.report();return;}
+    }
+    /* 5. Print Vouchers list: selected row's bill */
+    var pv=prnListSelectedVoucherId();
+    if(pv){openBillDialog(pv);return;}
+    /* 6. Business dashboard overlay: its own dashboard print */
+    var mdb=$('mdb-ov');
+    if(mdb&&isOpenEl(mdb)&&window.MayaPrint&&window.MayaPrint.dashboard){window.MayaPrint.dashboard();return;}
+    /* 7. Payroll: its own Print register button */
+    var mpy=$('mpy-ov');
+    if(mpy&&isOpenEl(mpy)){
+      var reg=mpy.querySelector('[data-act="reg"]');
+      if(reg&&!reg.disabled){reg.click();return;}
+    }
+    /* 8. Any other open overlay: clean print of that screen */
+    var ov=topmostOverlay();
+    if(ov){printElement(ov,((ov.querySelector('h2')||ov.querySelector('h3')||{}).textContent||'Print').trim()||'Print');return;}
+    /* 9. A plain workspace section (dashboard / company select / setup / view) */
+    var sec=visibleSection();
+    if(sec){printElement(sec,((sec.querySelector('h2')||{}).textContent||'MAYAACC').trim()||'MAYAACC');return;}
+    toast('Nothing to print on this screen.');
+  }catch(e){toast('Could not print: '+(e.message||e));}
+}
+window.mayaPrintCurrent=mayaPrintCurrent;
+
+/* ---------- Ctrl+P / F3 interception (outermost __mayaModalKey wrapper) ---------- */
+var SCREEN_OVS=['mayaacc-reports-overlay','mayaacc-voucher-entry-overlay','mayaInvDesigner','mdb-ov','mdt-ov','mxc-ov','mhp-ov','mpy-ov','mbm-ov','miox-ov'];
+var anyScreenOpen=function(){
+  for(var i=0;i<SCREEN_OVS.length;i++){var el=$(SCREEN_OVS[i]);if(el&&isOpenEl(el))return true;}
+  return false;
+};
+/* modals that block the top-bar nav buttons (the app's BUSY list minus
+   the full-screen screens, plus the features form + security/setup/unlock) */
+var BLOCKING=['createMasterDialog','mayaacc-group-overlay','mayaacc-group-config','mgConfirm','mgTree','mayaacc-ledger-overlay','mayaacc-ledger-config','mlgConfirm','mlgTree','mayaacc-stock-overlay','mayaacc-stock-config','msiConfirm','msiTree','mayaacc-hsn-finder','mayaacc-unit-overlay','mayaacc-unit-config','muConfirm','mayaacc-godown-overlay','mayaacc-godown-config','mgdConfirm','mgdTree','mayaacc-cost-centre-overlay','mayaacc-cost-centre-config','mccConfirm','mccTree','mayaacc-voucher-type-overlay','mayaacc-voucher-type-config','mvtConfirm','mayaacc-alter-other','mayaacc-sound-settings','mayaacc-backup','mayaacc-tax-gst-overlay','mayaacc-voucher-entry-config','mveOtherDialog','mveMasterPicker','alterMasterDialog','alterGroupPickerDialog','mayaacc-alter-group-form','alterLedgerPickerDialog','mayaacc-alter-ledger-form','mcf-ov','maya-security-dialog','maya-setup-screen','maya-unlock-screen'];
+var blockingModalOpen=function(){
+  if(isPrintDialogOpen())return true;
+  for(var i=0;i<BLOCKING.length;i++){var el=$(BLOCKING[i]);if(el&&isOpenEl(el))return true;}
+  return false;
+};
+if(window.__mayaModalKey&&!window.__mayaModalKey.__mayaPrintFix2){
+  var prevModal=window.__mayaModalKey;
+  var wrappedModal=function(e){
+    try{
+      var k=e.key;
+      /* F3: open the Company menu from any workspace screen (the top
+         bar is always visible now), unless a modal blocks it */
+      if(k==='F3'&&!e.ctrlKey&&!e.altKey&&!e.metaKey){
+        if(!$('mcm')&&anyScreenOpen()&&!blockingModalOpen()&&typeof window.mayaCompanyMenu==='function'){
+          window.mayaCompanyMenu();return 2;
+        }
+      }
+      /* Ctrl+P: print the current page/screen intelligently */
+      if(e.ctrlKey&&!e.altKey&&!e.shiftKey&&(k==='p'||k==='P')){
+        if(!isPrintDialogOpen()){
+          mayaPrintCurrent();
+          if(e.preventDefault)e.preventDefault();
+          if(e.stopImmediatePropagation)e.stopImmediatePropagation();
+          return 2;
+        }
+      }
+    }catch(err){}
+    return prevModal(e);
+  };
+  wrappedModal.__mayaPrintFix2=true;
+  /* keep the print system's marker visible on the outermost wrapper,
+     so anything checking __mayaModalKey.__mayaPrintDlg still sees it */
+  if(prevModal&&prevModal.__mayaPrintDlg)wrappedModal.__mayaPrintDlg=true;
+  window.__mayaModalKey=wrappedModal;
+}
+
+/* ============================================================
+FIX 3 — a Print button in each screen's own header
+============================================================ */
+var addBtn=function(parent,label,title){
+  if(!parent)return null;
+  if(parent.querySelector('[data-maya-print]'))return null;
+  var b=document.createElement('button');
+  b.type='button';b.setAttribute('data-maya-print','1');
+  b.className='maya-print-btn';
+  b.textContent=label||'🖨️ Print';
+  b.title=title||'Print this screen (Ctrl+P)';
+  b.addEventListener('click',function(){mayaPrintCurrent();});
+  parent.appendChild(b);
+  return b;
+};
+var OVERLAY_PRINT_HEADS={
+  'mayaacc-group-overlay':'.mg-title',
+  'mayaacc-ledger-overlay':'.mlg-title',
+  'mayaacc-stock-overlay':'.msi-title',
+  'mayaacc-unit-overlay':'.mug-title',
+  'mayaacc-godown-overlay':'.mugd-title',
+  'mayaacc-cost-centre-overlay':'.mcc-title',
+  'mayaacc-voucher-type-overlay':'.mvt-title',
+  'mayaacc-tax-gst-overlay':'.mtg-head',
+  'mayaacc-backup':'h2',
+  'mayaacc-sound-settings':'h2',
+  'mayaacc-alter-other':'h2',
+  'mpy-ov':'.mpy-h',
+  'mbm-ov':'.mbm-top',
+  'mdt-ov':'.mio-top, h3',
+  'mxc-ov':'.mio-top, h3',
+  'mhp-ov':'.mio-top, h3'
+};
+var ensureScreenPrintButtons=function(){
+  try{
+    var tools=$('mrp-top')&&$('mrp-top').querySelector('.mrp-tools');
+    if(tools)addBtn(tools,'🖨️ Print (Ctrl+P)','Print the selected bill, or this report (Ctrl+P)');
+    var cs=$('companySelect')&&$('companySelect').querySelector('.company-actions');
+    if(cs)addBtn(cs,'🖨️ Print','Print this screen (Ctrl+P)');
+    var cv=$('companyView')&&$('companyView').querySelector('.company-view-actions');
+    if(cv)addBtn(cv,'🖨️ Print','Print this screen (Ctrl+P)');
+    var saveBtn=$('companySetup')&&$('companySetup').querySelector('.save-btn');
+    if(saveBtn&&saveBtn.parentNode)addBtn(saveBtn.parentNode,'🖨️ Print','Print this screen (Ctrl+P)');
+    var mve=$('mve-top');
+    if(mve)addBtn(mve,'🖨️ Print','Print this voucher (Ctrl+P)');
+    Object.keys(OVERLAY_PRINT_HEADS).forEach(function(id){
+      var ov=$(id);if(!ov)return;
+      var head=ov.querySelector(OVERLAY_PRINT_HEADS[id]);
+      if(head)addBtn(head,'🖨️ Print','Print this screen (Ctrl+P)');
+    });
+  }catch(e){}
+};
+
+/* ============================================================
+FIX 4 — move .gateway-top into a persistent fixed top bar
+============================================================ */
+var topbarShouldShow=function(){
+  if(!document.body.classList.contains('workspace-mode'))return false;
+  if(isOpenEl($('maya-setup-screen')))return false;
+  if(isOpenEl($('maya-unlock-screen')))return false;
+  return true;
+};
+var updateTopbar=function(){
+  var bar=$('maya-topbar');if(!bar)return;
+  var on=topbarShouldShow();
+  if(on){
+    if(bar.style.display!=='block')bar.style.display='block';
+    var h=bar.offsetHeight||48;
+    document.documentElement.style.setProperty('--maya-topbar-h',h+'px');
+  }else{
+    bar.style.display='none';
+  }
+  document.body.classList.toggle('maya-topbar-on',on);
+};
+var mountTopbar=function(){
+  var gt=document.querySelector('.gateway-top');
+  if(!gt)return;
+  var bar=$('maya-topbar');
+  if(!bar){
+    bar=document.createElement('div');
+    bar.id='maya-topbar';
+    document.body.appendChild(bar);
+    bar.appendChild(gt);
+    var nav=gt.querySelector('.gateway-nav');
+    if(nav&&!$('maya-topbar-print')){
+      var b=document.createElement('button');
+      b.id='maya-topbar-print';b.type='button';
+      b.setAttribute('data-maya-print','1');
+      b.title='Print the current page (Ctrl+P)';
+      b.textContent='🖨️ Print Page (Ctrl+P)';
+      b.addEventListener('click',function(){mayaPrintCurrent();});
+      nav.appendChild(b);
+    }
+    /* gate the nav buttons while a blocking modal is open; the
+       Print Page button is never gated */
+    bar.addEventListener('click',function(e){
+      if(e.target&&e.target.closest&&e.target.closest('#maya-topbar-print'))return;
+      if(blockingModalOpen()){
+        e.preventDefault();e.stopPropagation();
+        toast('Close this dialog first.');
+      }
+    },true);
+  }
+  updateTopbar();
+};
+
+/* ---------------- arm ---------------- */
+var wrapNav=function(name,after){
+  var fn=window[name];
+  if(typeof fn!=='function'||fn.__mayaFix2)return;
+  var w=function(){
+    var r=fn.apply(this,arguments);
+    if(after){try{after();}catch(e){}}
+    setTimeout(updateTopbar,30);
+    return r;
+  };
+  w.__mayaFix2=true;window[name]=w;
+};
+try{
+  migrateInvCfg();
+  mountTopbar();
+  ensureScreenPrintButtons();
+  wrapNav('mayaOpenInvoiceDesigner',migrateInvCfg);
+  wrapNav('showCompanyWorkspace',migrateInvCfg);
+  wrapNav('showCompanySelect');
+  wrapNav('showDashboard');
+  wrapNav('logoutMaya');
+  wrapNav('showHome');
+  var _sched=false;
+  var _obs=new MutationObserver(function(){
+    if(_sched)return;_sched=true;
+    setTimeout(function(){_sched=false;updateTopbar();ensureScreenPrintButtons();},0);
+  });
+  _obs.observe(document.body,{subtree:true,attributes:true,attributeFilter:['class','style'],childList:true});
+  var _rt=null;
+  window.addEventListener('resize',function(){
+    clearTimeout(_rt);_rt=setTimeout(updateTopbar,120);
+  });
+  updateTopbar();
+}catch(err){}
+})();
+</script>
+
+
+
+
+
+
+<script id="mayaacc-print-reports">
+/* MAYAACC Report Printing — Tally-style print dialog for ALL reports.
+   - Every report page (Ledger details, Balance Sheet, P&L, Trial
+     Balance, Day Book, Cash/Bank Book, Chart of Accounts, all
+     registers, Bills Receivable/Payable, Ageing, Statistics, Group /
+     Stock summaries, Stock Transfers, BOM, Stock Query, Ratio
+     Analysis, Cash/Funds Flow, GST reports, Business Dashboard)
+     now opens the SAME print dialog as vouchers (Print / Preview /
+     Configuration / Save PDF), instead of printing straight away.
+   - LUXURY formats: the report is re-rendered as a polished
+     document — company letterhead, report title + period, ruled
+     tables with right-aligned figures, emphasised subtotals and
+     grand totals, signature block and "End of report" footer —
+     NOT the raw on-screen table dumped to print. The existing
+     MayaPrint.clean() normalises the live report DOM first
+     (numeric columns right-aligned, total rows marked), and the
+     report skin restyles it per template.
+   - PER-PAGE TEMPLATES: the dialog sidebar shows templates for
+     THAT report's family — Ledger, Statement, Register, GST and
+     Stock each have their own 4 named templates (Classic / Modern /
+     Premium Gold / Minimal), driven by the 8 voucher design engines
+     (Classic Corporate, Modern Sidebar, Premium Charcoal & Gold,
+     Minimal Swiss). The choice persists per family
+     (mayaacc_report_tpl_<cid>) and falls back to the Classic style
+     (id 1, same family as the global default Classic Corporate)
+     when nothing was chosen for that family.
+   - CONFIGURATION applies to reports too: the same per-company
+     print config (paper, orientation, margins, copies, header /
+     footer toggles, colour) actually changes the report output
+     via @page CSS. Save PDF for reports uses the chosen template
+     + config (canvas technique, same as the voucher PDF writer).
+   - Excel / CSV export is NOT touched — it still uses the shared
+     export menu exactly as before.
+   Wiring: MayaPrint.report() and MayaPrint.dashboard() are wrapped
+   (their originals are kept as __mayaOrig and used as fallback).
+   The fix2 print router (mayaPrintCurrent) already calls
+   window.MayaPrint.report() when no bill is selected, so Ctrl+P,
+   the top-bar Print button and the per-screen Print buttons all
+   reach this dialog for reports automatically. */
+(function(){
+'use strict';
+/* ---------- helpers (own copies — the originals live in IIFEs) ---------- */
+var $=function(id){ return document.getElementById(id); };
+var B=function(){ return window.MayaBooks; };
+var I=window.__mayaInv;
+var PRINT=window.__mayaPrint;
+if(!I||!B()||!PRINT||!window.MayaPrint) return;
+var esc=I.esc, fmt=I.fmt, dmy=I.dmy, num=I.num;
+var cid=function(){ try{ return B().cid(); }catch(e){ return ''; } };
+var companyOf=function(){ try{ return (B().companyOf&&B().companyOf(B().cid()))||{}; }catch(e){ return {}; } };
+var toast=function(m){ try{ if(window.mayaToast) window.mayaToast(m); else alert(m); }catch(e){} };
+var isOpenEl=function(el){
+  if(!el) return false;
+  if(el.classList.contains('on')||el.classList.contains('is-open')) return true;
+  if(el.getAttribute('aria-hidden')==='true') return false;
+  try{ return getComputedStyle(el).display!=='none'; }catch(e){ return false; }
+};
+function nowStr(){ var d=new Date(),p=function(n){ return String(n).padStart(2,'0'); }; return p(d.getDate())+'-'+p(d.getMonth()+1)+'-'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes()); }
+function safeName(s){ return String(s==null?'':s).replace(/[^\w.\-]+/g,'_').replace(/^_+|_+$/g,'')||'report'; }
+function tint(h,p){ h=String(h||'#000000').replace('#',''); if(h.length===3) h=h.split('').map(function(c){ return c+c; }).join('');
+  var n=parseInt(h,16)||0, r=[(n>>16)&255,(n>>8)&255,n&255];
+  return '#'+r.map(function(v){ return Math.max(0,Math.min(255,Math.round(v+(255-v)*(1-p)))).toString(16).padStart(2,'0'); }).join(''); }
+function readLS(k,d){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+function writeLS(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } }
+
+/* ---------- report families + per-page template sets ---------- */
+var FAMILY_VIEWS={
+  ledger:['ledger','pickledger','cashbook','bills','groupled','groupvch','gstledgers'],
+  statement:['trial','pl','bs','coa','cashflow','fundsflow','ratios','stats','more','pie','pnw','msme1','msmeparties'],
+  register:['daybook','register','salesreg','purreg','regmonth','monthly'],
+  gst:['gstr1','gstr1det','gstr3b','gstr3bdet','gstannual','gsttrack','eway','einv','gstr1rec','gstr2a','gstr2b','challan','ims','gstutil','gstrate'],
+  stock:['stock','stockitem','stocktransfer','bomlist','stockquery','pickitem','pickquery']
+};
+var FAMILY_LABEL={ledger:'Ledger',statement:'Statement',register:'Register',gst:'GST',stock:'Stock'};
+var FAMILY_NAMES={
+  ledger:['Classic Ledger','Modern Ledger','Premium Gold Ledger','Minimal Ledger'],
+  statement:['Classic Statement','Modern Statement','Premium Gold Statement','Minimal Statement'],
+  register:['Classic Register','Modern Register','Premium Gold Register','Minimal Register'],
+  gst:['Classic GST','Modern GST','Premium Gold GST','Minimal GST'],
+  stock:['Classic Stock','Modern Stock','Premium Gold Stock','Minimal Stock']
+};
+var FAMILY_NOTES={
+  ledger:['Navy header, clean ruled ledger','Teal side-accent ledger','Dark header, gold lines','White space, thin lines'],
+  statement:['Navy header, clean statement','Teal side-accent statement','Dark header, gold lines','White space, thin lines'],
+  register:['Navy header, clean register','Teal side-accent register','Dark header, gold lines','White space, thin lines'],
+  gst:['Navy header, clean GST return','Teal side-accent GST return','Dark header, gold lines','White space, thin lines'],
+  stock:['Navy header, clean stock report','Teal side-accent stock report','Dark header, gold lines','White space, thin lines']
+};
+/* template id (1-4 within a family) -> voucher design id that drives it */
+var FAMILY_BASE=[1,2,3,5];
+function familyFor(view,title){
+  view=String(view||'');
+  var f=null;
+  Object.keys(FAMILY_VIEWS).forEach(function(k){ if(FAMILY_VIEWS[k].indexOf(view)>=0) f=k; });
+  if(f) return f;
+  var t=String(title||'');
+  if(/trial balance/i.test(t)) return 'statement';
+  if(/profit|balance sheet|cash flow|funds flow|ratio|chart of accounts|statistics/i.test(t)) return 'statement';
+  if(/ledger|cash\/bank|group|bills (receivable|payable)/i.test(t)) return 'ledger';
+  if(/register|day book/i.test(t)) return 'register';
+  if(/gstr|gst|eway|e-invoice|challan|ims/i.test(t)) return 'gst';
+  if(/stock|bom|godown/i.test(t)) return 'stock';
+  return 'statement';
+}
+function familyLabel(family){ return FAMILY_LABEL[family]||'Report'; }
+function templatesFor(family){
+  family=FAMILY_NAMES[family]?family:'statement';
+  return FAMILY_NAMES[family].map(function(n,i){
+    return {id:i+1, name:n, note:FAMILY_NOTES[family][i], base:FAMILY_BASE[i]};
+  });
+}
+function tplAccent(t){
+  var d=(I.TPL||[]).find(function(x){ return x.id===t.base; });
+  return d?d.d.accent:'#1b2f4b';
+}
+/* ---------- per-family template choice (persisted per company) ---------- */
+function repTplKey(){ return 'mayaacc_report_tpl_'+cid(); }
+function loadRepTplMap(){ return readLS(repTplKey(),null)||{}; }
+function tplForReport(family){
+  family=FAMILY_NAMES[family]?family:'statement';
+  var m=loadRepTplMap(), n=parseInt(m[family],10);
+  return (n>=1&&n<=4)?n:1;
+}
+function setTplForReport(family,id){
+  family=FAMILY_NAMES[family]?family:'statement';
+  id=Math.max(1,Math.min(4,parseInt(id,10)||1));
+  var m=loadRepTplMap(); m[family]=id; writeLS(repTplKey(),m);
+}
+function tplNameReport(family,id){
+  var list=templatesFor(family);
+  var t=list.find(function(x){ return x.id===id; })||list[0];
+  return t.name;
+}
+
+/* ---------- collect the current report / dashboard ---------- */
+function collectReport(){
+  var ov=$('mayaacc-reports-overlay');
+  if(!ov||!ov.classList.contains('is-open')) return null;
+  var body=$('mrp-body'); if(!body) return null;
+  var title=(($('mrp-title')||{}).textContent||'Report').trim();
+  var crumb=(($('mrp-crumb')||{}).textContent||'').trim();
+  var cur=null;
+  try{ var st=window.MayaReportCtx&&window.MayaReportCtx.st; if(st&&st.stack&&st.stack.length) cur=st.stack[st.stack.length-1]; }catch(e){}
+  var view=cur?cur.view:'';
+  var family=familyFor(view,title);
+  var el=null;
+  try{ el=window.MayaPrint.clean(body); }catch(e){ return null; }
+  var html=el?el.innerHTML:'';
+  var rows=0; try{ rows=(html.match(/<tr/g)||[]).length; }catch(e){}
+  return {kind:view||title, family:family, title:title, crumb:crumb, bodyHtml:html, rows:rows, dashboard:false};
+}
+function collectDashboard(){
+  var ov=$('mdb-ov'); if(!ov) return null;
+  var sub=(($('mdbSub')||{}).textContent||'').trim();
+  var body=$('mdbBody'); if(!body) return null;
+  var css='';
+  try{
+    css=Array.prototype.map.call(document.querySelectorAll('style#mdb-css,style#ml-css,style#mayaacc-loaders-css'),function(s){ return s.textContent; }).join('\n').replace('body>*:not(#mdb-ov){display:none!important}','');
+  }catch(e){}
+  var clone=body.cloneNode(true);
+  try{ clone.querySelectorAll('button,input,select,.ml-skel,.mdb-foot').forEach(function(n){ n.remove(); }); }catch(e){}
+  var extra='.d-s2{grid-column:span 2!important}.d-s3{grid-column:span 3!important}.d-s4{grid-column:span 4!important}.d-s5{grid-column:span 5!important}.d-s6{grid-column:span 6!important}.d-s7{grid-column:span 7!important}.d-s8{grid-column:span 8!important}.d-s9{grid-column:span 9!important}.d-s10{grid-column:span 10!important}.d-s11{grid-column:span 11!important}.d-s12{grid-column:span 12!important}.d-rwrap{grid-template-columns:170px 1fr!important}.d-c,.d-k{box-shadow:none!important;animation:none!important;break-inside:avoid;page-break-inside:avoid}.d-bar,.d-ln,.d-ga,.d-ht i{animation:none!important}.mdb-k,.mdb-g{break-inside:auto}';
+  return {kind:'dashboard', family:'statement', title:'Business Dashboard', crumb:sub, bodyHtml:'<div style="zoom:.68">'+clone.outerHTML+'</div>', rows:0, dashboard:true, dashCss:css+'\n'+extra};
+}
+
+/* ---------- luxury report skin (driven by the template's design) ---------- */
+function reportSkin(d,cfg){
+  var a=cfg.colour?d.accent:'#444444', tx=d.text, bd=cfg.colour?d.border:'#999999',
+      dk=d.dark||'#1f2d3d', a2=cfg.colour?(d.accent2||'#ff6b3d'):'#777777',
+      hf=d.hfont||d.font, L=d.layout, fs=d.fs||10.5;
+  var lt=tint(a,.08), lt2=tint(a,.16), mu=tint(tx,.62), soft=tint(bd,.5);
+  var c='body{font-family:'+d.font+';font-size:'+fs+'pt;color:'+tx+'}'
+   +'.rpg{width:100%;box-sizing:border-box;page-break-after:always;background:#fff}.rpg:last-child{page-break-after:auto}'
+   +'.lh h1{color:'+a+';font-family:'+hf+'}'
+   +'.ttl h2{color:'+a+';font-family:'+hf+'}'
+   +'.ttl .pd{color:'+mu+'}'
+   +'table th{background:'+a+'!important;color:#fff!important;border-color:'+a+'!important}'
+   +'tr.tot td,tr.tot th{background:'+lt+'!important;border-top:1.5px solid '+a+'!important;border-bottom:1.5px solid '+a+'!important}'
+   +'tr.sub td{background:'+lt2+'!important}'
+   +'.sec{color:'+a+'}'
+   +'.card{border-left-color:'+a+'}'
+   +'.mrp-bar{background:'+a+'}'
+   +'.mrp-empty{padding:12px;color:#4b5563}'
+   +'.rbody{padding-top:2px}';
+  var skins={
+   L1:'.lh{background:'+a+';color:#fff;padding:14px 18px;border-bottom:0;border-radius:6px 6px 0 0}.lh h1{color:#fff}.lh .ad{color:rgba(255,255,255,.85)}.lh .rt{color:rgba(255,255,255,.85)}.lh .rt b{color:#fff}',
+   L2:'.lh{border-left:6px solid '+a+';padding-left:16px}.ttl{border-bottom:2px solid '+a+';padding-bottom:6px}',
+   L3:'.lh{background:'+dk+';color:#f4efe4;padding:16px 20px;border-bottom:4px solid '+a+';border-radius:6px 6px 0 0}.lh h1{color:'+a+'}.lh .ad{color:#f4efe4}.lh .rt{color:#f4efe4}.lh .rt b{color:#f4efe4}.ttl h2{color:'+dk+'}',
+   L4:'.lh{border:1.5px solid '+tx+';padding:10px 14px}.ttl{border-bottom:1px solid '+tx+';padding-bottom:6px}table th{background:#e6e6e6!important;color:'+tx+'!important;border-bottom:1px solid '+tx+'!important}tr.tot td{background:#f2f2f2!important}',
+   L5:'.lh{border-bottom:0;padding:10px 0}.ttl h2{font-weight:300;font-size:22pt;letter-spacing:-.5px}table th{background:transparent!important;color:'+tx+'!important;border-bottom:1.5px solid '+tx+'!important}tr.tot td{border-top:1.5px solid '+tx+'!important}',
+   L6:'.lh{display:grid;grid-template-columns:1.4fr 1fr;padding:0;border-bottom:0;overflow:hidden;border-radius:8px}.lh>div:first-child{background:'+a+';color:#fff;padding:14px 18px}.lh>div:first-child h1{color:#fff}.lh .rt{background:'+lt+';padding:14px 18px;display:flex;flex-direction:column;justify-content:center}',
+   L7:'.lh{flex-direction:column;align-items:center;text-align:center;border-bottom:0}.lh .rt{text-align:center}.ttl{flex-direction:column;align-items:center;text-align:center}.ttl h2{font-family:'+hf+';font-size:20pt}',
+   L8:'.lh{background:#f4f6f9;border-radius:12px;padding:14px 18px;border-bottom:0}.card{border-radius:12px}.ttl h2{color:'+a+'}'
+  };
+  c+=skins[L]||skins.L1;
+  if(!cfg.showHeader) c+='.lh{display:none!important}';
+  if(!cfg.showFooter) c+='.sign,.end{display:none!important}';
+  if(!cfg.colour) c+='body{filter:grayscale(1)!important}';
+  return c;
+}
+/* @page size/orientation/margins from the shared print config, with a
+   running footer (printed-on + page numbers) in the margin area. */
+function reportPageCss(cfg,dims){
+  var m={narrow:8,normal:12,wide:20}[cfg.margin]||12;
+  var paper=cfg.paper+(cfg.orientation==='landscape'?' landscape':' portrait');
+  var bot=Math.max(m,12);
+  var s='@page{size:'+paper+';margin:'+m+'mm '+m+'mm '+bot+'mm '+m+'mm;'
+   +'@bottom-left{content:"Printed on '+nowStr()+' | MAYAACC";font:8pt Arial,sans-serif;color:#6b7280}'
+   +'@bottom-right{content:"Page " counter(page) " of " counter(pages);font:8pt Arial,sans-serif;color:#6b7280}}';
+  s+='.rpg{min-height:'+(dims[1]-2*m)+'mm}';
+  return s;
+}
+/* Build the full printable document for one report. */
+function buildReportDoc(report,opts){
+  opts=opts||{};
+  var cfg=PRINT.loadCfg();
+  var dims=opts.dims||PRINT.dimsFor(cfg);
+  var tplId=tplForReport(report.family);
+  var tpl=templatesFor(report.family).find(function(t){ return t.id===tplId; })||templatesFor(report.family)[0];
+  var design=(I.TPL||[]).find(function(x){ return x.id===tpl.base; });
+  var d=design?design.d:((I.TPL||[])[0]||{d:{}}).d;
+  var co=companyOf();
+  var title=report.title||'Report';
+  var crumb=report.crumb||'';
+  var signWorthy=/balance sheet|profit|trial|ratio/i.test(title);
+  var copies=opts.copies!=null?opts.copies:(opts.forPdf?1:cfg.copies);
+  var head='';
+  try{ head=window.MayaPrint.letterhead(co,title,crumb); }catch(e){ head='<div class="ttl"><h2>'+esc(title)+'</h2><div class="pd">'+esc(crumb)+'</div></div>'; }
+  var foot=(signWorthy?'<div class="sign"><div>Prepared by</div><div>Checked by</div><div>Authorised Signatory</div></div>':'')
+    +'<div class="end">--- End of report ---</div>';
+  var pages='';
+  for(var i=0;i<copies;i++){
+    pages+='<div class="rpg">'+head+'<div class="rbody">'+report.bodyHtml+'</div>'+foot+'</div>';
+  }
+  var extraCss=report.dashCss||'';
+  var html='<!doctype html><html><head><meta charset="utf-8"><title>'+esc(title+' - '+(co.companyName||'MAYAACC'))+'</title><style>'
+    +window.MayaPrint.CSS+reportSkin(d,cfg)+reportPageCss(cfg,dims)+extraCss
+    +'</style></head><body>'+pages+'</body></html>';
+  return {html:html, paper:cfg.paper, dims:dims, tpl:tplId, family:report.family};
+}
+
+/* ---------- PDF for reports (same canvas technique as vouchers) ---------- */
+var wait=function(ms){ return new Promise(function(r){ setTimeout(r,ms); }); };
+async function htmlToCanvasR(html,wPx){
+  var f=document.createElement('iframe');
+  f.style.cssText='position:fixed;left:-99999px;top:0;width:'+wPx+'px;height:100px;border:0';
+  document.body.appendChild(f);
+  try{
+    await new Promise(function(r){ f.onload=r; f.srcdoc=html; });
+    await wait(250);
+    var d=f.contentDocument, h=Math.max(d.documentElement.scrollHeight,d.body.scrollHeight,200);
+    var xml=new XMLSerializer().serializeToString(d.documentElement);
+    var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+wPx+'" height="'+h+'"><foreignObject width="100%" height="100%">'+xml+'</foreignObject></svg>';
+    var img=new Image();
+    await new Promise(function(ok,no){ img.onload=ok; img.onerror=function(){ no(new Error('render')); }; img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg); });
+    var k=2, cv=document.createElement('canvas');
+    cv.width=wPx*k; cv.height=h*k;
+    var g=cv.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height); g.drawImage(img,0,0,cv.width,cv.height);
+    cv.toDataURL('image/jpeg',.5); return cv;
+  }finally{ f.remove(); }
+}
+function pdfFromCanvasR(cv,wmm,hmm){
+  var W=wmm*72/25.4, H=hmm*72/25.4, ph=Math.round(cv.width*hmm/wmm), pages=[];
+  var n=Math.max(1,Math.ceil((cv.height-12)/ph)); if(n>8) n=8;
+  for(var i=0;i<n;i++){
+    var p=document.createElement('canvas'); p.width=cv.width; p.height=ph;
+    var g=p.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,p.width,p.height);
+    g.drawImage(cv,0,i*ph,cv.width,ph,0,0,cv.width,ph);
+    var b=atob(p.toDataURL('image/jpeg',.92).split(',')[1]), u=new Uint8Array(b.length);
+    for(var q=0;q<b.length;q++) u[q]=b.charCodeAt(q);
+    pages.push({u:u,w:p.width,h:p.height});
+  }
+  var enc=new TextEncoder(), parts=[], offs=[], len=0;
+  var push=function(x){ if(typeof x==='string') x=enc.encode(x); parts.push(x); len+=x.length; };
+  var obj=function(id,body){ offs[id]=len; push(id+' 0 obj\n'+body+'\nendobj\n'); };
+  push('%PDF-1.4\n');
+  obj(1,'<< /Type /Catalog /Pages 2 0 R >>');
+  obj(2,'<< /Type /Pages /Kids ['+pages.map(function(x,i){ return (3+i*3)+' 0 R'; }).join(' ')+'] /Count '+pages.length+' >>');
+  pages.forEach(function(pg,i){
+    var a=3+i*3, c=a+1, mm=a+2, s='q '+W.toFixed(2)+' 0 0 '+H.toFixed(2)+' 0 0 cm /Im0 Do Q';
+    obj(a,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+W.toFixed(2)+' '+H.toFixed(2)+'] /Resources << /XObject << /Im0 '+mm+' 0 R >> >> /Contents '+c+' 0 R >>');
+    obj(c,'<< /Length '+s.length+' >>\nstream\n'+s+'\nendstream');
+    offs[mm]=len; push(mm+' 0 obj\n<< /Type /XObject /Subtype /Image /Width '+pg.w+' /Height '+pg.h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+pg.u.length+' >>\nstream\n'); push(pg.u); push('\nendstream\nendobj\n');
+  });
+  var total=3+pages.length*3, xr=len, t='xref\n0 '+total+'\n0000000000 65535 f \n';
+  for(var i=1;i<total;i++) t+=String(offs[i]).padStart(10,'0')+' 00000 n \n';
+  push(t+'trailer\n<< /Size '+total+' /Root 1 0 R >>\nstartxref\n'+xr+'\n%%EOF');
+  return new Blob(parts,{type:'application/pdf'});
+}
+async function saveReportPdf(report){
+  toast('Preparing PDF…');
+  try{
+    var cfg=PRINT.loadCfg();
+    var doc=buildReportDoc(report,{forPdf:true});
+    var dims=doc.dims;
+    var cv=await htmlToCanvasR(doc.html,Math.round(dims[0]*3.7795));
+    var blob=pdfFromCanvasR(cv,dims[0],dims[1]);
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=safeName(report.title)+'_'+safeName(report.crumb||'')+'.pdf';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500);
+    toast('PDF saved.');
+    return true;
+  }catch(e){ toast('The PDF could not be created: '+(e.message||e)); return false; }
+}
+
+/* ---------- routing: reports + dashboard print through the dialog ---------- */
+if(window.MayaPrint&&typeof window.MayaPrint.report==='function'&&!window.MayaPrint.report.__mayaPrintReports){
+  var origReport=window.MayaPrint.report;
+  var wrappedReport=function(){
+    try{
+      var r=collectReport();
+      if(r&&window.__mayaPrint&&typeof window.__mayaPrint.openReport==='function'){
+        window.__mayaPrint.openReport(r);
+        return true;
+      }
+    }catch(e){}
+    return origReport.apply(this,arguments);
+  };
+  wrappedReport.__mayaPrintReports=true;
+  wrappedReport.__mayaOrig=origReport;
+  window.MayaPrint.report=wrappedReport;
+}
+if(window.MayaPrint&&typeof window.MayaPrint.dashboard==='function'&&!window.MayaPrint.dashboard.__mayaPrintReports){
+  var origDash=window.MayaPrint.dashboard;
+  var wrappedDash=function(){
+    try{
+      var r=collectDashboard();
+      if(r&&window.__mayaPrint&&typeof window.__mayaPrint.openReport==='function'){
+        window.__mayaPrint.openReport(r);
+        return true;
+      }
+    }catch(e){}
+    return origDash.apply(this,arguments);
+  };
+  wrappedDash.__mayaPrintReports=true;
+  wrappedDash.__mayaOrig=origDash;
+  window.MayaPrint.dashboard=wrappedDash;
+}
+
+/* ---------- public API ---------- */
+window.__mayaPrintReport={
+  families:Object.keys(FAMILY_NAMES),
+  familyLabel:familyLabel,
+  familyFor:familyFor,
+  templatesFor:templatesFor,
+  tplForReport:tplForReport,
+  setTplForReport:setTplForReport,
+  tplNameReport:tplNameReport,
+  tplAccent:tplAccent,
+  buildReportDoc:buildReportDoc,
+  collectReport:collectReport,
+  collectDashboard:collectDashboard,
+  savePdf:saveReportPdf,
+  reportSkin:reportSkin,
+  reportPageCss:reportPageCss
+};
+})();
+</script>
 </body>
 </html>
