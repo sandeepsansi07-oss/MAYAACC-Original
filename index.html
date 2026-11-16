@@ -18202,6 +18202,7 @@ window.__mayaFix156={
 })();
 
 
+
 /* ================================================================
    TALLY-STYLE LEDGER + DAY BOOK — injected block (2026-11-16)
    Appended inside the last script block so the file keeps 76 script
@@ -18253,6 +18254,19 @@ window.__mayaFix156={
       open in the Day Book still prints that bill.
    Test hooks: window.__mayaTally.{openPicker,hideLedger,
    unhideLedger,readHidden,isHidden,selectedCount,summary}.
+   PART 2 (same file, below): Tally screenshots 1–13 behaviour —
+   picker Create + count + Q/A hints; footer voucher actions
+   Add/Duplicate/Insert/Cancel-Vch/Remove/Restore Line (keys
+   A/2/I/X/R/U); Opening/Current/Closing balances bar; Cash/Bank
+   Summary grouped view; register monthly chart; right-side quick
+   actions rail (Period/Bill-wise/Monthly/Filter/Save View, keys
+   F2/F4/F5/F6/F/L); Day Book Inwards/Outwards Qty columns +
+   "For <date>" title; Trial Balance Group/Ledger-wise/Monthly
+   modes; Bill-wise view; Apply Filter; Save View. Sales voucher
+   entry screen is NOT changed (shot 13 is reference only).
+   Test hooks (Part 2): window.__mayaTally.{balances,rail,chart,
+   daybook,tbMode,setTbMode,saveView,readSaved,filter,cashSummary,
+   openTypePicker,createFromPicker}.
    ================================================================ */
 (function(){
 'use strict';
@@ -18297,7 +18311,36 @@ function unhideLedger(name){if(!name)return;writeHidden(readHidden().filter(func
   +'#mtl-actions{display:none;flex:0 0 auto;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 16px 0;font-family:Segoe UI,Inter,Arial,sans-serif}'
   +'#mtl-actions button{height:32px;padding:0 13px;border-radius:8px;border:1px solid #aebbd0;background:#fff;font-weight:700;font-size:12.5px;color:#35456a;cursor:pointer}#mtl-actions button:hover{background:#eaf0ff;border-color:#5478d4}#mtl-actions button.danger{border-color:#e3a3a3;color:#a02424}#mtl-actions button.danger:hover{background:#fdecec;border-color:#d24c4c}#mtl-actions button:disabled{opacity:.45;cursor:default}'
   +'#mtl-ctx{font-size:12.5px;font-weight:700;color:#1d2b40;margin-right:4px}#mtl-hint{font-size:11.5px;color:#6b7a90;margin-left:auto}'
-  +'#mtl-summary{display:none;flex:0 0 auto;align-items:center;gap:18px;flex-wrap:wrap;margin:8px 16px 0;padding:10px 14px;background:#eef3fd;border:1px solid #c3cee3;border-radius:10px;font-size:13px;color:#1d2b40;font-family:Segoe UI,Inter,Arial,sans-serif}'
+  +'#mtl-summary{display:none;flex:1;min-width:280px;align-items:center;gap:18px;flex-wrap:wrap;margin:0;padding:10px 14px;background:#eef3fd;border:1px solid #c3cee3;border-radius:10px;font-size:13px;color:#1d2b40;font-family:Segoe UI,Inter,Arial,sans-serif}'
+  +'#mtl-foot2{display:flex;gap:12px;flex-wrap:wrap;margin:8px 16px 0}'
+  +'#mtl-balances{display:none;flex:1;min-width:280px;align-items:center;gap:18px;flex-wrap:wrap;margin:0;padding:10px 14px;background:#eef3fd;border:1px solid #c3cee3;border-radius:10px;font-size:13px;color:#1d2b40;font-family:Segoe UI,Inter,Arial,sans-serif}'
+  +'#mtl-balances b{color:#1f3f86}'
+  +'#mtl-rail{display:none;position:absolute;right:0;width:150px;z-index:3;background:#f7f9fd;border-left:1px solid #cfd8e8;padding:10px 8px;overflow:auto;font-family:Segoe UI,Inter,Arial,sans-serif}'
+  +'.mtl-rail-title{font-size:11px;font-weight:800;letter-spacing:.4px;color:#4a5b78;padding:2px 4px 8px}'
+  +'#mtl-qa button{display:block;width:100%;text-align:left;height:32px;margin-bottom:6px;padding:0 10px;border-radius:8px;border:1px solid #aebbd0;background:#fff;font-weight:700;font-size:12px;color:#35456a;cursor:pointer;font-family:inherit}'
+  +'#mtl-qa button:hover{background:#eaf0ff;border-color:#5478d4}'
+  +'.mtl-rail-sec{font-size:11px;font-weight:800;color:#4a5b78;padding:8px 4px 6px}'
+  +'#mtl-filter input,#mtl-filter select{display:block;width:100%;box-sizing:border-box;height:30px;margin-bottom:6px;border:1px solid #aebbd0;border-radius:7px;padding:0 8px;font-size:12px;font-family:inherit}'
+  +'#mtl-filter .mtl-rail-row{display:flex;gap:6px}'
+  +'#mtl-filter .mtl-rail-row button{flex:1;height:30px;border-radius:7px;border:1px solid #aebbd0;background:#fff;font-weight:700;font-size:12px;color:#35456a;cursor:pointer}'
+  +'#mtl-filter .mtl-rail-row button:hover{background:#eaf0ff;border-color:#5478d4}'
+  +'#mtl-f-status{font-size:11px;color:#6b7a90;padding:4px 2px}'
+  +'#mtl-saved [data-sv]{display:flex;align-items:center;gap:6px;width:100%;text-align:left;background:#fff;border:1px solid #c5d0e3;border-radius:7px;padding:6px 8px;margin-bottom:6px;font-size:11.5px;color:#22304d;cursor:pointer}'
+  +'#mtl-saved [data-sv]:hover{background:#eaf0ff}'
+  +'#mtl-saved [data-sv] span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+  +'#mtl-saved [data-svdel]{border:0;background:transparent;color:#a02424;font-weight:800;cursor:pointer;font-size:13px;line-height:1;padding:0 2px}'
+  +'#mtl-chart{padding:12px 16px 16px}'
+  +'.mtl-chart-title{font-size:12px;font-weight:800;color:#35456a;padding:2px 0 8px}'
+  +'.mtl-chart-row{display:flex;align-items:center;gap:10px;padding:3px 0;font-size:12px;color:#35456a}'
+  +'.mtl-chart-lab{width:90px;flex:0 0 auto;color:#4a5b78}'
+  +'.mtl-chart-val{font-weight:700;color:#1d2b40;font-variant-numeric:tabular-nums}'
+  +'.mtlp-create-row{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left;padding:10px 12px;border:0;border-bottom:1px solid #eef2f9;background:#f4f8ff;border-radius:10px;cursor:pointer;font-size:14px;color:#1f3f86;font-family:inherit}'
+  +'.mtlp-create-row small{color:#7a89a5;font-size:12px;white-space:nowrap}'
+  +'.mtlp-create-row:hover{background:#eaf0ff}'
+  +'#mtl-type-ov{display:none;position:fixed;inset:0;z-index:11200;align-items:center;justify-content:center;background:rgba(20,32,60,.45);font-family:Segoe UI,Inter,Arial,sans-serif;color:#172033}'
+  +'#mtl-type-ov.on{display:flex}'
+  +'#mtl-type-list{flex:1;min-height:120px;overflow:auto;padding:4px 12px 12px}'
+  +'@media print{#mtl-rail{display:none!important}#mtl-chart{display:none!important}}';
   +'#mtl-summary b{color:#1f3f86}#mtl-summary .mtl-diff b{color:#a02424}'
   +'.mtl-cb{margin-right:8px;vertical-align:-2px;width:15px;height:15px;accent-color:#5478d4;cursor:pointer}';
   document.head.appendChild(s);
@@ -18312,7 +18355,8 @@ function pickerEl(){
   ov.innerHTML='<div class="mtlp-box"><div class="mtlp-head"><div><h2>Select Ledger</h2><div class="mtlp-sub" id="mtlp-sub"></div></div><button type="button" class="mtlp-x" id="mtlp-x" title="Close (Esc)">×</button></div>'
     +'<input id="mtlp-search" type="search" placeholder="Type to search ledgers…" autocomplete="off" aria-label="Search ledgers">'
     +'<div id="mtlp-list" role="listbox" aria-label="Ledgers"></div>'
-    +'<div class="mtlp-foot"><span id="mtlp-count"></span><span class="mtlp-keys">↑ ↓ select · Enter open · Esc cancel</span>'
+    +'<div class="mtlp-foot"><span id="mtlp-count"></span><span class="mtlp-keys">Q: Quit · A: Accept · ↑ ↓ select · Enter open</span>'
+    +'<button type="button" id="mtlp-create" title="Create a new ledger">＋ Create</button>'
     +'<button type="button" id="mtlp-hide" title="Hide the selected ledger from this list">Hide</button>'
     +'<button type="button" id="mtlp-unhide" title="Show hidden ledgers to restore them">Unhide…</button>'
     +'<button type="button" id="mtlp-cancel" class="pri">Cancel</button></div></div>';
@@ -18320,6 +18364,7 @@ function pickerEl(){
   ov.addEventListener('click',function(e){if(e.target===ov)closePicker();});
   $('mtlp-x').addEventListener('click',closePicker);
   $('mtlp-cancel').addEventListener('click',closePicker);
+  $('mtlp-create').addEventListener('click',createFromPicker);
   $('mtlp-hide').addEventListener('click',function(){var it=P.filtered[P.active];if(!it)return;hideLedger(it.name);toast('“'+it.name+'” hidden from the ledger list. Use Unhide to restore it.');refreshPickerItems();renderPicker();});
   $('mtlp-unhide').addEventListener('click',function(){openUnhide(true);});
   $('mtlp-search').addEventListener('input',function(){P.q=this.value;renderPicker();});
@@ -18327,6 +18372,8 @@ function pickerEl(){
     if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(!P.filtered.length)return;P.active=(P.active+(e.key==='ArrowDown'?1:-1)+P.filtered.length)%P.filtered.length;paintPicker();}
     else if(e.key==='Enter'){e.preventDefault();var it=P.filtered[P.active];if(it)pickLedger(it.name);}
     else if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closePicker();}
+    else if((e.key==='q'||e.key==='Q')&&e.target!==$('mtlp-search')){e.preventDefault();closePicker();}
+    else if((e.key==='a'||e.key==='A')&&e.target!==$('mtlp-search')){e.preventDefault();var it2=P.filtered[P.active];if(it2)pickLedger(it2.name);}
   });
   return ov;
 }
@@ -18341,13 +18388,15 @@ function renderPicker(){
   if(P.active>=P.filtered.length)P.active=Math.max(0,P.filtered.length-1);
   var hid=readHidden().length;
   $('mtlp-sub').textContent=P.items.length+' ledger'+(P.items.length===1?'':'s')+(hid?' · '+hid+' hidden':'');
-  $('mtlp-count').textContent=P.filtered.length?P.filtered.length+' shown':'No ledger matches';
+  $('mtlp-count').textContent=q?(P.filtered.length+' shown · '+P.items.length+' ledger'+(P.items.length===1?'':'s')):(P.items.length+' ledger'+(P.items.length===1?'':'s'));
   var list=$('mtlp-list');
-  if(!P.filtered.length){list.innerHTML='<div class="mtlp-empty">'+(P.items.length?'No ledger matches “'+esc(P.q)+'”.':'No ledgers yet. Create one in Masters → Create → Ledger.')+'</div>';return;}
-  list.innerHTML=P.filtered.map(function(l,i){
+  var createRow='<button type="button" class="mtlp-create-row" id="mtlp-create-row"><span><b>＋ Create new ledger…</b><br><small>Opens the ledger creation form</small></span><span><small>New</small></span></button>';
+  if(!P.filtered.length){list.innerHTML=createRow+'<div class="mtlp-empty">'+(P.items.length?'No ledger matches “'+esc(P.q)+'”.':'No ledgers yet. Create one in Masters → Create → Ledger.')+'</div>';}
+  else{list.innerHTML=createRow+P.filtered.map(function(l,i){
     var bal='';try{var b=B().balance(cid(),l.name);bal=b&&b.text?b.text:'';}catch(e){}
     return '<button type="button" class="mtlp-row'+(i===P.active?' on':'')+'" data-i="'+i+'" role="option" aria-selected="'+(i===P.active)+'"><span><b>'+esc(l.name)+'</b><br><small>'+esc(l.under||'No group')+'</small></span>'+(bal?'<small>'+esc(bal)+'</small>':'')+'</button>';
-  }).join('');
+  }).join('');}
+  var cr=list.querySelector('#mtlp-create-row');if(cr)cr.addEventListener('click',createFromPicker);
   list.querySelectorAll('.mtlp-row').forEach(function(row){
     row.addEventListener('click',function(){P.active=+row.dataset.i;pickLedger(P.filtered[P.active].name);});
     row.addEventListener('mouseenter',function(){P.active=+row.dataset.i;paintPicker();});
@@ -18426,7 +18475,13 @@ function ensureBar(){
     var bar=document.createElement('div');bar.id='mtl-actions';
     bar.innerHTML='<span id="mtl-ctx"></span>'
       +'<button type="button" data-act="select" title="Open the highlighted entry (Enter)">Select</button>'
+      +'<button type="button" data-act="add" title="Add a new voucher (A)">Add Vch</button>'
+      +'<button type="button" data-act="dup" title="Duplicate the highlighted voucher (2)">Duplicate Vch</button>'
+      +'<button type="button" data-act="insert" title="Insert a new voucher before the highlighted one (I)">Insert Vch</button>'
       +'<button type="button" data-act="delete" class="danger" title="Delete the highlighted voucher (Delete key)">Delete</button>'
+      +'<button type="button" data-act="cancelvch" class="danger" title="Cancel (void) the highlighted voucher (X)">Cancel Vch</button>'
+      +'<button type="button" data-act="remove" title="Remove this line from the display (R)">Remove Line</button>'
+      +'<button type="button" data-act="restore" title="Bring removed lines back (U)">Restore Line</button>'
       +'<button type="button" data-act="hide" title="Hide the selected ledger from the ledger list">Hide</button>'
       +'<button type="button" data-act="unhide" title="Show hidden ledgers to restore them">Unhide</button>'
       +'<button type="button" data-act="cancel" title="Close this report (Esc)">Cancel</button>'
@@ -18437,7 +18492,13 @@ function ensureBar(){
       var b=e.target.closest('button[data-act]');if(!b)return;
       var a=b.dataset.act;
       if(a==='select')doSelect();else if(a==='delete')doDelete();else if(a==='hide')doHide();else if(a==='unhide')openUnhide();else if(a==='cancel')doCancel();
+      else if(a==='add')doAdd();else if(a==='dup')doDuplicate();else if(a==='insert')doInsert();else if(a==='cancelvch')doCancelVch();else if(a==='remove')doRemoveLine();else if(a==='restore')doRestoreLines();
     });
+  }
+  if(!$('mtl-foot2')){
+    var f2=document.createElement('div');f2.id='mtl-foot2';
+    var foot=$('mrp-foot');
+    if(foot&&foot.parentNode)foot.parentNode.insertBefore(f2,foot);else ov.appendChild(f2);
   }
   if(!$('mtl-summary')){
     var sum=document.createElement('div');sum.id='mtl-summary';
@@ -18445,9 +18506,15 @@ function ensureBar(){
       +'<span>Dr total: <b id="mtl-sum-dr">0.00</b></span>'
       +'<span>Cr total: <b id="mtl-sum-cr">0.00</b></span>'
       +'<span class="mtl-diff">Difference (Dr − Cr): <b id="mtl-sum-diff">0.00</b></span>';
-    var foot=$('mrp-foot');
-    if(foot&&foot.parentNode)foot.parentNode.insertBefore(sum,foot);else ov.appendChild(sum);
-  }
+    $('mtl-foot2').appendChild(sum);
+  }else if($('mtl-summary').parentNode!==$('mtl-foot2')){$('mtl-foot2').appendChild($('mtl-summary'));}
+  if(!$('mtl-balances')){
+    var bal=document.createElement('div');bal.id='mtl-balances';
+    bal.innerHTML='<span><b>Opening Balance</b> <span id="mtl-bal-open">—</span></span>'
+      +'<span><b>Current Total</b> Dr <span id="mtl-bal-curdr">—</span> · Cr <span id="mtl-bal-curcr">—</span></span>'
+      +'<span><b>Closing Balance</b> <span id="mtl-bal-close">—</span></span>';
+    $('mtl-foot2').appendChild(bal);
+  }else if($('mtl-balances').parentNode!==$('mtl-foot2')){$('mtl-foot2').appendChild($('mtl-balances'));}
 }
 function highlightedVoucher(cur){
   if(!cur)return null;
@@ -18546,8 +18613,8 @@ function mtlAfterRender(){
   ensureBar();
   var bar=$('mtl-actions'),sum=$('mtl-summary');
   if(!bar||!sum)return;
-  var cur=curView();
-  if(!cur||ACTION_VIEWS.indexOf(cur.view)<0){bar.style.display='none';sum.style.display='none';return;}
+  var cur=curView2();
+  if(!cur||ACTION_VIEWS.indexOf(cur.view)<0){bar.style.display='none';sum.style.display='none';try{mtl2AfterRender(cur);}catch(e){}return;}
   bar.style.display='flex';
   var vk=cur.view+'|'+cur.name+'|'+cur.from+'|'+cur.to;
   if(vk!==lastViewKey){lastViewKey=vk;sel.clear();}
@@ -18559,7 +18626,779 @@ function mtlAfterRender(){
   if(delBtn)delBtn.disabled=!highlightedVoucher(cur);
   injectCheckboxes(cur);
   updateSummary(cur);
+  try{mtl2AfterRender(cur);}catch(e){}
 }
+
+
+/* ================================================================
+   PART 2 — TALLY SCREENSHOTS 1–13 BEHAVIOUR (2026-11-16)
+   Matches Tally Prime's BEHAVIOUR as shown in the user's Tally
+   screenshots, in MAYAACC's own theme (no Tally blue, no theme
+   change). Screenshots 1–7 + Capture-3 (Gateway, Account Books,
+   Select Ledger, Ledger Vouchers, Cash/Bank Summary, Sales
+   Register + chart, Voucher Register) and 11–13 (Day Book, Trial
+   Balance, Sales voucher entry).
+
+   1. LEDGER PICKER (shot 3): a "Create new ledger…" row at the top
+      of the list + a "＋ Create" footer button (opens the ledger
+      creation form; when it closes, the picker re-opens with the
+      new ledger listed); the footer count now shows the TOTAL
+      ledger count ("6 ledgers", like Tally's "1103"); footer hints
+      are "Q: Quit · A: Accept · ↑ ↓ select · Enter open" and Q / A
+      work as keys (not while typing in the search box). The Create
+      row uses class .mtlp-create-row (NOT .mtlp-row) so the ledger
+      count in tests stays exact.
+   2. FOOTER VOUCHER ACTIONS (shots 4, 7, 11): Add Vch (A),
+      Duplicate Vch (2), Insert Vch (I), Cancel Vch (X), Remove
+      Line (R), Restore Line (U) — alongside Select / Delete /
+      Hide / Unhide / Cancel. Cancel Vch VOIDS via
+      MayaBooks.cancelVoucher (kept in the register, marked
+      cancelled, excluded from totals); Delete removes. Remove Line
+      hides a row from the display only (session-only, per view);
+      Restore Line brings hidden rows back. Duplicate posts a real
+      copy (new number, same date); Insert opens a new voucher of
+      the highlighted type dated like the highlighted voucher.
+      Stock Journal is handled through its own screen / engine
+      (postStockJournal). All keys are ignored while typing in an
+      input, while a detail popup / picker / print dialog / voucher
+      entry / designer is open.
+   3. SELECTED SUMMARY + BALANCES (shot 4): the existing Dr/Cr/
+      difference bar stays (selection only); a second, always-
+      visible bar on the Ledger Vouchers screen shows Opening
+      Balance, Current Total (Dr / Cr) and Closing Balance.
+   4. CASH / BANK SUMMARY (shot 5): new view "cashsummary" —
+      groups Cash-in-Hand, Bank Accounts, Bank OD A/c (a ledger is
+      OD when its group or name matches /overdraft|\bOD\b/i), with
+      Closing Balance Dr / Cr columns and a Grand Total row. Added
+      to the Account Books menu after "Cash/Bank Book(s)" (key B).
+      Enter opens the ledger's monthly summary.
+   5. MONTHLY CHART (shot 6): a small monthly bar chart under the
+      Sales / Purchase / other register monthly summaries, reusing
+      the Dashboard's .mrp-bar style (MAYAACC blue #5478d4, not
+      Tally's red).
+   6. RIGHT-SIDE QUICK ACTIONS (shots 4, 11, 12): a #mtl-rail panel
+      on the report screens — Period (F2), Ledger (F4, re-pick),
+      Bill-wise (F5), Monthly (F6), Voucher Type (F4, Day Book),
+      Group / Ledger-wise / Monthly (F4/F5/F6, Trial Balance),
+      Apply Filter (F), Save View (L). F5 is claimed with a
+      window-capture listener so it pre-empts the overlay's
+      PL/BS-only F5 banner on other views; on PL/BS the format
+      toggle is left alone. Columnar (F8) and Show Profit (F7) are
+      NOT built this pass (noted in the report).
+   7. DAY BOOK (shot 11): the Day Book view is overridden
+      (MayaMoreViews.daybook) with Tally's layout — Debit Amount
+      with an Inwards Qty sub-column, Credit Amount with an
+      Outwards Qty sub-column (quantities from the voucher's items;
+      Stock Journal src/dst; Physical Stock adjustments), the title
+      "For <date>" when the period is a single day, and Dr / Cr
+      totals. The amount goes to the Dr side for Sales, Payment,
+      Journal, Debit Note, Delivery Note, Sales Order, Physical
+      Stock, Stock Journal and to the Cr side for Purchase, Receipt,
+      Contra, Credit Note, Receipt Note, Purchase Order — the same
+      split as every row of shot 11.
+   8. TRIAL BALANCE (shot 12): the Trial Balance view is
+      overridden (MayaMoreViews.trial) with three modes — Group
+      (F4, the shot-12 layout: group rows only + Grand Total),
+      Ledger-wise (F5, the previous full layout: groups + ledgers),
+      Monthly (F6: Month / Debit / Credit / Closing Balance).
+      Mode persists per company in localStorage
+      `mayaacc_tb_mode_<cid>`; the default stays Ledger-wise so
+      existing behaviour is unchanged.
+   9. BILL-WISE (shot 4, F5): new view "billwise" — the pending
+      bills of the current ledger (same table as the Bills
+      Receivable/Payable detail), reachable from a ledger or its
+      monthly summary.
+   10. APPLY FILTER (F): a filter panel in the rail (text, min/max
+      amount, voucher type on the Day Book). The Day Book filters
+      natively (totals follow the filter); other voucher-row views
+      hide non-matching rows (their table totals still cover all
+      entries — the rail says so).
+   11. SAVE VIEW (L): saves the current report (view + args +
+      period) to localStorage `mayaacc_saved_views_<cid>`; saved
+      views appear as chips in the rail — click to reopen, × to
+      delete.
+   12. SALES ENTRY (shot 13): NO CHANGES. Verified only — the
+      entry screen already has "E: Autofill" and "U: Unused Vch
+      No." side buttons, matching Tally's E Autofill / U Unused
+      Vch No. placement and purpose.
+
+   Test hooks (added to window.__mayaTally): balances, rail, chart,
+   daybook, tbMode, setTbMode, saveView, readSaved, filter,
+   setFilter, cashSummary.
+   ================================================================ */
+
+/* ---------- Part 2 state + small helpers ---------- */
+var viewFilter=null, removedLines={};
+var MN2=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function months2(from,to){
+  var out=[];if(!from||!to||from>to)return out;
+  var pad=function(n){return String(n).padStart(2,'0');};
+  var y=+from.slice(0,4),m=+from.slice(5,7)-1,ey=+to.slice(0,4),em=+to.slice(5,7)-1;
+  while(y<ey||(y===ey&&m<=em)){
+    var last=new Date(y,m+1,0).getDate(),a=y+'-'+pad(m+1)+'-01',b=y+'-'+pad(m+1)+'-'+pad(last);
+    out.push({label:MN2[m]+' '+y,from:a<from?from:a,to:b>to?to:b});
+    m++;if(m>11){m=0;y++;}
+    if(out.length>60)break;
+  }
+  return out;
+}
+function live2(v){var t='';try{t=window.MayaReportCtx.today();}catch(e){t=new Date().toISOString().slice(0,10);}return !!(v&&!v.cancelled&&!v.optional&&!(v.postdated&&v.date>t));}
+function vInfo2(v){
+  var net=num(v.total),tax=v.gst?num(v.gst.tax):0,ro=0;
+  (v.entries||[]).forEach(function(e){if(norm(e.ledger)==='round off'){try{ro+=B().isSalesSide(v.type)?num(e.cr)-num(e.dr):num(e.dr)-num(e.cr);}catch(err){ro+=num(e.cr)-num(e.dr);}}});
+  ro=Math.round(ro*100)/100;
+  return {net:net,tax:tax,ro:ro,gross:Math.round((net-tax-ro)*100)/100};
+}
+function qfmt(n){return String(Math.round(num(n)*1000)/1000);}
+function curView2(){
+  try{
+    var RC=window.MayaReportCtx;if(!RC||!RC.st||!RC.st.stack||!RC.st.stack.length)return null;
+    var top=RC.st.stack[RC.st.stack.length-1];
+    return {view:top.view,name:top.name||'',type:top.type||'',label:top.label||'',group:top.group||'',mode:top.mode||'',from:top.from||RC.st.from,to:top.to||RC.st.to,st:RC.st};
+  }catch(e){return null;}
+}
+function viewKey(cur){return cur?cur.view+'|'+(cur.name||'')+'|'+(cur.type||'')+'|'+(cur.from||'')+'|'+(cur.to||''):'';}
+function overlayBusy(){
+  if(pickerOpen())return true;
+  var u=$('mtlu-ov');if(u&&u.classList.contains('on'))return true;
+  var tp=$('mtl-type-ov');if(tp&&tp.classList.contains('on'))return true;
+  var d=$('mrp-detail');if(d&&!d.hidden)return true;
+  var pd=$('maya-print-dialog');if(pd&&pd.classList.contains('on'))return true;
+  var ve=$('mayaacc-voucher-entry-overlay');if(ve&&ve.classList.contains('is-open'))return true;
+  var de=$('mayaInvDesigner');if(de&&de.classList.contains('is-open'))return true;
+  var lo=$('mayaacc-ledger-overlay');if(lo&&lo.style.display==='block')return true;
+  var ao=$('mayaacc-alter-other');if(ao&&ao.classList.contains('is-open'))return true;
+  return false;
+}
+
+/* ---------- Day Book: Tally layout (shot 11) ---------- */
+var DB_DR={Sales:1,Payment:1,Journal:1,'Debit Note':1,'Delivery Note':1,'Sales Order':1,'Physical Stock':1,'Stock Journal':1};
+function dbQty(v){
+  var iq=0,oq=0;
+  if(!v||v.cancelled)return {iq:0,oq:0};
+  try{
+    if(v.type==='Stock Journal'){var sd=B().sjSides(v);(sd.dst||[]).forEach(function(l){iq+=num(l.qty);});(sd.src||[]).forEach(function(l){oq+=num(l.qty);});}
+    else if(v.type==='Physical Stock'){(v.items||[]).forEach(function(i){var a=num(i.adj);if(a>0)iq+=a;else oq+=-a;});}
+    else if(B().stockIn(v.type)){(v.items||[]).forEach(function(i){iq+=num(i.qty);});}
+    else if(B().stockOut(v.type)){(v.items||[]).forEach(function(i){oq+=num(i.qty);});}
+  }catch(e){}
+  return {iq:Math.round(iq*1000)/1000,oq:Math.round(oq*1000)/1000};
+}
+function viewDayBook2(cur){
+  var RC=window.MayaReportCtx,st=RC.st,from=st.from,to=st.to;
+  var rows=B().dayBook(cid(),from,to);
+  var f=viewFilter,active=!!(f&&f.viewKey===viewKey({view:'daybook',name:'',type:'',from:from,to:to}));
+  var total=rows.length;
+  if(active){
+    rows=rows.filter(function(r){
+      if(f.type&&r.type!==f.type)return false;
+      if(f.text&&String(r.particulars+' '+r.type+' '+r.number).toLowerCase().indexOf(f.text)<0)return false;
+      var a=num(r.amount);
+      if(f.min!==''&&f.min!=null&&a<num(f.min))return false;
+      if(f.max!==''&&f.max!=null&&a>num(f.max))return false;
+      return true;
+    });
+  }
+  st.sel=rows.map(function(r){return {kind:'voucher',id:r.id};});
+  $('mrp-title').textContent='Day Book';
+  $('mrp-crumb').textContent=(from===to)?('For '+RC.ddmmyyyy(from)):('Vouchers from '+RC.ddmmyyyy(from)+' to '+RC.ddmmyyyy(to));
+  if(!rows.length){$('mrp-body').innerHTML='<div class="mrp-empty">No vouchers in this period.<br>Change the period with F2, or post a voucher from Transactions → Vouchers.</div>';return;}
+  var tdr=0,tcr=0,tiq=0,toq=0;
+  var html=rows.map(function(r,i){
+    var v=null;try{v=B().voucherById(cid(),r.id);}catch(e){}
+    var q=dbQty(v),dr=!!DB_DR[r.type],amt=num(r.amount);
+    if(dr)tdr+=amt;else tcr+=amt;
+    tiq+=q.iq;toq+=q.oq;
+    return '<tr data-i="'+i+'"'+(r.cancelled?' class="cxrow"':'')+'><td>'+esc(RC.ddmmyyyy(r.date))+'</td><td>'+esc(r.particulars)+(r.cancelled?'<span class="mrp-chip cx">Cancelled</span>':'')+(r.optional?'<span class="mrp-chip">Optional</span>':'')+(r.postdated?'<span class="mrp-chip">Post-Dated</span>':'')+'</td><td>'+esc(r.type)+'</td><td>'+esc(r.number)+'</td><td class="r">'+(dr&&amt?fmt(amt):'')+'</td><td class="r">'+(q.iq?qfmt(q.iq):'')+'</td><td class="r">'+(!dr&&amt?fmt(amt):'')+'</td><td class="r">'+(q.oq?qfmt(q.oq):'')+'</td></tr>';
+  }).join('');
+  var tot='<tr class="tot"><td colspan="4">'+rows.length+' voucher'+(rows.length>1?'s':'')+(active?' (filtered — '+rows.length+' of '+total+' shown)':'')+'</td><td class="r">'+fmt(B().r2(tdr))+'</td><td class="r">'+(tiq?qfmt(tiq):'')+'</td><td class="r">'+fmt(B().r2(tcr))+'</td><td class="r">'+(toq?qfmt(toq):'')+'</td></tr>';
+  var note=active?'<tr class="note"><td colspan="8">Filter active — totals are for the filtered rows. Press F to change the filter, Clear to remove it.</td></tr>':'';
+  $('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Date</th><th>Particulars</th><th>Vch Type</th><th>Vch No.</th><th class="r">Debit Amount</th><th class="r">Inwards Qty</th><th class="r">Credit Amount</th><th class="r">Outwards Qty</th></tr></thead><tbody>'+html+tot+note+'</tbody></table>';
+}
+
+/* ---------- Trial Balance modes (shot 12) ---------- */
+function tbMode(){var m='ledger';try{m=localStorage.getItem('mayaacc_tb_mode_'+cid())||'ledger';}catch(e){}if(m!=='group'&&m!=='monthly')m='ledger';return m;}
+function setTbMode(m){
+  if(m!=='group'&&m!=='monthly')m='ledger';
+  try{localStorage.setItem('mayaacc_tb_mode_'+cid(),m);}catch(e){}
+  try{if(window.MayaReportCtx&&MayaReportCtx.st)MayaReportCtx.st.tbMode=m;}catch(e){}
+  if(window.mayaReportRefresh){try{window.mayaReportRefresh();}catch(e){}}
+}
+function viewTrial2(cur){
+  var RC=window.MayaReportCtx,st=RC.st;
+  var mode=st.tbMode||tbMode();st.tbMode=mode;
+  var T=B().trialBalance(cid(),st.from,st.to);
+  st.sel=[];
+  $('mrp-title').textContent='Trial Balance';
+  var modeLbl=mode==='group'?'Group view':mode==='monthly'?'Monthly view':'Ledger-wise view';
+  $('mrp-crumb').textContent='For the period '+RC.ddmmyyyy(st.from)+' to '+RC.ddmmyyyy(st.to)+' · '+modeLbl+' (F4 Group · F5 Ledger-wise · F6 Monthly)';
+  if(mode==='monthly'){
+    var ms=months2(st.from,st.to),h='',td=0,tc=0,lastClose=0;
+    ms.forEach(function(m){
+      var Tm=B().trialBalance(cid(),m.from,m.to);
+      var closeSigned=B().r2(Tm.totals.closeDr-Tm.totals.closeCr);
+      td+=Tm.totals.dr;tc+=Tm.totals.cr;lastClose=closeSigned;
+      h+='<tr><td>'+m.label+'</td><td class="r">'+(Tm.totals.dr?fmt(Tm.totals.dr):'')+'</td><td class="r">'+(Tm.totals.cr?fmt(Tm.totals.cr):'')+'</td><td class="r">'+(closeSigned?RC.side(closeSigned):'')+'</td></tr>';
+    });
+    h+='<tr class="tot"><td>Grand Total</td><td class="r">'+fmt(B().r2(td))+'</td><td class="r">'+fmt(B().r2(tc))+'</td><td class="r">'+(lastClose?RC.side(lastClose):'')+'</td></tr>';
+    $('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Month</th><th class="r">Debit</th><th class="r">Credit</th><th class="r">Closing Balance</th></tr></thead><tbody>'+h+'</tbody></table>';
+    return;
+  }
+  if(!T.groups.length){$('mrp-body').innerHTML='<div class="mrp-empty">No ledger has a balance or movement in this period yet.</div>';return;}
+  var html='';
+  if(mode==='group'){
+    T.groups.forEach(function(g){
+      st.sel.push({kind:'view',view:'groupled',args:{group:g.name}});
+      html+='<tr class="grp" data-i="'+(st.sel.length-1)+'"><td>'+esc(g.name)+'</td><td class="r">'+RC.side(g.open)+'</td><td class="r">'+(g.dr?fmt(g.dr):'')+'</td><td class="r">'+(g.cr?fmt(g.cr):'')+'</td><td class="r">'+RC.side(g.close)+'</td></tr>';
+    });
+  }else{
+    T.groups.forEach(function(g){
+      html+='<tr class="grp"><td>'+esc(g.name)+'</td><td class="r">'+RC.side(g.open)+'</td><td class="r">'+(g.dr?fmt(g.dr):'')+'</td><td class="r">'+(g.cr?fmt(g.cr):'')+'</td><td class="r">'+RC.side(g.close)+'</td></tr>';
+      g.rows.forEach(function(r){st.sel.push({kind:'ledger',name:r.name});
+        html+='<tr class="led" data-i="'+(st.sel.length-1)+'"><td>'+esc(r.name)+'</td><td class="r">'+(r.open?RC.side(r.open):'')+'</td><td class="r">'+(r.dr?fmt(r.dr):'')+'</td><td class="r">'+(r.cr?fmt(r.cr):'')+'</td><td class="r">'+(r.close?RC.side(r.close):'')+'</td></tr>';});
+    });
+  }
+  if(T.diff!==0)html+='<tr class="note"><td>'+(T.suspense?'Suspense Account — difference in opening balances':'Difference in opening balances')+'</td><td class="r">'+RC.side(T.diff)+'</td><td></td><td></td><td class="r">'+RC.side(T.diff)+'</td></tr>';
+  var tally=T.totals.dr===T.totals.cr&&T.totals.closeDr===T.totals.closeCr;
+  html+='<tr class="tot"><td>Grand Total</td><td class="r">'+fmt(T.totals.openDr)+'</td><td class="r">'+fmt(T.totals.dr)+'</td><td class="r">'+fmt(T.totals.cr)+'</td><td class="r">'+fmt(T.totals.closeDr)+'</td></tr>';
+  html+='<tr class="note"><td colspan="5">Debit total '+(tally?'<span class="mrp-ok">equals</span>':'<span class="mrp-bad">does not equal</span>')+' Credit total — books are '+(tally?'<span class="mrp-ok">balanced ✓</span>':'<span class="mrp-bad">out of balance ✗</span>')+'</td></tr>';
+  $('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Particulars</th><th class="r">Opening Balance</th><th class="r">Debit</th><th class="r">Credit</th><th class="r">Closing Balance</th></tr></thead><tbody>'+html+'</tbody></table>';
+}
+
+/* ---------- Cash / Bank Summary (shot 5) ---------- */
+function viewCashSummary(cur){
+  var RC=window.MayaReportCtx,st=RC.st,c=cid();
+  st.sel=[];
+  $('mrp-title').textContent='Cash / Bank Summary';
+  $('mrp-crumb').textContent='Cash-in-hand, bank accounts and bank overdrafts · '+RC.ddmmyyyy(st.from)+' to '+RC.ddmmyyyy(st.to)+' · Enter opens the monthly summary';
+  var groups=[['Cash-in-Hand',[]],['Bank Accounts',[]],['Bank OD A/c',[]]];
+  var T={dr:0,cr:0};
+  var list=[];try{list=B().ledgers(c)||[];}catch(e){}
+  list.forEach(function(l){
+    if(!l||!l.name)return;
+    var kd='';try{kd=B().kind(c,l);}catch(e){}
+    var isOD=/overdraft|\bod\b/i.test((l.under||'')+' '+l.name);
+    var isCB=false;try{isCB=B().isCB(kd);}catch(e){}
+    var g=null;
+    if(isOD)g=groups[2];
+    else if(isCB&&kd==='cash')g=groups[0];
+    else if(isCB&&kd==='bank')g=groups[1];
+    if(!g)return;
+    var L=null;try{L=B().ledgerVouchers(c,l.name,st.from,st.to);}catch(e){}
+    if(!L)return;
+    g[1].push({name:l.name,close:L.close});
+  });
+  var html='';
+  groups.forEach(function(g){
+    if(!g[1].length)return;
+    g[1].sort(function(a,b){return String(a.name).localeCompare(String(b.name));});
+    html+='<tr class="grp"><td colspan="3">'+g[0]+'</td></tr>';
+    g[1].forEach(function(x){
+      st.sel.push({kind:'view',view:'monthly',args:{name:x.name}});
+      var dr=x.close>0?x.close:0,cr=x.close<0?-x.close:0;
+      T.dr+=dr;T.cr+=cr;
+      html+='<tr data-i="'+(st.sel.length-1)+'"><td>'+esc(x.name)+'</td><td class="r">'+(dr?fmt(dr):'')+'</td><td class="r">'+(cr?fmt(cr):'')+'</td></tr>';
+    });
+  });
+  if(!st.sel.length){$('mrp-body').innerHTML='<div class="mrp-empty">No Cash, Bank or Bank OD ledger exists yet.<br>Create one in Masters → Create → Ledger under Cash-in-Hand, Bank Accounts or a Bank OD group.</div>';return;}
+  html+='<tr class="tot"><td>Grand Total</td><td class="r">'+fmt(B().r2(T.dr))+'</td><td class="r">'+fmt(B().r2(T.cr))+'</td></tr>';
+  $('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Particulars</th><th class="r">Closing Balance — Debit</th><th class="r">Closing Balance — Credit</th></tr></thead><tbody>'+html+'</tbody></table>';
+}
+
+/* ---------- Bill-wise details of one ledger (shot 4, F5) ---------- */
+function viewBillwise(cur){
+  var RC=window.MayaReportCtx,st=RC.st,name=cur.name||'';
+  st.sel=[];
+  $('mrp-title').textContent='Bill-wise Details: '+name;
+  $('mrp-crumb').textContent='As on '+RC.ddmmyyyy(st.to)+' · press Enter to open the ledger';
+  if(!name){$('mrp-body').innerHTML='<div class="mrp-empty">No ledger selected. Open a ledger report first, then press F5 for its bill-wise details.</div>';return;}
+  var bills=[];try{bills=B().pendingBills(cid(),name,{asOf:st.to});}catch(e){}
+  if(!bills.length){$('mrp-body').innerHTML='<div class="mrp-empty">No pending bills for '+esc(name)+'.</div>';return;}
+  var asOf=new Date(st.to+'T00:00:00'),tot=0;
+  var h=bills.map(function(b){
+    tot+=b.pending;
+    var base=b.due||b.date,od=base&&b.pending>0?Math.max(0,Math.floor((asOf-new Date(base+'T00:00:00'))/864e5)):0;
+    st.sel.push({kind:'ledger',name:name});
+    return '<tr data-i="'+(st.sel.length-1)+'"><td>'+esc(b.label)+'</td><td>'+esc(RC.ddmmyyyy(b.date))+'</td><td>'+esc(RC.ddmmyyyy(b.due))+'</td><td class="r">'+fmt(Math.abs(b.pending))+' '+(b.pending>0?'':'(advance)')+'</td><td class="r'+(od>0?' neg':'')+'">'+(od>0?od+' days':'')+'</td></tr>';
+  }).join('');
+  $('mrp-body').innerHTML='<table class="mrp-table"><thead><tr><th>Bill Ref</th><th>Bill Date</th><th>Due Date</th><th class="r">Pending</th><th class="r">Overdue</th></tr></thead><tbody>'+h+'<tr class="tot"><td colspan="3">Total pending</td><td class="r">'+fmt(Math.abs(B().r2(tot)))+'</td><td></td></tr></tbody></table>';
+}
+
+/* ---------- footer voucher actions: Add / Duplicate / Insert / Cancel Vch / Remove / Restore ---------- */
+function actionType(cur){
+  if(!cur)return null;
+  if(cur.view==='regmonth')return cur.type||null;
+  if(cur.view==='daybook'||cur.view==='groupvch'){
+    var v=highlightedVoucher(cur);
+    if(!v)return null;
+    try{var vo=B().voucherById(cid(),v.id);return vo?vo.type:null;}catch(e){return null;}
+  }
+  if(cur.view==='ledger'||cur.view==='monthly'){
+    var v2=highlightedVoucher(cur);
+    if(v2){try{var vo2=B().voucherById(cid(),v2.id);return vo2?vo2.type:null;}catch(e){}}
+    return 'Sales';
+  }
+  return null;
+}
+function openEntryFor(type,date){
+  if(!type)return;
+  if(type==='Stock Journal'){
+    if(typeof window.mayaStockJournal==='function')window.mayaStockJournal();
+    else toast('Stock Journal entry is not available.');
+    return;
+  }
+  if(typeof window.mayaOpenVoucherEntry!=='function'){toast('Voucher entry is not available.');return;}
+  window.mayaOpenVoucherEntry();
+  try{if(typeof window.switchVoucherType==='function')window.switchVoucherType(type,true);}catch(e){}
+  if(date){
+    var d=$('mveDate');if(d)d.value=date;
+    var n=$('mveNumber');
+    if(n){
+      var manual=false;try{manual=/manual/i.test(String((B().vtSettings(cid(),type)||{}).numbering||''));}catch(e){}
+      if(!manual){try{n.value=B().nextNumber(cid(),type,date);}catch(e){}}
+    }
+  }
+}
+function doAdd(){
+  var cur=curView2();if(!cur)return;
+  var type=actionType(cur);
+  if(!type){toast('Add needs a voucher context on this screen.');return;}
+  openEntryFor(type,null);
+}
+function nextFreeNumber(type,date){
+  var serial=1;try{serial=B().nextSerial(cid(),type,date)||1;}catch(e){}
+  var n=String(serial);
+  for(var i=0;i<50;i++){
+    try{n=B().formatNumber(cid(),type,serial+i,date);}catch(e){n=String(serial+i);}
+    var taken=false;
+    try{taken=(B().vouchers(cid())||[]).some(function(v){return v.type===type&&String(v.number)===String(n);});}catch(e){}
+    if(!taken)return n;
+  }
+  return n;
+}
+function doDuplicate(){
+  var cur=curView2();if(!cur)return;
+  var v=highlightedVoucher(cur);
+  if(!v){toast('Select a voucher entry first (↑ ↓ to move).');return;}
+  var vo=null;try{vo=B().voucherById(cid(),v.id);}catch(e){}
+  if(!vo){toast('That voucher no longer exists.');return;}
+  if(vo.cancelled){toast('A cancelled voucher cannot be duplicated.');return;}
+  var r=null;
+  try{
+    if(vo.type==='Stock Journal'){
+      var sd=B().sjSides(vo);
+      r=B().postStockJournal(cid(),{date:vo.date,number:'',narration:vo.narration||'',
+        src:sd.src.map(function(l){return {name:l.name,godown:l.godown||'',qty:String(l.qty)};}),
+        dst:sd.dst.map(function(l){return {name:l.name,godown:l.godown||'',qty:String(l.qty),rate:(l.amount!=null&&num(l.qty)>0)?String(B().r2(num(l.amount)/num(l.qty))):''};})});
+    }else{
+      var spec=B().voucherToSpec(vo);
+      var manual=false;try{manual=/manual/i.test(String((B().vtSettings(cid(),vo.type)||{}).numbering||''));}catch(e){}
+      spec.number=manual?nextFreeNumber(vo.type,vo.date):'';
+      spec.date=vo.date;
+      r=B().post(cid(),spec);
+    }
+  }catch(e){r={ok:false,error:{msg:String((e&&e.message)||e)}};}
+  if(!r||!r.ok){var m=(r&&r.error&&((r.error.msg)||r.error))||'Could not duplicate this voucher.';try{if(window.MayaReportCtx&&MayaReportCtx.banner)MayaReportCtx.banner(String(m));}catch(e){}toast(String(m));return;}
+  toast(vo.type+' duplicated as #'+r.voucher.number+'.');
+  if(window.mayaReportRefresh){try{window.mayaReportRefresh();}catch(e){}}
+}
+function doInsert(){
+  var cur=curView2();if(!cur)return;
+  var v=highlightedVoucher(cur);
+  if(!v){toast('Select a voucher entry first (↑ ↓ to move).');return;}
+  var vo=null;try{vo=B().voucherById(cid(),v.id);}catch(e){}
+  if(!vo){toast('That voucher no longer exists.');return;}
+  openEntryFor(vo.type,vo.date);
+}
+function doCancelVch(){
+  var cur=curView2();if(!cur)return;
+  var v=highlightedVoucher(cur);
+  if(!v){toast('Select a voucher entry first (↑ ↓ to move).');return;}
+  var vo=null;try{vo=B().voucherById(cid(),v.id);}catch(e){}
+  if(!vo){toast('That voucher no longer exists.');return;}
+  if(vo.cancelled){toast('This voucher is already cancelled.');return;}
+  var label=vo.type+' #'+vo.number;
+  if(!window.confirm('Cancel '+label+'?\nIt stays in the register with zero amount and is excluded from totals.'))return;
+  var r;try{r=B().cancelVoucher(cid(),v.id);}catch(e){r={ok:false,error:{msg:String((e&&e.message)||e)}};}
+  if(!r||!r.ok){var m=(r&&r.error&&((r.error.msg)||r.error))||'Could not cancel this voucher.';try{if(window.MayaReportCtx&&MayaReportCtx.banner)MayaReportCtx.banner(String(m));}catch(e){}toast(String(m));return;}
+  sel.clear();
+  toast(label+' cancelled. Its number is kept; amounts are zero.');
+  if(window.mayaReportRefresh){try{window.mayaReportRefresh();}catch(e){}}
+}
+function rowKeyFor(cur,i){return viewKey(cur)+'|'+i;}
+function doRemoveLine(){
+  var cur=curView2();if(!cur)return;
+  if(cur.view==='pickledger'){toast('Nothing to remove on this screen.');return;}
+  var st=cur.st;if(!st||!st.sel||!st.sel.length){toast('Nothing to remove on this screen.');return;}
+  var i=Math.max(0,Math.min(st.idx||0,st.sel.length-1));
+  removedLines[rowKeyFor(cur,i)]=true;
+  try{sel.delete(cur.view+'|'+String(i));}catch(e){}
+  toast('Line removed from this view (U restores it). The voucher itself is unchanged.');
+  if(window.mayaReportRefresh){try{window.mayaReportRefresh();}catch(e){}}
+}
+function doRestoreLines(){
+  var cur=curView2();if(!cur)return;
+  var prefix=viewKey(cur)+'|',n=0;
+  Object.keys(removedLines).forEach(function(k){if(k.indexOf(prefix)===0){delete removedLines[k];n++;}});
+  if(!n){toast('No removed lines on this screen.');return;}
+  toast(n+' line'+(n===1?'':'s')+' restored.');
+  if(window.mayaReportRefresh){try{window.mayaReportRefresh();}catch(e){}}
+}
+function hideRemoved(cur){
+  var body=$('mrp-body');if(!body||!cur)return 0;
+  var n=0;
+  body.querySelectorAll('tbody tr[data-i]').forEach(function(tr){
+    if(removedLines[rowKeyFor(cur,tr.dataset.i)]){tr.style.display='none';n++;}
+  });
+  return n;
+}
+function updateActionButtons(cur){
+  var bar=$('mtl-actions');if(!bar)return;
+  var hasV=!!highlightedVoucher(cur);
+  var isPick=!cur||cur.view==='pickledger';
+  var hasRows=!!(cur&&cur.st&&cur.st.sel&&cur.st.sel.length);
+  var set=function(act,dis){var b=bar.querySelector('[data-act="'+act+'"]');if(b)b.disabled=!!dis;};
+  set('add',isPick||!cur);
+  set('dup',isPick||!hasV);
+  set('insert',isPick||!hasV);
+  set('cancelvch',isPick||!hasV);
+  set('remove',isPick||!hasRows);
+  set('restore',isPick);
+}
+
+/* ---------- picker: Create (shot 3) ---------- */
+var reopenPickerTimer=null;
+function createFromPicker(){
+  if(typeof window.mayaOpenLedger!=='function'){toast('Ledger creation is not available.');return;}
+  closePicker();
+  try{window.mayaOpenLedger();}catch(e){toast('Could not open ledger creation.');return;}
+  if(reopenPickerTimer){clearInterval(reopenPickerTimer);reopenPickerTimer=null;}
+  var tries=0;
+  reopenPickerTimer=setInterval(function(){
+    tries++;
+    var ov2=$('mayaacc-ledger-overlay');
+    var closed=!ov2||ov2.style.display==='none'||ov2.style.display==='';
+    if(closed||tries>150){
+      clearInterval(reopenPickerTimer);reopenPickerTimer=null;
+      if(closed){refreshPickerItems();openPicker();}
+    }
+  },400);
+}
+
+/* ---------- Day Book voucher-type picker (F4, shot 11) ---------- */
+function closeTypePicker(){var ov=$('mtl-type-ov');if(ov)ov.classList.remove('on');}
+function openTypePicker(){
+  var cur=curView2();if(!cur||cur.view!=='daybook')return;
+  var ov=$('mtl-type-ov');
+  if(!ov){
+    ov=document.createElement('div');ov.id='mtl-type-ov';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-label','Voucher Type');
+    ov.innerHTML='<div class="mtlp-box"><div class="mtlp-head"><div><h2>Voucher Type</h2><div class="mtlp-sub">Filter the Day Book to one voucher type.</div></div><button type="button" class="mtlp-x" id="mtl-type-x" title="Close (Esc)">×</button></div><div id="mtl-type-list"></div><div class="mtlp-foot"><span id="mtl-type-count"></span><span class="mtlp-keys">Esc close</span><button type="button" id="mtl-type-close" class="pri">Close</button></div></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click',function(e){if(e.target===ov)closeTypePicker();});
+    $('mtl-type-x').addEventListener('click',closeTypePicker);
+    $('mtl-type-close').addEventListener('click',closeTypePicker);
+    ov.addEventListener('keydown',function(e){if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeTypePicker();}});
+  }
+  var types=[];try{B().vouchers(cid()).forEach(function(v){if(v.date>=(cur.from||'')&&v.date<=(cur.to||'')&&types.indexOf(v.type)<0)types.push(v.type);});}catch(e){}
+  types.sort();
+  var list=$('mtl-type-list');
+  var curF=viewFilter&&viewFilter.viewKey===viewKey(cur)?viewFilter.type:'';
+  list.innerHTML='<button type="button" class="mtlp-row'+(!curF?' on':'')+'" data-t="">All voucher types</button>'+types.map(function(t){return '<button type="button" class="mtlp-row'+(curF===t?' on':'')+'" data-t="'+esc(t)+'">'+esc(t)+'</button>';}).join('');
+  $('mtl-type-count').textContent=types.length+' type'+(types.length===1?'':'s')+' in this period';
+  list.querySelectorAll('[data-t]').forEach(function(b){b.addEventListener('click',function(){setDayType(b.dataset.t);closeTypePicker();});});
+  ov.classList.add('on');
+  var first=list.querySelector('.mtlp-row');if(first)first.focus();
+}
+function setDayType(t){
+  var cur=curView2();if(!cur)return;
+  var key=viewKey(cur);
+  if(!viewFilter||viewFilter.viewKey!==key)viewFilter={viewKey:key,text:'',min:'',max:'',type:''};
+  viewFilter.type=t||'';
+  if(window.mayaReportRefresh){try{window.mayaReportRefresh();}catch(e){}}
+  toast(t?('Day Book filtered to '+t+' vouchers.'):'Day Book filter cleared.');
+}
+
+/* ---------- Apply Filter (F) + Save View (L) ---------- */
+function toggleFilterPanel(){
+  var p=$('mtl-filter');if(!p)return;
+  p.hidden=!p.hidden;
+  if(!p.hidden){var t=$('mtl-f-text');if(t)t.focus();}
+}
+function applyFilterFromPanel(){
+  var cur=curView2();if(!cur)return;
+  var t=$('mtl-f-text'),mn=$('mtl-f-min'),mx=$('mtl-f-max'),ts=$('mtl-f-type');
+  viewFilter={viewKey:viewKey(cur),text:t?String(t.value||'').trim().toLowerCase():'',min:mn&&mn.value!==''?mn.value:'',max:mx&&mx.value!==''?mx.value:'',type:(ts&&!ts.hidden&&ts.value)?ts.value:''};
+  if(window.mayaReportRefresh){try{window.mayaReportRefresh();}catch(e){}}
+  toast('Filter applied.');
+}
+function clearFilter(){
+  var cur=curView2();
+  viewFilter=null;
+  var t=$('mtl-f-text'),mn=$('mtl-f-min'),mx=$('mtl-f-max'),ts=$('mtl-f-type');
+  if(t)t.value='';if(mn)mn.value='';if(mx)mx.value='';if(ts)ts.value='';
+  if(window.mayaReportRefresh){try{window.mayaReportRefresh();}catch(e){}}
+  toast('Filter cleared.');
+}
+function applyDomFilter(cur){
+  if(!cur)return;
+  if(cur.view==='daybook')return; /* the Day Book filters natively in its own view */
+  var f=viewFilter;
+  var active=!!(f&&f.viewKey===viewKey(cur));
+  var body=$('mrp-body');if(!body)return;
+  var shown=0,total=0;
+  body.querySelectorAll('tbody tr[data-i]').forEach(function(tr){
+    total++;
+    if(!active){shown++;return;}
+    var ok=true;
+    var txt=tr.textContent.toLowerCase();
+    if(f.text&&txt.indexOf(f.text)<0)ok=false;
+    if(ok&&(f.min!==''||f.max!=='')){
+      var amt=0;
+      tr.querySelectorAll('td.r').forEach(function(td){var n=parseFloat(String(td.textContent).replace(/[^0-9.\-]/g,''));if(isFinite(n))amt=Math.max(amt,Math.abs(n));});
+      if(f.min!==''&&amt<num(f.min))ok=false;
+      if(f.max!==''&&amt>num(f.max))ok=false;
+    }
+    if(!ok){
+      tr.style.display='none';
+      try{sel.delete(cur.view+'|'+String(tr.dataset.i));}catch(e){}
+    }else shown++;
+  });
+  if(active)updateSummary(cur);
+  var note=$('mtl-f-status');
+  if(note)note.textContent=active?('Filter: '+shown+' of '+total+' rows shown — table totals include hidden rows.'):'';
+}
+var savedKey=function(){return 'mayaacc_saved_views_'+cid();};
+function readSaved(){try{var a=JSON.parse(localStorage.getItem(savedKey())||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+function writeSaved(a){try{localStorage.setItem(savedKey(),JSON.stringify(a));}catch(e){}}
+function saveCurrentView(){
+  var RC=window.MayaReportCtx;if(!RC||!RC.st||!RC.st.stack||!RC.st.stack.length)return;
+  var top=RC.st.stack[RC.st.stack.length-1];
+  var args={};['name','type','label','group','mode','from','to'].forEach(function(k){if(top[k]!=null)args[k]=top[k];});
+  var sv={id:'SV-'+Date.now(),label:((RC.$('mrp-title')||{}).textContent||top.view)+' · '+RC.ddmmyyyy(RC.st.from)+' to '+RC.ddmmyyyy(RC.st.to),view:top.view,args:args,from:RC.st.from,to:RC.st.to};
+  var all=readSaved();all.push(sv);writeSaved(all);
+  toast('View saved: '+sv.label);
+  renderRail(curView2());
+}
+function openSavedView(id){
+  var sv=readSaved().find(function(x){return x.id===id;});if(!sv)return;
+  var RC=window.MayaReportCtx;if(!RC)return;
+  RC.st.from=sv.from;RC.st.to=sv.to;
+  var f=RC.$('mrpFrom'),t=RC.$('mrpTo');if(f)f.value=sv.from;if(t)t.value=sv.to;
+  if(typeof window.mayaOpenReportView==='function')window.mayaOpenReportView(sv.view,sv.args||{});
+}
+function deleteSavedView(id){writeSaved(readSaved().filter(function(x){return x.id!==id;}));renderRail(curView2());}
+function insertCashSummaryMenu(){
+  try{
+    var menus=window.MayaMoreMenu&&window.MayaMoreMenu.menus&&window.MayaMoreMenu.menus();
+    if(!menus||!menus.books||!menus.books.items)return;
+    var items=menus.books.items;
+    if(items.some(function(x){return x&&x.v==='cashsummary';}))return;
+    var ix=-1;
+    items.forEach(function(x,i){if(x&&x.l==='Cash/Bank Book(s)')ix=i;});
+    var item={l:'Cash/Bank Summary',k:'B',v:'cashsummary'};
+    if(ix>=0)items.splice(ix+1,0,item);else items.unshift(item);
+  }catch(e){}
+}
+
+/* ---------- right-side quick actions rail (shots 4, 11, 12) ---------- */
+function railDefs(cur){
+  var v=cur.view;
+  var P={k:'period',t:'F2 · Period'};
+  var F={k:'filter',t:'F · Apply Filter'};
+  var S={k:'saveview',t:'L · Save View'};
+  if(v==='ledger')return [P,{k:'ledger',t:'F4 · Ledger'},{k:'billwise',t:'F5 · Bill-wise'},{k:'monthly',t:'F6 · Monthly'},F,S];
+  if(v==='billwise')return [P,{k:'ledgerback',t:'← Ledger Vouchers'},{k:'monthly',t:'F6 · Monthly'},F,S];
+  if(v==='monthly')return [P,{k:'billwise',t:'F5 · Bill-wise'},F,S];
+  if(v==='daybook')return [P,{k:'vtype',t:'F4 · Voucher Type'},F,S];
+  if(v==='trial')return [P,{k:'groupmode',t:'F4 · Group'},{k:'ledgermode',t:'F5 · Ledger-wise'},{k:'monthlymode',t:'F6 · Monthly'},F,S];
+  if(v==='register'||v==='salesreg'||v==='purreg')return [P,F,S];
+  if(v==='regmonth'||v==='groupvch'||v==='cashbook'||v==='cashsummary'||v==='groupled'||v==='pickgroup')return [P,F,S];
+  return null;
+}
+function railAction(k){
+  var cur=curView2();if(!cur)return;
+  if(k==='period'){var f=$('mrpFrom');if(f)f.focus();return;}
+  if(k==='ledger'){openPicker();return;}
+  if(k==='ledgerback'){if(cur.name)window.mayaOpenReportView('ledger',{name:cur.name});return;}
+  if(k==='billwise'){if(cur.name)window.mayaOpenReportView('billwise',{name:cur.name});else toast('Open a ledger first.');return;}
+  if(k==='monthly'){if(cur.name)window.mayaOpenReportView('monthly',{name:cur.name});return;}
+  if(k==='groupmode'){setTbMode('group');return;}
+  if(k==='ledgermode'){setTbMode('ledger');return;}
+  if(k==='monthlymode'){setTbMode('monthly');return;}
+  if(k==='vtype'){openTypePicker();return;}
+  if(k==='filter'){toggleFilterPanel();return;}
+  if(k==='filterapply'){applyFilterFromPanel();return;}
+  if(k==='filterclear'){clearFilter();return;}
+  if(k==='saveview'){saveCurrentView();return;}
+}
+function renderRail(cur){
+  var ov=$('mayaacc-reports-overlay');if(!ov)return;
+  var rail=$('mtl-rail');
+  if(!rail){
+    rail=document.createElement('div');rail.id='mtl-rail';
+    rail.innerHTML='<div class="mtl-rail-title">QUICK ACTIONS</div><div id="mtl-qa"></div>'
+      +'<div id="mtl-filter" hidden><div class="mtl-rail-sec">Apply Filter</div>'
+      +'<input id="mtl-f-text" type="text" placeholder="Text contains…" autocomplete="off">'
+      +'<input id="mtl-f-min" type="number" placeholder="Min amount" step="any">'
+      +'<input id="mtl-f-max" type="number" placeholder="Max amount" step="any">'
+      +'<select id="mtl-f-type" hidden></select>'
+      +'<div class="mtl-rail-row"><button type="button" data-qa="filterapply">Apply</button><button type="button" data-qa="filterclear">Clear</button></div>'
+      +'<div id="mtl-f-status"></div></div>'
+      +'<div class="mtl-rail-sec">Saved Views</div><div id="mtl-saved"></div>';
+    ov.appendChild(rail);
+    rail.addEventListener('click',function(e){
+      var del=e.target.closest('[data-svdel]');
+      if(del){e.stopPropagation();deleteSavedView(del.dataset.svdel);return;}
+      var chip=e.target.closest('[data-sv]');
+      if(chip){openSavedView(chip.dataset.sv);return;}
+      var b=e.target.closest('[data-qa]');
+      if(b)railAction(b.dataset.qa);
+    });
+  }
+  var defs=cur?railDefs(cur):null;
+  var body=$('mrp-body');
+  if(!defs){
+    rail.style.display='none';
+    if(body)body.style.marginRight='';
+    return;
+  }
+  rail.style.display='block';
+  if(body)body.style.marginRight='168px';
+  var topEl=$('mrp-top'),footEl=$('mrp-foot');
+  var topH=topEl?topEl.offsetHeight:56,footH=footEl?footEl.offsetHeight:40;
+  rail.style.top=(topH+8)+'px';
+  rail.style.bottom=(footH+8)+'px';
+  var qa=$('mtl-qa');
+  if(qa)qa.innerHTML=defs.map(function(d){return '<button type="button" data-qa="'+d.k+'">'+esc(d.t)+'</button>';}).join('');
+  var ts=$('mtl-f-type');
+  if(ts){
+    if(cur.view==='daybook'){
+      ts.hidden=false;
+      var types=[];try{B().vouchers(cid()).forEach(function(v){if(v.date>=(cur.from||'')&&v.date<=(cur.to||'')&&types.indexOf(v.type)<0)types.push(v.type);});}catch(e){}
+      types.sort();
+      var curT=viewFilter&&viewFilter.viewKey===viewKey(cur)?viewFilter.type:'';
+      ts.innerHTML='<option value="">All voucher types</option>'+types.map(function(t){return '<option value="'+esc(t)+'"'+(curT===t?' selected':'')+'>'+esc(t)+'</option>';}).join('');
+    }else ts.hidden=true;
+  }
+  var sv=$('mtl-saved');
+  if(sv){
+    var all=readSaved();
+    sv.innerHTML=all.length?all.map(function(x){return '<div data-sv="'+esc(x.id)+'" title="'+esc(x.label)+'"><span>'+esc(x.label)+'</span><button type="button" data-svdel="'+esc(x.id)+'" title="Delete this saved view">×</button></div>';}).join(''):'<div style="font-size:11px;color:#6b7a90;padding:2px 4px">No saved views yet.<br>Press L on a report to save it.</div>';
+  }
+}
+
+/* ---------- monthly chart under registers (shot 6) ---------- */
+function renderRegisterChart(cur){
+  var body=$('mrp-body');if(!body)return;
+  var old=$('mtl-chart');if(old)old.remove();
+  var type=cur.type||'';
+  if(!type)return;
+  var RC=window.MayaReportCtx;
+  var ms=months2(RC.st.from,RC.st.to);
+  var inv=false;try{inv=B().isInv(type);}catch(e){}
+  var data=ms.map(function(m){
+    var vs=[];try{vs=B().vouchers(cid()).filter(function(v){return v.type===type&&live2(v)&&v.date>=m.from&&v.date<=m.to;});}catch(e){}
+    var n=0;vs.forEach(function(v){if(inv){var i=vInfo2(v);n+=i.net;}else n+=num(v.total);});
+    return {label:m.label,net:B().r2(n),count:vs.length};
+  }).filter(function(d){return d.count>0;});
+  if(!data.length)return;
+  var max=Math.max.apply(null,data.map(function(d){return d.net;}));
+  var div=document.createElement('div');div.id='mtl-chart';
+  div.innerHTML='<div class="mtl-chart-title">Monthly trend — '+esc(type)+' (invoice value by month)</div>'+data.map(function(d){
+    var w=max>0?Math.round(d.net/max*140):0;
+    return '<div class="mtl-chart-row"><span class="mtl-chart-lab">'+esc(d.label)+'</span><span class="mrp-bar" style="width:'+w+'px"></span><span class="mtl-chart-val">'+fmt(d.net)+'</span></div>';
+  }).join('');
+  body.appendChild(div);
+}
+
+/* ---------- Selected Summary balances bar (shot 4) ---------- */
+function updateBalances(cur){
+  var bar=$('mtl-balances');if(!bar)return;
+  if(!cur||cur.view!=='ledger'){bar.style.display='none';return;}
+  var L=null;try{L=B().ledgerVouchers(cid(),cur.name,cur.from,cur.to);}catch(e){}
+  if(!L){bar.style.display='none';return;}
+  bar.style.display='flex';
+  bar.dataset.open=String(L.open);bar.dataset.curDr=String(L.dr);bar.dataset.curCr=String(L.cr);bar.dataset.close=String(L.close);
+  var RC=window.MayaReportCtx;
+  $('mtl-bal-open').textContent=RC.side(L.open);
+  $('mtl-bal-curdr').textContent=fmt(L.dr);
+  $('mtl-bal-curcr').textContent=fmt(L.cr);
+  $('mtl-bal-close').textContent=RC.side(L.close);
+}
+
+/* ---------- after-render glue (runs after Part 1's mtlAfterRender) ---------- */
+function mtl2AfterRender(cur){
+  if(!cur)cur=curView2();
+  updateBalances(cur);
+  var removed=hideRemoved(cur);
+  applyDomFilter(cur);
+  if(cur&&(cur.view==='register'||cur.view==='salesreg'||cur.view==='purreg'))renderRegisterChart(cur);
+  renderRail(cur);
+  updateActionButtons(cur);
+  var hint=$('mtl-hint');
+  if(hint){
+    var parts=['Tick ☑ beside an entry to add it to the summary below.'];
+    if(removed>0)parts.push(removed+' line'+(removed===1?'':'s')+' removed — U restores.');
+    if(viewFilter&&cur&&viewFilter.viewKey===viewKey(cur))parts.push('Filter active — F to change, Clear to remove.');
+    hint.textContent=parts.join(' ');
+  }
+  var f2=$('mtl-foot2');
+  if(f2){
+    var sv=$('mtl-summary'),bv=$('mtl-balances');
+    var any=(sv&&sv.style.display!=='none')||(bv&&bv.style.display!=='none');
+    f2.style.display=any?'flex':'none';
+  }
+}
+
+/* ---------- F4 / F5 / F6 view switches ---------- */
+function doF4(cur){
+  if(!cur)return;
+  if(cur.view==='ledger')openPicker();
+  else if(cur.view==='daybook')openTypePicker();
+  else if(cur.view==='trial')setTbMode('group');
+}
+function doF5(cur){
+  if(!cur)return;
+  if(cur.view==='ledger'||cur.view==='monthly'){if(cur.name)window.mayaOpenReportView('billwise',{name:cur.name});else toast('Open a ledger first.');}
+  else if(cur.view==='billwise'){if(cur.name)window.mayaOpenReportView('ledger',{name:cur.name});}
+  else if(cur.view==='trial')setTbMode('ledger');
+  else toast('Bill-wise applies to a ledger report.');
+}
+function doF6(cur){
+  if(!cur)return;
+  if(cur.view==='ledger'||cur.view==='billwise'){if(cur.name)window.mayaOpenReportView('monthly',{name:cur.name});}
+  else if(cur.view==='trial')setTbMode('monthly');
+}
+/* F5 is claimed by the overlay for PL/BS format only; on every other
+   report view it is Bill-wise / Ledger-wise here. A window-capture
+   listener runs before the overlay's document-capture listener, so
+   this pre-empts the overlay's "format applies to P&L / Balance
+   Sheet" banner on ledger, trial and other views. */
+window.addEventListener('keydown',function(e){
+  if(e.key!=='F5')return;
+  if(!window.MayaReportCtx||!MayaReportCtx.isOpen||!MayaReportCtx.isOpen())return;
+  var cur=curView2();if(!cur)return;
+  if(cur.view==='pl'||cur.view==='bs')return;
+  if(overlayBusy())return;
+  var t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'))return;
+  e.preventDefault();e.stopImmediatePropagation();
+  doF5(cur);
+},true);
+
+/* ---------- register the new views + menu item ---------- */
+try{
+  if(window.MayaMoreViews){
+    window.MayaMoreViews.daybook=function(c){viewDayBook2(c);};
+    window.MayaMoreViews.trial=function(c){viewTrial2(c);};
+    window.MayaMoreViews.cashsummary=function(c){viewCashSummary(c);};
+    window.MayaMoreViews.billwise=function(c){viewBillwise(c);};
+  }
+  if(window.MayaMoreMeta){
+    window.MayaMoreMeta.cashsummary=window.MayaMoreMeta.cashsummary||{};
+    window.MayaMoreMeta.billwise={asOnly:true};
+  }
+  insertCashSummaryMenu();
+}catch(e){}
 
 /* ---------- hook into the reports render + entry points ---------- */
 function armAfterRender(){
@@ -18590,9 +19429,29 @@ document.addEventListener('keydown',function(e){
   if(pickerOpen()&&e.key==='Escape'){closePicker();return;}
   if(!window.MayaReportCtx||!MayaReportCtx.isOpen||!MayaReportCtx.isOpen())return;
   var t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'))return;
+  if(overlayBusy())return;
   if(e.key==='Delete'&&!e.ctrlKey&&!e.altKey&&!e.metaKey){
-    var cur=curView();if(cur&&ACTION_VIEWS.indexOf(cur.view)>=0){e.preventDefault();doDelete();}
+    var cur=curView2();if(cur&&ACTION_VIEWS.indexOf(cur.view)>=0){e.preventDefault();doDelete();}
+    return;
   }
+  if(e.ctrlKey||e.altKey||e.metaKey)return;
+  var cur2=curView2();if(!cur2)return;
+  if(e.key==='F4'){e.preventDefault();doF4(cur2);return;}
+  if(e.key==='F6'){e.preventDefault();doF6(cur2);return;}
+  var k=String(e.key||'').toLowerCase();
+  if(k==='l'||k==='f'){
+    if(!railDefs(cur2))return;
+    e.preventDefault();
+    if(k==='l')saveCurrentView();else toggleFilterPanel();
+    return;
+  }
+  if(ACTION_VIEWS.indexOf(cur2.view)<0)return;
+  if(k==='a'){e.preventDefault();doAdd();}
+  else if(k==='2'){e.preventDefault();doDuplicate();}
+  else if(k==='i'){e.preventDefault();doInsert();}
+  else if(k==='x'){e.preventDefault();doCancelVch();}
+  else if(k==='r'){e.preventDefault();doRemoveLine();}
+  else if(k==='u'){e.preventDefault();doRestoreLines();}
 });
 try{mtlAfterRender();}catch(e){}
 
@@ -18603,7 +19462,17 @@ window.__mayaTally={
   openUnhide:openUnhide,closeUnhide:closeUnhide,
   selectedCount:function(){return sel.size;},
   summary:function(){var s=$('mtl-summary');if(!s)return null;return {count:+(s.dataset.count||0),dr:+(s.dataset.dr||0),cr:+(s.dataset.cr||0),diff:+(s.dataset.diff||0),visible:s.style.display!=='none'};},
-  curView:function(){var c=curView();return c?{view:c.view,name:c.name}:null;}
+  balances:function(){var b=$('mtl-balances');if(!b)return null;return {open:+(b.dataset.open||0),curDr:+(b.dataset.curDr||0),curCr:+(b.dataset.curCr||0),close:+(b.dataset.close||0),visible:b.style.display!=='none'};},
+  rail:function(){var r=$('mtl-rail');if(!r)return null;return {visible:r.style.display!=='none',buttons:Array.from(r.querySelectorAll('#mtl-qa [data-qa]')).map(function(x){return x.dataset.qa;}),saved:Array.from(r.querySelectorAll('#mtl-saved [data-sv]')).map(function(x){return x.dataset.sv;})};},
+  chart:function(){var c=$('mtl-chart');if(!c)return null;return {bars:c.querySelectorAll('.mtl-chart-row').length,values:Array.from(c.querySelectorAll('.mtl-chart-val')).map(function(x){return x.textContent.trim();})};},
+  daybook:function(){return {headers:Array.from(document.querySelectorAll('#mrp-body thead th')).map(function(x){return x.textContent.trim();}),crumb:($('mrp-crumb')||{}).textContent||'',rows:document.querySelectorAll('#mrp-body tbody tr[data-i]').length};},
+  tbMode:function(){try{return (window.MayaReportCtx&&MayaReportCtx.st&&MayaReportCtx.st.tbMode)||tbMode();}catch(e){return 'ledger';}},
+  setTbMode:setTbMode,
+  saveView:saveCurrentView,readSaved:readSaved,
+  filter:function(){return viewFilter?{viewKey:viewFilter.viewKey,text:viewFilter.text,min:viewFilter.min,max:viewFilter.max,type:viewFilter.type}:null;},
+  cashSummary:function(){return {groups:Array.from(document.querySelectorAll('#mrp-body tbody tr.grp td')).map(function(x){return x.textContent.trim();}),rows:document.querySelectorAll('#mrp-body tbody tr[data-i]').length};},
+  openTypePicker:openTypePicker,createFromPicker:createFromPicker,
+  curView:function(){var c=curView2();return c?{view:c.view,name:c.name,type:c.type||''}:null;}
 };
 })();
 
