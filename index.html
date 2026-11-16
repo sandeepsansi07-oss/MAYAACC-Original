@@ -15356,5 +15356,83 @@ body.workspace-mode #dashboard .gateway-main{overflow-y:auto}
 })();
 </script>
 
+<script id="mayaacc-desktop-login">
+/* MAYAACC Desktop (Original) — app mode.
+   The desktop app is an app, not a website: no landing page
+   (Home / Features / Plans / About, hero, plans) before login.
+   It opens straight to the Login window. If the login window is
+   closed without logging in, it opens again. After logout the
+   login window opens again instead of the landing page.
+   The login card is also restyled to match the app icon. */
+(function(){
+  'use strict';
+  function hasSession(){
+    try{ return !!JSON.parse(localStorage.getItem('mayaacc_session')||'null'); }
+    catch(e){ return false; }
+  }
+  /* Same hiding the app itself does after login (hidePublicSite). */
+  function hideLanding(){
+    document.querySelectorAll('.hero,.features,.cta,.public-about,.trial-banner,footer,.public-footer,#accountBar')
+      .forEach(function(x){ x.style.display='none'; });
+    var h=document.querySelector('header'); if(h) h.style.display='none';
+    document.body.classList.add('workspace-mode');
+  }
+  function openLogin(){
+    if(!hasSession() && typeof window.showAuth==='function') window.showAuth('login');
+  }
+  function beautify(){
+    var css=[
+      '.auth-overlay{background:linear-gradient(135deg,rgba(23,42,84,.78),rgba(37,99,235,.55));backdrop-filter:blur(8px)}',
+      '.auth-card{border-radius:22px;padding:30px 30px 26px;box-shadow:0 30px 80px rgba(10,25,60,.35);border:1px solid #e6ebf2;overflow:hidden;position:relative}',
+      '.auth-card:before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:linear-gradient(90deg,#1d4ed8,#3b82f6,#22d3ee)}',
+      '.maya-login-brand{display:flex;align-items:center;gap:12px;margin:2px 0 4px}',
+      '.maya-login-mark{width:46px;height:46px;flex:0 0 46px;border-radius:13px;background:linear-gradient(135deg,#1e40af,#2563eb 55%,#0ea5e9);color:#fff;font-size:26px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(37,99,235,.4)}',
+      '.maya-login-brand b{font-size:19px;letter-spacing:.02em;color:#172033}',
+      '.maya-login-brand small{display:block;font-size:11px;color:#687286;font-weight:600;letter-spacing:.06em}',
+      '.auth-card h2{font-size:23px}',
+      '.auth-field input{padding:12px 13px;border-radius:11px}',
+      '.auth-field input:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.15)}',
+      '.auth-submit{padding:13px;border-radius:11px;background:linear-gradient(135deg,#1d4ed8,#2563eb);font-size:15px}',
+      '.auth-tabs{border-radius:11px}',
+      '.google-btn{border-radius:11px}'
+    ].join('\n');
+    if(!document.getElementById('maya-desktop-login-css')){
+      var st=document.createElement('style');
+      st.id='maya-desktop-login-css'; st.textContent=css;
+      document.head.appendChild(st);
+    }
+    var card=document.querySelector('#authOverlay .auth-card');
+    if(card && !card.querySelector('.maya-login-brand')){
+      var brand=document.createElement('div'); brand.className='maya-login-brand';
+      brand.innerHTML='<div class="maya-login-mark">M</div><div><b>MAYAACC</b><small>SMART ACCOUNTING</small></div>';
+      card.insertBefore(brand, card.firstChild);
+    }
+  }
+  function wrapOnce(name, after){
+    var fn=window[name];
+    if(typeof fn!=='function' || fn.__mayaDesktop) return;
+    var wrapped=function(){ var r=fn.apply(this, arguments); after(); return r; };
+    wrapped.__mayaDesktop=true;
+    window[name]=wrapped;
+  }
+  function arm(){
+    beautify();
+    /* Login band ho to wapas khul jaye (Esc / bahar click / X) — sirf tab jab login nahi hua. */
+    wrapOnce('closeAuth', function(){ setTimeout(openLogin, 30); });
+    /* Logout ke baad landing nahi, seedha login. */
+    wrapOnce('logoutMaya', function(){ setTimeout(function(){ hideLanding(); openLogin(); }, 30); });
+    /* Home wapas jane par bhi landing nahi. */
+    wrapOnce('showHome', function(){ setTimeout(function(){ hideLanding(); openLogin(); }, 30); });
+    /* App khulte hi: landing chhupao; login nahi hai to login window kholo. */
+    setTimeout(function(){
+      hideLanding();
+      openLogin();
+    }, 150);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', arm);
+  else arm();
+})();
+</script>
+
 </body>
 </html>
