@@ -1,0 +1,54 @@
+{
+  "author": "MAYAACC",
+  "build": {
+    "appId": "com.mayaacc.desktop",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html"
+    ],
+    "nsis": {
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "MAYAACC-Setup-${version}.exe",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false,
+      "oneClick": false,
+      "perMachine": false,
+      "shortcutName": "MAYAACC"
+    },
+    "portable": {
+      "artifactName": "MAYAACC-Setup-${version}.exe"
+    },
+    "productName": "MAYAACC",
+    "win": {
+      "target": [
+        {
+          "arch": [
+            "x64"
+          ],
+          "target": "nsis"
+        }
+      ]
+    }
+  },
+  "description": "MAYAACC — Smart Accounting Software for Indian Businesses (Desktop for Windows PC). Data stays on this PC in Documents/MAYAACC-Data.",
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "license": "UNLICENSED",
+  "main": "main.js",
+  "name": "mayaacc-desktop",
+  "private": true,
+  "scripts": {
+    "dist": "electron-builder --win nsis --x64 --publish never",
+    "build:win-installer": "electron-builder --win nsis --x64 --publish never",
+    "build:win": "electron-builder --win nsis --x64 --publish never",
+    "start": "electron ."
+  },
+  "version": "1.0.0"
+}
