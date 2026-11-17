@@ -7,7 +7,7 @@
 /* Tally-style focus: put the cursor at the END of the field value instead of
    selecting it all. Select-all + one Backspace used to wipe the whole value
    (e.g. the qty "5" or the unit "kg" on voucher entry). */
-window.__mayaEnd=function(el){if(!el)return;try{el.focus();}catch(e){}try{if(el.setSelectionRange&&el.type!=='date'&&el.type!=='checkbox'&&el.type!=='file'){var l=(el.value||'').length;el.setSelectionRange(l,l);}}catch(e){}};
+window.__mayaEnd=function(el){if(!el)return;try{el.focus();}catch(e){}if(el&&el.dataset){try{el.dataset.mayaFresh='1';}catch(e){}}try{if(el.setSelectionRange&&el.type!=='date'&&el.type!=='checkbox'&&el.type!=='file'){var l=(el.value||'').length;el.setSelectionRange(l,l);}}catch(e){}};
 window.addEventListener('keydown',function(e){var f=window.__mayaModalKey;if(!f)return;var r=f(e);if(r){e.stopImmediatePropagation();if(r===2)e.preventDefault();}},true);
 </script>
 <script id="mayaacc-dialog-nav">
@@ -230,7 +230,7 @@ footer{padding:28px 6%;color:#788295;font-size:13px;border-top:1px solid #e6e9ef
 .company-wrap{max-width:1120px;margin:auto;padding:35px 5% 60px}
 .company-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:25px}
 .company-head h2{margin:0;font-size:28px}.company-head p{color:#788295;margin:7px 0 0;font-size:13px}
-.stepbar{display:flex;gap:8px;margin-bottom:22px;overflow:auto}.step{padding:9px 13px;border-radius:20px;background:#e9edf3;color:#6d7686;font-size:12px;font-weight:700;white-space:nowrap}.step.active{background:#172033;color:#fff}
+.stepbar{display:flex;gap:8px;margin-bottom:22px;overflow:auto;position:sticky;top:48px;z-index:5;background:#f6f8fb;padding:8px 4px;border-bottom:1px solid #e1e7ee}.step{padding:9px 13px;border-radius:20px;background:#e9edf3;color:#6d7686;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer}.step:hover{background:#dbe2ec}.step:focus-visible{outline:2px solid #5478d4;outline-offset:2px}.step.active{background:#172033;color:#fff}.form-panel{scroll-margin-top:110px}
 .form-panel{background:#fff;border:1px solid #e2e7ee;border-radius:14px;padding:25px;margin-bottom:17px}
 .form-panel h3{margin:0 0 5px;font-size:17px}.form-panel>p{margin:0 0 20px;color:#7b8494;font-size:12px}
 .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}.field label{font-size:12px;font-weight:700;color:#505a6b}.field input,.field select,.field textarea{width:100%;padding:11px 12px;border:1px solid #dfe4eb;border-radius:8px;background:#fff;font:inherit;font-size:13px;outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:#8993a4}.field textarea{min-height:75px;resize:vertical}
@@ -409,61 +409,62 @@ footer{background:rgba(255,255,255,.7);border-color:rgba(255,255,255,.9)}
     <div class="gateway-top">
       <div class="gateway-brand">MAYAACC</div>
       <div class="gateway-nav">
-        <button id="mcoBtn" onclick="mayaCompanyMenu()" title="Company menu (F3)">Company &#9662; <small style="opacity:.55">F3</small></button>
-        <button data-shortcut="Y" onclick="mayaAction('Data')">Data <small style="opacity:.55">Y</small></button>
-        <button data-shortcut="Z" onclick="mayaAction('Exchange')">Exchange <small style="opacity:.55">Z</small></button>
-        <button class="goto" onclick="mayaAction('Go To')">Go To <small style="opacity:.55">Alt+G</small></button>
-        <button data-shortcut="I" onclick="mayaAction('Import')">Import <small style="opacity:.55">I</small></button>
-        <button data-shortcut="E" onclick="mayaAction('Export')">Export <small style="opacity:.55">E</small></button><button data-shortcut="M" onclick="mayaAction('Share')">Share <small style="opacity:.55">M</small></button>
-        <button data-mio="print" onclick="mayaAction('Print')">Print <small style="opacity:.55">Alt+P</small></button>
-        <button onclick="mayaAction('Help')">Help <small style="opacity:.55">F1</small></button>
+        <button id="mcoBtn" onclick="mayaCompanyMenu()" title="Company menu (F3)" data-lang-html="top.company">Company &#9662; <small style="opacity:.55">F3</small></button>
+        <button data-shortcut="Y" onclick="mayaAction('Data')" data-lang-html="top.data">Data <small style="opacity:.55">Y</small></button>
+        <button data-shortcut="Z" onclick="mayaAction('Exchange')" data-lang-html="top.exchange">Exchange <small style="opacity:.55">Z</small></button>
+        <button class="goto" onclick="mayaAction('Go To')" data-lang-html="top.goto">Go To <small style="opacity:.55">Alt+G</small></button>
+        <button data-shortcut="I" onclick="mayaAction('Import')" data-lang-html="top.import">Import <small style="opacity:.55">I</small></button>
+        <button data-shortcut="E" onclick="mayaAction('Export')" data-lang-html="top.export">Export <small style="opacity:.55">E</small></button><button data-shortcut="M" onclick="mayaAction('Share')" data-lang-html="top.share">Share <small style="opacity:.55">M</small></button>
+        <button data-mio="print" onclick="mayaAction('Print')" data-lang-html="top.print">Print <small style="opacity:.55">Alt+P</small></button>
+        <button onclick="mayaAction('Help')" data-lang-html="top.help">Help <small style="opacity:.55">F1</small></button>
       </div>
       <div class="workspace-account">
         <span id="workspaceUserName"></span>
-        <button class="workspace-logout" onclick="logoutMaya()">Logout</button>
+        <button class="workspace-logout" id="mayaLangBtn" type="button" onclick="mayaToggleLang()" title="Switch language / भाषा बदलें">हिंदी</button>
+        <button class="workspace-logout" data-lang="top.logout" onclick="logoutMaya()">Logout</button>
       </div>
     </div>
     <div class="gateway-sub"><span class="workspace-breadcrumb">MAYAACC / Company Workspace</span><span class="workspace-greeting-header" id="workspaceGreetingHeader">Welcome to MAYAACC.</span><span class="workspace-close" id="workspaceClose" onclick="showCompanySelect()">×</span></div>
     <div class="gateway-body">
       <div class="gateway-main">
         <div class="workspace-summary">
-          <div><span class="summary-label">CURRENT PERIOD</span><strong id="currentPeriod">—</strong></div>
-          <div class="summary-date"><span class="summary-label">CURRENT DATE</span><strong id="currentDate">—</strong></div>
+          <div><span class="summary-label" data-lang="gw.period">CURRENT PERIOD</span><strong id="currentPeriod">—</strong></div>
+          <div class="summary-date"><span class="summary-label" data-lang="gw.date">CURRENT DATE</span><strong id="currentDate">—</strong></div>
         </div>
-        <div class="company-data-head"><span>NAME OF COMPANY</span><span>LAST ACTIVITY</span></div>
+        <div class="company-data-head"><span data-lang="gw.company">NAME OF COMPANY</span><span data-lang="gw.lastactivity">LAST ACTIVITY</span></div>
         <div class="selected-company-row">
           <div><strong id="workspaceCompanyName">Selected Company</strong><small id="workspaceCompanyInfo">—</small></div>
           <strong id="workspaceLastActivity">—</strong>
         </div>
         <div class="gateway-cards">
-          <div class="gateway-stat"><span>Sales</span><strong id="wsSales">₹ 0</strong><small>Current company data</small></div>
-          <div class="gateway-stat"><span>Receivables</span><strong id="wsReceivables">₹ 0</strong><small>Current company data</small></div>
-          <div class="gateway-stat"><span>Payables</span><strong id="wsPayables">₹ 0</strong><small>Current company data</small></div>
-          <div class="gateway-stat"><span>Stock Value</span><strong id="wsStock">₹ 0</strong><small>Current company data</small></div>
+          <div class="gateway-stat"><span data-lang="gw.sales">Sales</span><strong id="wsSales">₹ 0</strong><small data-lang="gw.currdata">Current company data</small></div>
+          <div class="gateway-stat"><span data-lang="gw.receivables">Receivables</span><strong id="wsReceivables">₹ 0</strong><small data-lang="gw.currdata">Current company data</small></div>
+          <div class="gateway-stat"><span data-lang="gw.payables">Payables</span><strong id="wsPayables">₹ 0</strong><small data-lang="gw.currdata">Current company data</small></div>
+          <div class="gateway-stat"><span data-lang="gw.stockv">Stock Value</span><strong id="wsStock">₹ 0</strong><small data-lang="gw.currdata">Current company data</small></div>
         </div>
         <div class="gateway-note" id="workspaceGreeting" style="display:none"></div>
       </div>
       <aside class="gateway-menu">
-        <div class="menu-title">MAYAACC Workspace</div>
-        <div class="menu-section">MASTERS</div>
-        <button data-shortcut="C" onclick="mayaAction('Create')"><strong>C</strong>reate</button>
-        <button data-shortcut="A" onclick="mayaAction('Alter Master')"><strong>A</strong>lter</button>
-        <button data-shortcut="O" onclick="mayaAction('Chart of Accounts')">Chart <strong>o</strong>f Accounts</button>
-        <div class="menu-section">TRANSACTIONS</div>
-        <button data-shortcut="V" onclick="mayaAction('Vouchers')"><strong>V</strong>ouchers</button>
-        <button data-shortcut="K" onclick="mayaAction('Day Book')">Day Boo<strong>k</strong></button>
-        <div class="menu-section">UTILITIES</div>
-        <button data-shortcut="B" onclick="mayaAction('Banking')"><strong>B</strong>anking</button>
-        <button data-shortcut="G" onclick="mayaAction('Tax & GST')">Tax &amp; <strong>G</strong>ST</button>
-        <button data-shortcut="N" onclick="mayaAction('Sound Settings')">Sou<strong>n</strong>d Settings</button>
-        <div class="menu-section">REPORTS</div>
-        <button data-shortcut="T" onclick="mayaAction('Trial Balance')"><strong>T</strong>rial Balance</button>
-        <button data-shortcut="L" onclick="mayaAction('Balance Sheet')">Ba<strong>l</strong>ance Sheet</button>
-        <button data-shortcut="P" onclick="mayaAction('Profit & Loss')"><strong>P</strong>rofit &amp; Loss</button>
-        <button data-shortcut="S" onclick="mayaAction('Stock Summary')"><strong>S</strong>tock Summary</button>
-        <button data-shortcut="R" onclick="mayaAction('Ratio Analysis')"><strong>R</strong>atio Analysis</button>
-        <button data-shortcut="D" onclick="mayaAction('More Reports')"><strong>D</strong>isplay More Reports</button>
-        <button data-shortcut="H" onclick="mayaAction('Dashboard')">Das<strong>h</strong>board</button>
+        <div class="menu-title" data-lang="gw.title">MAYAACC Workspace</div>
+        <div class="menu-section" data-lang="gw.masters">MASTERS</div>
+        <button data-shortcut="C" onclick="mayaAction('Create')" data-lang-html="gw.create"><strong>C</strong>reate</button>
+        <button data-shortcut="A" onclick="mayaAction('Alter Master')" data-lang-html="gw.alter"><strong>A</strong>lter</button>
+        <button data-shortcut="O" onclick="mayaAction('Chart of Accounts')" data-lang-html="gw.chart">Chart <strong>o</strong>f Accounts</button>
+        <div class="menu-section" data-lang="gw.transactions">TRANSACTIONS</div>
+        <button data-shortcut="V" onclick="mayaAction('Vouchers')" data-lang-html="gw.vouchers"><strong>V</strong>ouchers</button>
+        <button data-shortcut="K" onclick="mayaAction('Day Book')" data-lang-html="gw.daybook">Day Boo<strong>k</strong></button>
+        <div class="menu-section" data-lang="gw.utilities">UTILITIES</div>
+        <button data-shortcut="B" onclick="mayaAction('Banking')" data-lang-html="gw.banking"><strong>B</strong>anking</button>
+        <button data-shortcut="G" onclick="mayaAction('Tax & GST')" data-lang-html="gw.gst">Tax &amp; <strong>G</strong>ST</button>
+        <button data-shortcut="N" onclick="mayaAction('Sound Settings')" data-lang-html="gw.sound">Sou<strong>n</strong>d Settings</button>
+        <div class="menu-section" data-lang="gw.reports">REPORTS</div>
+        <button data-shortcut="T" onclick="mayaAction('Trial Balance')" data-lang-html="gw.trial"><strong>T</strong>rial Balance</button>
+        <button data-shortcut="L" onclick="mayaAction('Balance Sheet')" data-lang-html="gw.bs">Ba<strong>l</strong>ance Sheet</button>
+        <button data-shortcut="P" onclick="mayaAction('Profit & Loss')" data-lang-html="gw.pl"><strong>P</strong>rofit &amp; Loss</button>
+        <button data-shortcut="S" onclick="mayaAction('Stock Summary')" data-lang-html="gw.stock"><strong>S</strong>tock Summary</button>
+        <button data-shortcut="R" onclick="mayaAction('Ratio Analysis')" data-lang-html="gw.ratio"><strong>R</strong>atio Analysis</button>
+        <button data-shortcut="D" onclick="mayaAction('More Reports')" data-lang-html="gw.more"><strong>D</strong>isplay More Reports</button>
+        <button data-shortcut="H" onclick="mayaAction('Dashboard')" data-lang-html="gw.dash">Das<strong>h</strong>board</button>
       </aside>
     </div>
   </div>
@@ -484,58 +485,64 @@ function showDashboard(){
 <section class="company-setup" id="companySetup">
   <div class="company-wrap">
     <div class="company-head">
-      <div><h2>Create Company</h2><p>Set up your business once. You can change these details later.</p></div>
-      <button class="btn" onclick="showDashboard()">← Back to Dashboard</button>
+      <div><h2 data-lang="cc.title">Create Company</h2><p data-lang="cc.sub">Set up your business once. You can change these details later.</p></div>
+      <button class="btn" data-lang="cc.back" onclick="showDashboard()">← Back to Dashboard</button>
     </div>
 
-    <div class="stepbar">
-      <span class="step active">1. Company Details</span>
-      <span class="step">2. Tax & GST</span>
-      <span class="step">3. Accounting</span>
-      <span class="step">4. Security</span>
+    <div class="stepbar" role="tablist" aria-label="Company setup steps">
+      <span class="step active" role="tab" tabindex="0" data-cc-step="0" data-lang="cc.step1">1. Company Details</span>
+      <span class="step" role="tab" tabindex="0" data-cc-step="1" data-lang="cc.step2">2. Tax &amp; GST</span>
+      <span class="step" role="tab" tabindex="0" data-cc-step="2" data-lang="cc.step3">3. Accounting</span>
+      <span class="step" role="tab" tabindex="0" data-cc-step="3" data-lang="cc.step4">4. Security</span>
     </div>
 
-    <div class="form-panel">
-      <h3>Basic Information</h3><p>Tell MAYAACC about your business.</p>
+    <div class="form-panel" id="ccPanelDetails">
+      <h3 data-lang="cc.basic">Basic Information</h3><p data-lang="cc.basicSub">Tell MAYAACC about your business.</p>
       <div class="form-grid">
-        <div class="field"><label>Company / Business Name *</label><input id="companyName" required placeholder="e.g. Sharma Traders"></div>
-        <div class="field"><label>Legal Name</label><input placeholder="Legal registered name"></div>
-        <div class="field"><label>Mobile Number *</label><input id="mobile" required inputmode="tel" placeholder="+91 XXXXX XXXXX"></div>
-        <div class="field"><label>Email Address *</label><input id="email" required type="email" placeholder="business@example.com"></div>
-        <div class="field full"><label>Address *</label><textarea id="address" required placeholder="Business address"></textarea></div>
-        <div class="field"><label>State / Union Territory *</label><select id="state" required><option value="">Select State / UT</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option><option>Bihar</option><option>Chhattisgarh</option><option>Goa</option><option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option><option>Andaman and Nicobar Islands</option><option>Chandigarh</option><option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Jammu and Kashmir</option><option>Ladakh</option><option>Lakshadweep</option><option>Puducherry</option></select></div>
-        <div class="field"><label>Country *</label><select id="country" required><option value="">Select Country</option><option selected>India</option><option>United Arab Emirates</option><option>United States</option><option>United Kingdom</option><option>Canada</option><option>Australia</option><option>Singapore</option><option>Other</option></select></div>
-        <div class="field"><label>PIN Code *</label><input id="pin" required inputmode="numeric" maxlength="6" placeholder="000000"></div>
-        <div class="field"><label>Business Type *</label><select id="businessType" required><option value="">Select type</option><option>Proprietorship</option><option>Partnership</option><option>LLP</option><option>Private Limited</option><option>Other</option></select></div>
-        <div class="field"><label>Currency</label><select><option>INR — Indian Rupee (₹)</option></select></div>
+        <div class="field"><label data-lang="cc.f.name">Company / Business Name *</label><input id="companyName" required placeholder="e.g. Sharma Traders"></div>
+        <div class="field"><label data-lang="cc.f.legal">Legal Name</label><input placeholder="Legal registered name"></div>
+        <div class="field"><label data-lang="cc.f.mobile">Mobile Number *</label><input id="mobile" required inputmode="tel" placeholder="+91 XXXXX XXXXX"></div>
+        <div class="field"><label data-lang="cc.f.email">Email Address *</label><input id="email" required type="email" placeholder="business@example.com"></div>
+        <div class="field full"><label data-lang="cc.f.address">Address *</label><textarea id="address" required placeholder="Business address"></textarea></div>
+        <div class="field"><label data-lang="cc.f.state">State / Union Territory *</label><select id="state" required><option value="">Select State / UT</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option><option>Bihar</option><option>Chhattisgarh</option><option>Goa</option><option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option><option>Andaman and Nicobar Islands</option><option>Chandigarh</option><option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Jammu and Kashmir</option><option>Ladakh</option><option>Lakshadweep</option><option>Puducherry</option></select></div>
+        <div class="field"><label data-lang="cc.f.country">Country *</label><select id="country" required><option value="">Select Country</option><option selected>India</option><option>United Arab Emirates</option><option>United States</option><option>United Kingdom</option><option>Canada</option><option>Australia</option><option>Singapore</option><option>Other</option></select></div>
+        <div class="field"><label data-lang="cc.f.pin">PIN Code *</label><input id="pin" required inputmode="numeric" maxlength="6" placeholder="000000"></div>
+        <div class="field"><label data-lang="cc.f.biztype">Business Type *</label><select id="businessType" required><option value="">Select type</option><option>Proprietorship</option><option>Partnership</option><option>LLP</option><option>Private Limited</option><option>Other</option></select></div>
+        <div class="field"><label data-lang="cc.f.currency">Currency</label><select><option>INR — Indian Rupee (₹)</option></select></div>
       </div>
     </div>
 
-    <div class="form-panel">
-      <h3>Tax &amp; GST</h3><p>Configure GST and taxpayer details for this company.</p>
+    <div class="form-panel" id="ccPanelTax">
+      <h3 data-lang="cc.tax">Tax &amp; GST</h3><p data-lang="cc.taxSub">Configure GST and taxpayer details for this company.</p>
       <div class="form-grid">
-        <div class="field"><label>GST Registration *</label><select id="gstStatus" required onchange="updateGSTFields()"><option value="">Select registration status</option><option value="registered">Registered</option><option value="unregistered">Unregistered / No GST</option></select></div>
-        <div class="field" id="gstinField" style="display:none"><label>GSTIN *</label><input id="gstin" maxlength="15" placeholder="15-digit GSTIN" autocomplete="off"></div>
-        <div class="field"><label>PAN</label><input id="pan" maxlength="10" placeholder="ABCDE1234F" autocomplete="off"></div>
-        <div class="field" id="taxpayerTypeField" style="display:none"><label>Taxpayer Type *</label><select id="taxpayerType"><option value="">Select taxpayer type</option><option>Unknown</option><option>Composition</option><option>Regular</option><option>Unregistered/Consumer</option><option>Government entity / TDS</option><option>Regular - SEZ</option><option>Regular-Deemed Exporter</option><option>Regular-Exports (EOU)</option><option>e-Commerce Operator</option><option>Input Service Distributor</option><option>Embassy/UN Body</option><option>Non-Resident Taxpayer</option></select></div>
-        <div class="field"><label>Udyam Registration No.</label><input id="udyamNo" maxlength="19" placeholder="UDYAM-HR-06-0000000" autocomplete="off" style="text-transform:uppercase"></div>
-        <div class="field"><label>MSME Category</label><select id="msmeType"><option value="">Not MSME / not set</option><option>Micro</option><option>Small</option><option>Medium</option></select></div>
-        <div class="field"><label>Type of Activity</label><select id="msmeActivity"><option value="">Select activity</option><option>Manufacturing</option><option>Services</option><option>Trading</option></select></div>
+        <div class="field"><label data-lang="cc.f.gstreg">GST Registration *</label><select id="gstStatus" required onchange="updateGSTFields()"><option value="">Select registration status</option><option value="registered">Registered</option><option value="unregistered">Unregistered / No GST</option></select></div>
+        <div class="field" id="gstinField" style="display:none"><label data-lang="cc.f.gstin">GSTIN *</label><input id="gstin" maxlength="15" placeholder="15-digit GSTIN" autocomplete="off"></div>
+        <div class="field"><label data-lang="cc.f.pan">PAN</label><input id="pan" maxlength="10" placeholder="ABCDE1234F" autocomplete="off"></div>
+        <div class="field" id="taxpayerTypeField" style="display:none"><label data-lang="cc.f.taxpayer">Taxpayer Type *</label><select id="taxpayerType"><option value="">Select taxpayer type</option><option>Unknown</option><option>Composition</option><option>Regular</option><option>Unregistered/Consumer</option><option>Government entity / TDS</option><option>Regular - SEZ</option><option>Regular-Deemed Exporter</option><option>Regular-Exports (EOU)</option><option>e-Commerce Operator</option><option>Input Service Distributor</option><option>Embassy/UN Body</option><option>Non-Resident Taxpayer</option></select></div>
+        <div class="field"><label data-lang="cc.f.udyam">Udyam Registration No.</label><input id="udyamNo" maxlength="19" placeholder="UDYAM-HR-06-0000000" autocomplete="off" style="text-transform:uppercase"></div>
+        <div class="field"><label data-lang="cc.f.msme">MSME Category</label><select id="msmeType"><option value="">Not MSME / not set</option><option>Micro</option><option>Small</option><option>Medium</option></select></div>
+        <div class="field"><label data-lang="cc.f.activity">Type of Activity</label><select id="msmeActivity"><option value="">Select activity</option><option>Manufacturing</option><option>Services</option><option>Trading</option></select></div>
       </div>
     </div>
 
-    <div class="form-panel">
-      <h3>Financial & Accounting</h3><p>Set the period and basic accounting preferences.</p>
+    <div class="form-panel" id="ccPanelAcct">
+      <h3 data-lang="cc.acct">Financial &amp; Accounting</h3><p data-lang="cc.acctSub">Set the period and basic accounting preferences.</p>
       <div class="form-grid">
-        <div class="field"><label>Financial Year Begins *</label><input id="fyStart" type="date" value="2026-04-01" required></div>
-        <div class="field"><label>Books Beginning From *</label><input id="booksStart" type="date" value="2026-04-01" required></div>
-        <div class="field"><label>Invoice Numbering</label><select id="invoiceNumbering"><option>Automatic</option><option>Manual</option></select></div>
-        <div class="field"><label>Inventory</label><select id="inventoryMode"><option>Maintain Accounts + Inventory</option><option>Accounts Only</option></select></div>
+        <div class="field"><label data-lang="cc.f.fy">Financial Year Begins *</label><input id="fyStart" type="date" value="2026-04-01" required></div>
+        <div class="field"><label data-lang="cc.f.books">Books Beginning From *</label><input id="booksStart" type="date" value="2026-04-01" required></div>
+        <div class="field"><label data-lang="cc.f.invnum">Invoice Numbering</label><select id="invoiceNumbering"><option>Automatic</option><option>Manual</option></select></div>
+        <div class="field"><label data-lang="cc.f.inventory">Inventory</label><select id="inventoryMode"><option>Maintain Accounts + Inventory</option><option>Accounts Only</option></select></div>
       </div>
     </div>
 
+    <div class="form-panel" id="ccPanelSecurity">
+      <h3 data-lang="cc.sec">Security</h3><p data-lang="cc.secSub">Protect your companies with a password.</p>
+      <div class="form-grid">
+        <div class="field full"><label data-lang="cc.secStatusLab">Password Security</label><div id="ccSecStatus" style="font-size:13px;color:#34465f;padding:10px 0">—</div><button type="button" class="btn" id="ccSecManage" onclick="if(window.mayaOpenSecurityDialog)window.mayaOpenSecurityDialog()">Manage Password Security</button></div>
+      </div>
+    </div>
     <div class="form-footer">
-      <span class="hint">* Required fields · Settings can be altered later.</span>
+      <span class="hint" data-lang="cc.hint">* Required fields · Settings can be altered later.</span>
       <button class="save-btn" onclick="createCompany()">Create Company</button>
     </div>
   </div>
@@ -665,7 +672,7 @@ window.addEventListener('DOMContentLoaded',()=>{populate();updateGSTFields()}) }
   window.filterCreateMaster=function(){
     const q=(document.getElementById('createMasterSearch')?.value||'').trim().toLowerCase();
     document.querySelectorAll('#createMasterList .create-option').forEach(btn=>{
-      btn.style.display=btn.dataset.createName.toLowerCase().includes(q)?'flex':'none';
+      btn.style.display=(btn.dataset.createName.toLowerCase().includes(q)&&window.mayaInventoryAllows(btn.dataset.createName))?'flex':'none';
     });
     createMasterActiveIndex=0;
     updateCreateMasterActive(false);
@@ -1160,7 +1167,7 @@ function opts(){return [...document.querySelectorAll('#alterMasterList .alter-op
 function paint(scroll=true){const a=opts();document.querySelectorAll('#alterMasterList .alter-option').forEach(x=>x.classList.remove('keyboard-active'));if(!a.length){alterMasterActiveIndex=0;return;}alterMasterActiveIndex=Math.max(0,Math.min(alterMasterActiveIndex,a.length-1));a[alterMasterActiveIndex].classList.add('keyboard-active');if(scroll)a[alterMasterActiveIndex].scrollIntoView({block:'nearest'});}
 window.openAlterMaster=function(){const m=document.getElementById('alterMasterDialog');if(!m)return;m.style.display='flex';m.setAttribute('aria-hidden','false');alterMasterActiveIndex=0;const q=document.getElementById('alterMasterSearch');if(q){q.value='';filterAlterMaster();setTimeout(()=>{q.focus();q.select();paint(false);},0);}};
 window.closeAlterMaster=function(){const m=document.getElementById('alterMasterDialog');if(!m)return;m.style.display='none';m.setAttribute('aria-hidden','true');};
-window.filterAlterMaster=function(){const q=(document.getElementById('alterMasterSearch')?.value||'').trim().toLowerCase();document.querySelectorAll('#alterMasterList .alter-option').forEach(x=>x.style.display=x.dataset.alterName.toLowerCase().includes(q)?'flex':'none');alterMasterActiveIndex=0;paint(false);};
+window.filterAlterMaster=function(){const q=(document.getElementById('alterMasterSearch')?.value||'').trim().toLowerCase();document.querySelectorAll('#alterMasterList .alter-option').forEach(x=>x.style.display=(x.dataset.alterName.toLowerCase().includes(q)&&window.mayaInventoryAllows(x.dataset.alterName))?'flex':'none');alterMasterActiveIndex=0;paint(false);};
 window.alterMasterAction=function(name){alert(name+' alteration module will open here.');};
 document.addEventListener('DOMContentLoaded',()=>{const q=document.getElementById('alterMasterSearch');if(q)q.addEventListener('input',filterAlterMaster);const m=document.getElementById('alterMasterDialog');if(m)m.addEventListener('click',e=>{if(e.target===m)closeAlterMaster();});});
 document.addEventListener('keydown',e=>{const m=document.getElementById('alterMasterDialog');if(!m||m.style.display!=='flex')return;const childIds=['alterGroupPickerDialog','mayaacc-alter-group-form','alterLedgerPickerDialog','mayaacc-alter-ledger-form'];if(childIds.some(id=>{const el=document.getElementById(id);return el&&getComputedStyle(el).display!=='none'&&el.getAttribute('aria-hidden')!=='true';}))return;if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();closeAlterMaster();return;}const a=opts();if(!a.length)return;if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();e.stopImmediatePropagation();alterMasterActiveIndex=(alterMasterActiveIndex+(e.key==='ArrowDown'?1:-1)+a.length)%a.length;paint(true);return;}if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();a[alterMasterActiveIndex]?.click();}});
@@ -6694,7 +6701,7 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
   function voucherNo(){if(numberingMode()==='manual')return '';return Books.nextNumber(Books.cid(),st.type,$('mveDate').value);}
   function layout(){
     const t=st.type,inv=isInvT(t),jr=t==='Journal',nw=isNewT(t);
-    const item=(inv||nw)&&st.mode==='item';
+    const item=(inv||nw)&&st.mode==='item'&&(!window.mayaInventoryOn||window.mayaInventoryOn(Books.cid()));
     /* per-type grid profiles (2026-11-17): stock types move stock only,
        orders price items without GST, Physical Stock counts book vs
        physical. The Sales/Purchase invoice grid is untouched. */
@@ -6869,6 +6876,7 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
   }
   window.switchVoucherType=switchVoucherType;
   function toggleMode(){
+    if(window.mayaInventoryOn&&!window.mayaInventoryOn(Books.cid())){banner('Inventory is OFF for this company (Accounts Only) — item entry is not available.','info');return;}
     if(isNewT(st.type)){banner(st.type+' is always entered as items.','info');return;}
     if(!isInvT(st.type)){banner('Change Mode works for Sales, Purchase, Credit Note and Debit Note.','info');return;}
     st.mode=st.mode==='item'?'acct':'item';st.invMode=st.mode;layout();
@@ -7690,6 +7698,16 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
   function hasVal(v){const s=String(v||'').trim();if(!s)return false;const n=Number(s.replace(/,/g,''));return !(isFinite(n)&&n===0);}
   function onBackspace(e,el){
     if(el.type==='date'||el.type==='checkbox')return;
+    /* Tally fresh-arrival (2026-11-17): just arrived via navigation, not yet
+       edited or cursor-moved — Backspace goes to the previous field with
+       content, deletes nothing. Composes with fix D. */
+    if(el.dataset&&el.dataset.mayaFresh){
+      delete el.dataset.mayaFresh;
+      e.preventDefault();
+      const f=fields(),i=f.indexOf(el);
+      if(i>0){let m=i-1;while(m>0&&!hasVal(f[m].value))m--;focusEl(f[m]);}
+      return;
+    }
     if(el.selectionStart===0&&el.selectionEnd===0){
       /* Tally behaviour. (1) Numeric grid field with a value, cursor at the
          left edge: clear the field and STAY — never jump to the previous
@@ -9519,7 +9537,7 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
  const mmTop=()=>MM.stack[MM.stack.length-1];
  /* menu gating (2026-11-16): an item with gate:<F11 key> is hidden while that Company Features switch is OFF (e.g. Bill of Materials while bom is off).
     NOTE: in this script block B is the engine OBJECT (B.features / B.cid), not a function — B() would throw and the gate would silently never hide. */
- const mmGateOk=it=>{if(!it.gate)return true;try{return !!B.features(B.cid())[it.gate];}catch(e){return true;}};
+ const mmGateOk=it=>{if(it.m==='invb'||it.m==='invs'){try{return window.mayaInventoryOn(B.cid());}catch(e){return true;}}if(!it.gate)return true;try{return !!B.features(B.cid())[it.gate];}catch(e){return true;}};
  const mmItems=()=>MENUS[mmTop().id].items.filter(mmGateOk);
  const mmFocusable=()=>mmItems().map((it,i)=>it.l?i:-1).filter(i=>i>=0);
  const mmBold=(l,k)=>{const i=l.toLowerCase().indexOf(String(k).toLowerCase());return i<0?esc(l):esc(l.slice(0,i))+'<strong>'+esc(l.charAt(i))+'</strong>'+esc(l.slice(i+1));};
@@ -11195,6 +11213,9 @@ function buildItems(){
     if(r.sec!==undefined){cols[col].push({t:'sec',l:r.sec});return}
     if(r.text){cols[col].push({t:'text',l:r.text});return}
     if(r.info==='gst'){const c=company();cols[col].push({t:'info',l:'Enable Goods and Services Tax (GST)',v:c.gstStatus==='registered'?'Yes':'No',n:c.gstStatus==='registered'?'GSTIN '+(c.gstin||''):'Company is unregistered'});return}
+    /* Inventory OFF (Accounts Only): godown / BOM / batch / expiry switches do not apply — force them off and hide the rows.
+       NOTE: S.list.co is only the udyam/msme fields, NOT the company — read the full company via company(). */
+    if(['godowns','bom','batches','expiry'].indexOf(r.k)>=0){var _co=null;try{_co=company();}catch(e){}if(_co&&_co.inventoryMode==='Accounts Only'){f[r.k]=false;return;}}
     if(!visible(r,f))return;
     const it={t:'tog',k:r.k,l:r.l,n:r.n};items.push(it);cols[col].push(it);
     if(f[r.k]&&r.sub){const s={t:'sub',sub:r.sub,l:r.subl,n:subSummary(r.sub)};items.push(s);cols[col].push(s)}
@@ -16420,10 +16441,11 @@ body.workspace-mode #dashboard .gateway-main{overflow-y:auto}
   }
   function openSecurityDialog(){
     buildSecurityDialog();
-    refreshSecurityDialog();
+    refreshSecurityDialog();if(window.mayaRefreshCcSecurity)window.mayaRefreshCcSecurity();
     var d=document.getElementById('maya-security-dialog');
     if(d) d.classList.add('on');
   }
+  window.mayaOpenSecurityDialog=openSecurityDialog;
   function hideSecurityDialog(){
     var d=document.getElementById('maya-security-dialog');
     if(d) d.classList.remove('on');
@@ -16444,7 +16466,7 @@ body.workspace-mode #dashboard .gateway-main{overflow-y:auto}
         return;
       }
       setSecurity(false);
-      refreshSecurityDialog();
+      refreshSecurityDialog();if(window.mayaRefreshCcSecurity)window.mayaRefreshCcSecurity();
       toast('Security OFF — company seedha khul jayegi.');
     }else{
       /* ON karne ke liye bhi password verify karo — dialog password maangta hai to ignore nahi karna chahiye. */
@@ -16459,7 +16481,7 @@ body.workspace-mode #dashboard .gateway-main{overflow-y:auto}
         return;
       }
       setSecurity(true);
-      refreshSecurityDialog();
+      refreshSecurityDialog();if(window.mayaRefreshCcSecurity)window.mayaRefreshCcSecurity();
       toast('Security ON — company kholne par password manga jayega.');
     }
   }
@@ -27258,6 +27280,460 @@ try{
 }catch(e){}
 })();
 </script>
+
+<script id="mayaacc-company-fixes-script">
+/* CREATE COMPANY FIXES — 2026-11-17, user report from the real EXE (run #12):
+   1. step pills are clickable tabs (+ scroll-spy) and step 4 has a real Security panel
+   2. focusing a field scrolls it to the centre of the viewport
+   3. double Enter in Address moves to the next field
+   4. Tally Backspace logic, app-wide (fresh-arrival tracking)
+   5. Inventory mode is wired: Accounts Only hides inventory UI
+   6. English / Hindi language toggle (Devanagari, global, default English)
+   Injected before the last </body>; all wrappers are idempotent (guarded by
+   __maya* flags) so a double inject does not double-wrap. */
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+
+/* ================= shared field helpers (Backspace / Enter nav) ================= */
+function isField(el){return !!el&&/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName||'');}
+function visField(el){
+  if(!el||el.disabled||el.type==='hidden')return false;
+  try{var r=el.getBoundingClientRect();return r.width>0&&r.height>0;}catch(e){return false;}
+}
+function fieldScope(el){
+  if(!el||!el.closest)return document;
+  return el.closest('#companySetup, .maya-ov, [role="dialog"], [id$="-overlay"], form')||document;
+}
+function fieldList(el){
+  var scope=fieldScope(el);
+  return Array.prototype.filter.call(scope.querySelectorAll('input,select,textarea'),visField);
+}
+function focusField(el){
+  if(!el)return;
+  if(window.__mayaEnd)window.__mayaEnd(el);else{try{el.focus();}catch(e){}}
+  if(el.dataset)el.dataset.mayaFresh='1';
+}
+function prevField(el){var f=fieldList(el),i=f.indexOf(el);return i>0?f[i-1]:null;}
+function nextField(el){var f=fieldList(el),i=f.indexOf(el);return (i>=0&&i<f.length-1)?f[i+1]:null;}
+window.mayaFocusNextField=function(el){var n=nextField(el);if(n)focusField(n);};
+window.mayaFocusPrevField=function(el){var p=prevField(el);if(p)focusField(p);};
+
+/* ================= 1. step pills = clickable tabs + scroll-spy ================= */
+var CC_STEPS=['ccPanelDetails','ccPanelTax','ccPanelAcct','ccPanelSecurity'];
+var ccSpyHold=0; /* scroll-spy pauses briefly after a step click so the
+  click's tab wins while the smooth scroll settles */
+function ccSetActive(i){
+  var steps=document.querySelectorAll('#companySetup .stepbar .step');
+  steps.forEach(function(s,ix){s.classList.toggle('active',ix===i);});
+}
+function ccGoTo(i){
+  var p=$(CC_STEPS[i]);if(!p)return;
+  ccSpyHold=Date.now()+1200;
+  ccSetActive(i);
+  try{p.scrollIntoView({behavior:'smooth',block:'start'});}catch(e){try{p.scrollIntoView();}catch(_){}}
+}
+window.mayaCcGoTo=ccGoTo;
+function ccRefreshSecurity(){
+  var st=$('ccSecStatus');if(!st)return;
+  var en=true;
+  try{var s=JSON.parse(localStorage.getItem('mayaacc_security')||'null');if(s&&typeof s.enabled==='boolean')en=s.enabled;}catch(e){}
+  var lang=(window.MayaLang&&window.MayaLang.get)?window.MayaLang.get():'en';
+  st.textContent=(lang==='hi')
+    ?(en?'पासवर्ड सुरक्षा: चालू — कंपनी खोलने पर पासवर्ड माँगा जाएगा।':'पासवर्ड सुरक्षा: बंद — कंपनी सीधे खुल जाएगी, पासवर्ड नहीं माँगा जाएगा।')
+    :(en?'Password Security: ON — a password will be asked when opening a company.':'Password Security: OFF — companies open directly, no password asked.');
+  var b=$('ccSecManage');if(b)b.textContent=(lang==='hi')?'पासवर्ड सुरक्षा प्रबंधित करें':'Manage Password Security';
+}
+window.mayaRefreshCcSecurity=ccRefreshSecurity;
+document.addEventListener('click',function(e){
+  var s=e.target&&e.target.closest?e.target.closest('#companySetup .stepbar .step'):null;
+  if(!s)return;
+  var i=parseInt(s.getAttribute('data-cc-step'),10);
+  if(!isNaN(i)){e.preventDefault();ccGoTo(i);}
+});
+document.addEventListener('keydown',function(e){
+  if((e.key==='Enter'||e.key===' ')&&e.target&&e.target.classList&&e.target.classList.contains('step')){
+    e.preventDefault();
+    var i=parseInt(e.target.getAttribute('data-cc-step'),10);
+    if(!isNaN(i))ccGoTo(i);
+  }
+});
+window.addEventListener('scroll',function(){
+  if(Date.now()<ccSpyHold)return;
+  var cs=$('companySetup');if(!cs||cs.style.display==='none')return;
+  var idx=0;
+  CC_STEPS.forEach(function(id,i){var p=$(id);if(!p)return;try{var r=p.getBoundingClientRect();if(r.top<=200)idx=i;}catch(e){}});
+  ccSetActive(idx);
+},{passive:true});
+(function(){
+  var orig=window.showCompanySetup;
+  if(typeof orig==='function'&&!orig.__mayaCcSteps){
+    var w=function(){
+      var r=orig.apply(this,arguments);
+      /* orig() rewrites ONLY the title/subtitle (Create vs Alter) — recapture
+         the fresh English text for those two only. The field labels are NOT
+         rewritten by orig(); recapturing them here would store the Hindi
+         translation as the "English" text when the form opens in Hindi mode. */
+      var head=document.querySelector('#companySetup .company-head');
+      if(head)head.querySelectorAll('[data-lang]').forEach(function(el){el.dataset.enTxt=el.textContent;});
+      ccSetActive(0);ccRefreshSecurity();
+      if(window.MayaLang)window.MayaLang.apply();
+      return r;
+    };
+    w.__mayaCcSteps=true;window.showCompanySetup=w;
+  }
+})();
+
+/* ================= 2. focusing a field centres it in the viewport ================= */
+document.addEventListener('focusin',function(e){
+  var el=e.target;
+  if(!el||!el.matches||!/^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName))return;
+  if(el.disabled||el.readOnly)return;
+  if(el.closest&&el.closest('#maya-print-dialog'))return;
+  try{el.scrollIntoView({block:'center',behavior:'smooth'});}catch(_){}
+});
+
+/* ================= 3. double Enter in Address = next field ================= */
+(function(){
+  var addr=$('address');if(!addr)return;
+  var prevEnter=false;
+  addr.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){
+      if(prevEnter){
+        e.preventDefault();prevEnter=false;
+        var v=addr.value;if(v.charAt(v.length-1)==='\n')addr.value=v.slice(0,-1);
+        var n=nextField(addr);if(n)focusField(n);
+      }else{prevEnter=true;}
+    }else{prevEnter=false;}
+  });
+  addr.addEventListener('blur',function(){prevEnter=false;});
+})();
+
+/* ================= 4. Tally Backspace, app-wide ================= */
+(function(){
+  var navPending=false;
+  document.addEventListener('mousedown',function(){navPending=false;},true);
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Tab'||e.key==='Enter'){navPending=true;return;}
+    if(e.key==='ArrowLeft'||e.key==='ArrowRight'||e.key==='ArrowUp'||e.key==='ArrowDown'||e.key==='Home'||e.key==='End'){
+      var a=document.activeElement;if(a&&a.dataset)delete a.dataset.mayaFresh;return;
+    }
+    if(e.key!=='Backspace')return;
+    /* voucher entry has its own (fix D) handler — never double-handle */
+    var ve=$('mayaacc-voucher-entry-overlay');
+    if(ve&&ve.classList.contains('is-open'))return;
+    var el=e.target;
+    if(!isField(el))return;
+    if(el.disabled)return;
+    if(el.closest&&(el.closest('#mtlp-ov')||el.closest('#mtlu-ov')||el.closest('#mtl-type-ov')||el.closest('#maya-print-dialog')))return;
+    var tag=el.tagName;
+    if(tag==='SELECT'){var p=prevField(el);if(p){e.preventDefault();focusField(p);}return;}
+    if(el.type==='checkbox'||el.type==='radio'||el.type==='button'||el.type==='submit'||el.type==='file')return;
+    if(tag==='TEXTAREA'){
+      /* fresh arrival or empty textarea: go back, delete nothing */
+      if(el.dataset.mayaFresh||!String(el.value||'').trim()){
+        var p2=prevField(el);if(p2){e.preventDefault();delete el.dataset.mayaFresh;focusField(p2);}return;
+      }
+      try{if(el.selectionStart===0&&el.selectionEnd===0){var p2b=prevField(el);if(p2b){e.preventDefault();focusField(p2b);}}}catch(_){}
+      return;
+    }
+    if(el.readOnly){var p3=prevField(el);if(p3){e.preventDefault();focusField(p3);}return;}
+    if(el.dataset.mayaFresh){var p4=prevField(el);if(p4){e.preventDefault();delete el.dataset.mayaFresh;focusField(p4);}return;}
+    if(!String(el.value||'').trim()){var p5=prevField(el);if(p5){e.preventDefault();focusField(p5);}return;}
+    if(el.type==='date')return;
+    var ss=null;try{ss=el.selectionStart;}catch(_){}
+    if(ss===0){try{if(el.selectionEnd===0){var p6=prevField(el);if(p6){e.preventDefault();focusField(p6);}}}catch(_){}}
+  },true);
+  document.addEventListener('focusin',function(e){
+    var el=e.target;if(!isField(el))return;
+    if(navPending){if(el.dataset)el.dataset.mayaFresh='1';}
+    else{if(el.dataset)delete el.dataset.mayaFresh;}
+    navPending=false;
+  });
+  document.addEventListener('input',function(e){var el=e.target;if(el&&el.dataset)delete el.dataset.mayaFresh;},true);
+  /* Enter moves to the next field on the Create Company form (selects keep native dropdown) */
+  document.addEventListener('keydown',function(e){
+    if(e.key!=='Enter')return;
+    var el=e.target;
+    if(!el||!el.closest||!el.closest('#companySetup'))return;
+    if(!isField(el)||el.tagName==='TEXTAREA'||el.tagName==='SELECT'||el.tagName==='BUTTON')return;
+    e.preventDefault();
+    var n=nextField(el);if(n)focusField(n);
+  });
+})();
+
+/* ================= 5. inventory mode wiring ================= */
+window.mayaInventoryOn=function(cid){
+  if(!cid)return true;
+  try{
+    var list=JSON.parse(localStorage.getItem('mayaacc_companies')||'[]');
+    var c=null;for(var i=0;i<list.length;i++){if(list[i].id===cid){c=list[i];break;}}
+    return !c||c.inventoryMode!=='Accounts Only';
+  }catch(e){return true;}
+};
+window.mayaCurrentInventoryOn=function(){
+  try{return window.mayaInventoryOn(localStorage.getItem('mayaacc_active_company')||'');}catch(e){return true;}
+};
+window.mayaInventoryAllows=function(name){
+  if(!name)return true;
+  var inv=['Stock Item','Godown'];
+  if(inv.indexOf(name)<0)return true;
+  return window.mayaCurrentInventoryOn();
+};
+/* gateway: hide the Stock Summary button when the active company is Accounts Only.
+   The create-company wrapper stamps inventoryMode AFTER the base createCompany
+   calls showCompanyWorkspace, so re-apply once the current task finishes. */
+(function(){
+  var orig=window.showCompanyWorkspace;
+  if(typeof orig==='function'&&!orig.__mayaInvGw){
+    var w=function(id){
+      var r=orig.apply(this,arguments);
+      var apply=function(){
+        try{
+          var on=window.mayaInventoryOn(id);
+          var b=document.querySelector('#dashboard .gateway-menu button[data-shortcut="S"]');
+          if(b)b.style.display=on?'':'none';
+        }catch(e){}
+      };
+      apply();
+      setTimeout(function(){
+        try{if((localStorage.getItem('mayaacc_active_company')||'')!==id)return;}catch(e){}
+        apply();
+      },0);
+      return r;
+    };
+    w.__mayaInvGw=true;window.showCompanyWorkspace=w;
+  }
+})();
+/* stock voucher types refuse to open when inventory is off */
+(function(){
+  var orig=window.switchVoucherType;
+  if(typeof orig==='function'&&!orig.__mayaInvGate){
+    var w=function(type,keepFocus){
+      if(type&&['Delivery Note','Receipt Note','Physical Stock','Sales Order','Purchase Order'].indexOf(type)>=0){
+        try{
+          var cid=localStorage.getItem('mayaacc_active_company')||'';
+          if(!window.mayaInventoryOn(cid)){
+            if(window.mayaToast)window.mayaToast(type+' needs inventory — this company is Accounts Only.');
+            return;
+          }
+        }catch(e){}
+      }
+      return orig.apply(this,arguments);
+    };
+    w.__mayaInvGate=true;window.switchVoucherType=w;
+  }
+})();
+
+/* ================= 6. English / Hindi language toggle ================= */
+/* Stored GLOBAL (localStorage key mayaacc_lang), default English. Proper
+   Devanagari Hindi, not Roman Hinglish. Scope in this pass: top menu,
+   Gateway menu, Create Company form (labels + steps), voucher entry screen
+   labels, Day Book / Ledger Vouchers titles + footer hints. Everything else
+   falls back to English. Static text is translated via data-lang (plain) /
+   data-lang-html (keeps the <small> shortcut letter); dynamic text via
+   two-way maps in applyVoucher()/applyReport(). */
+window.MayaLang=(function(){
+  var KEY='mayaacc_lang';
+  var DICT={
+    /* top menu */
+    'top.company':'कंपनी','top.data':'डेटा','top.exchange':'एक्सचेंज','top.goto':'जाएँ','top.import':'आयात',
+    'top.export':'निर्यात','top.share':'शेयर','top.print':'प्रिंट','top.help':'सहायता','top.logout':'लॉगआउट',
+    /* gateway */
+    'gw.title':'MAYAACC कार्यक्षेत्र','gw.masters':'मास्टर्स','gw.transactions':'लेनदेन','gw.utilities':'उपयोगिताएँ','gw.reports':'रिपोर्ट्स',
+    'gw.create':'<strong>ब</strong>नाएँ','gw.alter':'<strong>ब</strong>दलें','gw.chart':'खातों का <strong>च</strong>ार्ट','gw.vouchers':'<strong>व</strong>ाउचर','gw.daybook':'<strong>दै</strong>निक बही',
+    'gw.banking':'<strong>बैं</strong>किंग','gw.gst':'कर व <strong>जी</strong>एसटी','gw.sound':'<strong>ध्व</strong>नि सेटिंग्स','gw.trial':'<strong>त</strong>लपट','gw.bs':'<strong>स्थि</strong>ति विवरण',
+    'gw.pl':'<strong>ला</strong>भ व हानि','gw.stock':'<strong>स्टॉ</strong>क सारांश','gw.ratio':'<strong>अ</strong>नुपात विश्लेषण','gw.more':'<strong>अ</strong>धिक रिपोर्ट देखें','gw.dash':'<strong>डै</strong>शबोर्ड',
+    'gw.period':'वर्तमान अवधि','gw.date':'वर्तमान तिथि','gw.company':'कंपनी का नाम','gw.lastactivity':'अंतिम गतिविधि',
+    'gw.sales':'बिक्री','gw.receivables':'प्राप्य','gw.payables':'देय','gw.stockv':'स्टॉक मूल्य','gw.currdata':'वर्तमान कंपनी डेटा',
+    /* create company */
+    'cc.title':'कंपनी बनाएँ','cc.sub':'अपना व्यवसाय एक बार सेट करें। ये विवरण बाद में बदले जा सकते हैं।',
+    'cc.back':'← डैशबोर्ड पर वापस','cc.step1':'1. कंपनी विवरण','cc.step2':'2. कर व जीएसटी','cc.step3':'3. लेखा','cc.step4':'4. सुरक्षा',
+    'cc.basic':'मूल जानकारी','cc.basicSub':'MAYAACC को अपने व्यवसाय के बारे में बताएँ।',
+    'cc.tax':'कर व जीएसटी','cc.taxSub':'इस कंपनी के लिए जीएसटी और करदाता विवरण सेट करें।',
+    'cc.acct':'वित्तीय व लेखा','cc.acctSub':'अवधि और मूल लेखा प्राथमिकताएँ सेट करें।',
+    'cc.sec':'सुरक्षा','cc.secSub':'अपनी कंपनियों को पासवर्ड से सुरक्षित करें।','cc.secStatusLab':'पासवर्ड सुरक्षा',
+    'cc.hint':'* आवश्यक फ़ील्ड · सेटिंग्स बाद में बदली जा सकती हैं।',
+    'cc.f.name':'कंपनी / व्यवसाय का नाम *','cc.f.legal':'कानूनी नाम','cc.f.mobile':'मोबाइल नंबर *','cc.f.email':'ईमेल पता *',
+    'cc.f.address':'पता *','cc.f.state':'राज्य / केंद्र शासित प्रदेश *','cc.f.country':'देश *','cc.f.pin':'पिन कोड *',
+    'cc.f.biztype':'व्यवसाय का प्रकार *','cc.f.currency':'मुद्रा','cc.f.gstreg':'जीएसटी पंजीकरण *','cc.f.gstin':'जीएसटीआईएन *',
+    'cc.f.pan':'पैन','cc.f.taxpayer':'करदाता प्रकार *','cc.f.udyam':'उद्यम पंजीकरण सं.','cc.f.msme':'एमएसएमई श्रेणी',
+    'cc.f.activity':'गतिविधि का प्रकार','cc.f.fy':'वित्तीय वर्ष प्रारंभ *','cc.f.books':'खाते प्रारंभ *',
+    'cc.f.invnum':'चालान क्रमांकन','cc.f.inventory':'इन्वेंटरी'
+  };
+  var VOUCHER_PAIRS=[ /* two-way map for voucher-entry dynamic labels */
+    ['SALES ORDER','बिक्री ऑर्डर'],['PURCHASE ORDER','खरीद ऑर्डर'],['DELIVERY NOTE','डिलीवरी नोट'],
+    ['RECEIPT NOTE','प्राप्ति नोट'],['PHYSICAL STOCK','भौतिक स्टॉक'],['STOCK JOURNAL','स्टॉक जर्नल'],
+    ['CREDIT NOTE','क्रेडिट नोट'],['DEBIT NOTE','डेबिट नोट'],
+    ['SALES','बिक्री'],['PURCHASE','खरीद'],['PAYMENT','भुगतान'],['RECEIPT','प्राप्ति'],['CONTRA','अंतरण'],['JOURNAL','जर्नल'],
+    ['Mode: Item Invoice','मोड: वस्तु बीजक'],['Mode: Accounting Invoice','मोड: लेखा बीजक'],
+    ['Stock Out','स्टॉक बाहर'],['Stock In','स्टॉक अंदर'],['Physical Count','भौतिक गणना'],
+    ['Order Entry','ऑर्डर प्रविष्टि'],['Item Entry','वस्तु प्रविष्टि'],
+    ['As Voucher (Double Entry)','वाउचर (दोहरी प्रविष्टि)'],['As Voucher (Single Entry)','वाउचर (एकल प्रविष्टि)'],
+    ['ALTERATION · ','परिवर्तन · '],['Mode: ','मोड: '],[' · Optional',' · वैकल्पिक'],[' · Post-Dated',' · उत्तर-दिनांकित'],
+    ['Party A/c Name','पार्टी खाता नाम'],['Sales Ledger','बिक्री खाता'],['Purchase Ledger','खरीद खाता'],
+    ['Current Balance','वर्तमान शेष'],['Ref No.','संदर्भ सं.'],['Ref Date','संदर्भ तिथि'],
+    ['Order No.','ऑर्डर सं.'],['Due Date','नियत तिथि'],['Against Order','ऑर्डर के विरुद्ध'],
+    ['No.','सं.'],['Date','तिथि'],['Narration','विवरण'],
+    ['Name of Item','वस्तु का नाम'],['Ledger','खाता'],['Description','विवरण'],
+    ['Book Qty','पुस्तक मात्रा'],['Quantity','मात्रा'],['Adjustment','समायोजन'],
+    ['Rate','दर'],['Per','प्रति'],['Disc %','छूट %'],['Godown','गोदाम'],
+    ['Batch No.','बैच सं.'],['Expiry','समाप्ति'],['GST %','जीएसटी %'],['Amount','राशि'],
+    ['ITEM INVOICE — NAME OF ITEM, QUANTITY, RATE, PER, DISC %, AMOUNT','वस्तु बीजक — वस्तु का नाम, मात्रा, दर, प्रति, छूट %, राशि'],
+    ['ACCOUNTING INVOICE — LEDGER, AMOUNT','लेखा बीजक — खाता, राशि'],
+    ['STOCK IN — NAME OF ITEM, QUANTITY, RATE, PER, DISC %, AMOUNT','स्टॉक अंदर — वस्तु का नाम, मात्रा, दर, प्रति, छूट %, राशि'],
+    ['STOCK OUT — NAME OF ITEM, QUANTITY, RATE, PER, DISC %, AMOUNT','स्टॉक बाहर — वस्तु का नाम, मात्रा, दर, प्रति, छूट %, राशि'],
+    ['PHYSICAL COUNT — NAME OF ITEM, BOOK QTY, QUANTITY, ADJUSTMENT','भौतिक गणना — वस्तु का नाम, पुस्तक मात्रा, मात्रा, समायोजन'],
+    ['ORDER ENTRY — NAME OF ITEM, QUANTITY, RATE, PER, DISC %, AMOUNT','ऑर्डर प्रविष्टि — वस्तु का नाम, मात्रा, दर, प्रति, छूट %, राशि'],
+    ['ITEM ENTRY — NAME OF ITEM, QUANTITY, RATE, PER, DISC %, AMOUNT','वस्तु प्रविष्टि — वस्तु का नाम, मात्रा, दर, प्रति, छूट %, राशि'],
+    ['AS VOUCHER (DOUBLE ENTRY) — LEDGER, AMOUNT','वाउचर (दोहरी प्रविष्टि) — खाता, राशि'],
+    ['AS VOUCHER (SINGLE ENTRY) — LEDGER, AMOUNT','वाउचर (एकल प्रविष्टि) — खाता, राशि'],
+    ['FUNCTIONS','कार्य'],['Quit','बाहर निकलें'],['Accept','स्वीकार करें'],['Delete','हटाएँ'],['Cancel','रद्द करें']
+  ];
+  var REPORT_PAIRS=[ /* two-way map for report titles / footer / summary labels */
+    ['Day Book','दैनिक बही'],['Ledger Vouchers','खाता वाउचर'],['Trial Balance','तलपट'],
+    ['Saved Views','सहेजे गए दृश्य'],
+    ['Cash / Bank Summary','नकद / बैंक सारांश'],['Display More Reports','अधिक रिपोर्ट देखें'],
+    ['Quit','बाहर निकलें'],['Alter','बदलें'],['Select','चुनें'],['Add Vch','वाउचर जोड़ें'],
+    ['Duplicate Vch','वाउचर दोहराएँ'],['Insert Vch','वाउचर डालें'],['Delete','हटाएँ'],
+    ['Cancel Vch','वाउचर रद्द करें'],['Remove Line','पंक्ति हटाएँ'],['Restore Line','पंक्ति वापस लाएँ'],
+    ['Configure','कॉन्फ़िगर करें'],['Period','अवधि'],['Company','कंपनी'],['Ledger','खाता'],
+    ['Bill-wise','बिलवार'],['Monthly','मासिक'],['GST Info','जीएसटी जानकारी'],['Columnar','स्तंभवार'],
+    ['Voucher Type','वाउचर प्रकार'],['Show Profit','लाभ दिखाएँ'],['Hide Profit','लाभ छिपाएँ'],
+    ['Ledger-wise','खातावार'],['Group','समूह'],['New Column','नया स्तंभ'],['Alter Column','स्तंभ बदलें'],
+    ['Delete Column','स्तंभ हटाएँ'],['Auto Column','स्वचालित स्तंभ'],['Filter Details','फ़िल्टर विवरण'],
+    ['Hide ledger','खाता छिपाएँ'],['GST Portal View','जीएसटी पोर्टल देखें'],
+    ['Ledger Vouchers-GST','खाता वाउचर-जीएसटी'],['Basis of Values','मूल्यों का आधार'],
+    ['Change View','दृश्य बदलें'],['Exception Reports','अपवाद रिपोर्ट'],['Save View','दृश्य सहेजें'],
+    ['Apply Filter','फ़िल्टर लागू करें'],['Hide','छिपाएँ'],['Unhide…','दिखाएँ…'],
+    ['Reconcile','मिलान करें'],['Contact','संपर्क'],['GST Portal','जीएसटी पोर्टल'],['Set GST Status','जीएसटी स्थिति सेट करें'],
+    ['Debit Amt','डेबिट राशि'],['Credit Amt','क्रेडिट राशि'],['Balance','शेष'],
+    ['Opening Balance :','प्रारंभिक शेष :'],['Current Total :','वर्तमान कुल :'],['Closing Balance :','अंतिम शेष :'],
+    ['Debit Amount','डेबिट राशि'],['Credit Amount','क्रेडिट राशि'],['Particulars','विवरण'],
+    ['Vch Type','वाउचर प्रकार'],['Vch No.','वाउचर सं.'],['Date','तिथि'],
+    ['Inwards Qty','आवक मात्रा'],['Outwards Qty','जावक मात्रा']
+  ];
+  function get(){try{return localStorage.getItem(KEY)||'en';}catch(e){return 'en';}}
+  function set(l){try{localStorage.setItem(KEY,l);}catch(e){}}
+  function mapText(txt,lang){
+    /* longest phrase first, so 'Cancel Vch' beats 'Cancel', 'Sales Ledger'
+       beats 'Ledger', 'SALES ORDER' beats 'SALES' — otherwise the short
+       pair fires first and leaves a half-translated label behind */
+    var pairs=(lang==='hi'?VOUCHER_PAIRS.concat(REPORT_PAIRS):REPORT_PAIRS.concat(VOUCHER_PAIRS)).slice();
+    pairs.sort(function(a,b){return (lang==='hi'?b[0].length-a[0].length:b[1].length-a[1].length);});
+    var out=txt;
+    if(lang==='hi'){
+      pairs.forEach(function(pr){if(out.indexOf(pr[0])>=0)out=out.split(pr[0]).join(pr[1]);});
+    }else{
+      pairs.forEach(function(pr){if(out.indexOf(pr[1])>=0)out=out.split(pr[1]).join(pr[0]);});
+    }
+    return out;
+  }
+  function setTxt(el,txt){if(el&&el.textContent!==txt)el.textContent=txt;}
+  function setHtml(el,html){if(el&&el.innerHTML!==html)el.innerHTML=html;}
+  function apply(){
+    var lang=get();
+    document.querySelectorAll('[data-lang]').forEach(function(el){
+      var k=el.getAttribute('data-lang');
+      if(lang==='hi'&&k==='cc.title'&&el.dataset.enTxt&&el.dataset.enTxt.indexOf('Alter')===0)setTxt(el,'कंपनी बदलें');
+      else if(lang==='hi'&&k==='cc.sub'&&el.dataset.enTxt&&el.dataset.enTxt.indexOf('Change')===0)setTxt(el,'कंपनी के विवरण बदलें।');
+      else if(lang==='hi'&&DICT[k])setTxt(el,DICT[k]);
+      else if(lang==='en'&&el.dataset.enTxt!==undefined)setTxt(el,el.dataset.enTxt);
+    });
+    document.querySelectorAll('[data-lang-html]').forEach(function(el){
+      var k=el.getAttribute('data-lang-html');
+      if(lang==='hi'&&DICT[k])setHtml(el,DICT[k]+(el.dataset.key?' <small style="opacity:.55">'+el.dataset.key+'</small>':''));
+      else if(lang==='en'&&el.dataset.enHtml!==undefined)setHtml(el,el.dataset.enHtml);
+    });
+    var btn=$('mayaLangBtn');if(btn)btn.textContent=(lang==='hi')?'English':'हिंदी';
+    if(window.mayaRefreshCcSecurity)window.mayaRefreshCcSecurity();
+    applyVoucher();applyReport();
+  }
+  function applyVoucher(){
+    var lang=get();
+    var ov=$('mayaacc-voucher-entry-overlay');
+    if(!ov||!ov.classList.contains('is-open'))return;
+    var ids=['mve-title','mveLblParty','mveLblLedger','mveBalParty','mveBalLedger','mveModeLabel',
+      'mve-top-title','mve-grid-title','mveNarration','mveSideTitle'];
+    ids.forEach(function(id){var el=$(id);if(el)setTxt(el,mapText(el.textContent,lang));});
+    ov.querySelectorAll('#mveSide button span:first-child').forEach(function(sp){setTxt(sp,mapText(sp.textContent,lang));});
+    ov.querySelectorAll('#mveItemTable thead th, #mveJournalTable thead th').forEach(function(th){setTxt(th,mapText(th.textContent,lang));});
+    ['mveBtnQuit','mveBtnAccept','mveBtnDelete','mveBtnCancel'].forEach(function(id){var el=$(id);if(el)setTxt(el,mapText(el.textContent,lang));});
+    ov.querySelectorAll('#mve-top label').forEach(function(l){setTxt(l,mapText(l.textContent,lang));});
+  }
+  function applyReport(){
+    var lang=get();
+    var ov=$('mayaacc-reports-overlay');
+    if(!ov||!ov.classList.contains('is-open'))return;
+    var t=$('mrp-title');if(t)setTxt(t,mapText(t.textContent,lang));
+    var fl=$('mtl-footline');
+    if(fl)fl.querySelectorAll('.mtl-fl-seg').forEach(function(seg){
+      var b=seg.querySelector('b');var key=b?b.textContent:'';
+      var lbl=seg.textContent.replace(key,'').trim();
+      var mapped=mapText(lbl,lang);
+      if(b)setHtml(seg,'<b>'+key+'</b> '+mapped);
+    });
+    ['mtl-sum-lab-dr','mtl-sum-lab-cr','mtl-sum-lab-diff'].forEach(function(id){var el=$(id);if(el)setTxt(el,mapText(el.textContent,lang));});
+    var bal=$('mtl-balances');
+    if(bal)bal.querySelectorAll('.mtl-bal-row>span:first-child').forEach(function(sp){setTxt(sp,mapText(sp.textContent,lang));});
+    var rail=$('mtl-rail');
+    if(rail){
+      /* sidebar rows are .mtl-sb-row (a <b> key + a <span> label) — translate the
+         label span only, never the key letter; .mtl-rail-row is only the filter
+         panel's Apply/Clear buttons, NOT the sidebar */
+      rail.querySelectorAll('.mtl-sb-row span').forEach(function(sp){setTxt(sp,mapText(sp.textContent,lang));});
+      rail.querySelectorAll('.mtl-rail-sec').forEach(function(sec){setTxt(sec,mapText(sec.textContent,lang));});
+    }
+    /* report table column headers (re-rendered per view; the observer below
+       re-applies when the table changes) */
+    ov.querySelectorAll('.mrp-table th').forEach(function(th){setTxt(th,mapText(th.textContent,lang));});
+  }
+  function toggle(){
+    var next=get()==='hi'?'en':'hi';set(next);apply();
+    if(window.mayaToast)window.mayaToast(next==='hi'?'भाषा: हिंदी':'Language: English');
+  }
+  function init(){
+    document.querySelectorAll('[data-lang]').forEach(function(el){if(el.dataset.enTxt===undefined)el.dataset.enTxt=el.textContent;});
+    document.querySelectorAll('[data-lang-html]').forEach(function(el){
+      if(el.dataset.enHtml===undefined)el.dataset.enHtml=el.innerHTML;
+      var sm=el.querySelector('small');if(sm&&el.dataset.key===undefined)el.dataset.key=sm.textContent.trim();
+    });
+    /* dynamic labels change when the user navigates inside a report / voucher screen */
+    try{
+      var obs=new MutationObserver(function(){if(get()==='hi'){applyVoucher();applyReport();}});
+      ['mve-title','mveModeLabel','mrp-title','mtl-footline','mtl-foot2','mrp-body','mtl-rail'].forEach(function(id){
+        var el=$(id);if(el)obs.observe(el,{childList:true,characterData:true,subtree:true});
+      });
+    }catch(e){}
+    /* wrap the report openers so a fresh report opens in the current language */
+    [['mayaOpenReport',false],['mayaOpenReportView',false]].forEach(function(pair){
+      var name=pair[0];var orig=window[name];
+      if(typeof orig==='function'&&!orig.__mayaLang){
+        var w=function(){var r=orig.apply(this,arguments);
+          setTimeout(function(){applyReport();},0);
+          return r;};
+        w.__mayaLang=true;window[name]=w;
+      }
+    });
+    apply();
+  }
+  return {get:get,set:set,apply:apply,toggle:toggle,applyVoucher:applyVoucher,applyReport:applyReport,init:init};
+})();
+window.mayaToggleLang=function(){window.MayaLang.toggle();};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){window.MayaLang.init();});
+else window.MayaLang.init();
+})();
+</script>
+
+
+
+
+
+
+
+
+
+
 
 </body>
 </html>
