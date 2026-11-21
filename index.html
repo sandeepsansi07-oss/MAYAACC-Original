@@ -441,7 +441,7 @@ var MAYA_COINS_LOGO_FULL_IMG="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAccA
     <div class="gateway-top">
       <div class="gateway-brand"><img id="mayaGatewayLogoImg" class="maya-logo-img" alt="MAYAACC" style="height:30px;width:auto;display:block" onerror="this.style.display='none'">MAYAACC</div>
       <div class="gateway-nav">
-        <button id="mcoBtn" onclick="mayaCompanyMenu()" title="Company menu (F3)" data-lang-html="top.company">Company &#9662; <small style="opacity:.55">F3</small></button>
+        <button id="mcoBtn" onclick="window.mayaF3Dropdown?window.mayaF3Dropdown():window.mayaCompanyMenu()" title="Company menu (F3)" data-lang-html="top.company">Company &#9662; <small style="opacity:.55">F3</small></button>
         <button data-shortcut="Y" onclick="mayaAction('Data')" data-lang-html="top.data">Data <small style="opacity:.55"><u>Y</u></small></button>
         <button data-shortcut="Z" onclick="mayaAction('Exchange')" data-lang-html="top.exchange">Exchange <small style="opacity:.55"><u>Z</u></small></button>
         <button class="goto" onclick="mayaAction('Go To')" data-lang-html="top.goto">Go To <small style="opacity:.55">Alt+<u>G</u></small></button>
@@ -465,10 +465,13 @@ var MAYA_COINS_LOGO_FULL_IMG="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAccA
           <div class="summary-date"><span class="summary-label" data-lang="gw.date">CURRENT DATE</span><strong id="currentDate">—</strong></div>
         </div>
         <div class="company-data-head"><span data-lang="gw.company">NAME OF COMPANY</span><span data-lang="gw.lastactivity">LAST ACTIVITY</span></div>
-        <div class="selected-company-row">
-          <div><strong id="workspaceCompanyName">Selected Company</strong><small id="workspaceCompanyInfo">—</small></div>
-          <strong id="workspaceLastActivity">—</strong>
+        <div id="mayaOpenCompaniesList">
+          <div class="selected-company-row">
+            <div><strong id="workspaceCompanyName">Selected Company</strong><small id="workspaceCompanyInfo">—</small></div>
+            <strong id="workspaceLastActivity">—</strong>
+          </div>
         </div>
+        <div class="open-companies-count" id="mayaOpenCompaniesCount">OPEN COMPANIES — 1</div>
         <div class="gateway-cards">
           <div class="gateway-stat"><span data-lang="gw.sales">Sales</span><strong id="wsSales">₹ 0</strong><small data-lang="gw.currdata">Current company data</small></div>
           <div class="gateway-stat"><span data-lang="gw.receivables">Receivables</span><strong id="wsReceivables">₹ 0</strong><small data-lang="gw.currdata">Current company data</small></div>
@@ -1527,7 +1530,7 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
 #mayaacc-ledger-panel{position:absolute;left:0;top:0;height:100%;width:100%;min-width:0;background:rgba(255,255,255,.99);border-right:1px solid #dfe4ec;box-shadow:18px 0 45px rgba(16,24,40,.16);display:flex;flex-direction:column;overflow:hidden}
 .mlg-content{display:flex;min-height:100%;overflow:hidden}.mlg-main{padding:26px 28px 110px;overflow:auto;flex:1}.mlg-side{width:148px;background:#f7f9fc;border-left:1px solid #e3e8ef;padding:22px 12px;flex:0 0 148px}.mlg-side h3{font-size:11px;letter-spacing:.08em;color:#7b8797;margin:3px 6px 12px}.mlg-side button{width:100%;padding:10px 9px;margin:0 0 8px;border:1px solid #dce3eb;border-radius:8px;background:#fff;color:#34465d;text-align:left;cursor:pointer;font-size:12px}.mlg-side button:hover{background:#eef3fb}
 .mlg-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}.mlg-title h2{margin:0;font-size:22px;color:#18273c}.mlg-close{border:0;background:transparent;font-size:22px;color:#7b8797;cursor:pointer}.mlg-section{margin-bottom:18px}.mlg-section h4{margin:0 0 10px;font-size:10px;letter-spacing:.08em;color:#78869a;text-transform:uppercase}.mlg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.mlg-field{margin-bottom:0}.mlg-field.full{grid-column:1/-1}.mlg-field label{display:block;font-size:12px;font-weight:800;color:#45546a;margin-bottom:7px}.mlg-field input,.mlg-field select,.mlg-field textarea{width:100%;box-sizing:border-box;padding:10px 11px;border:1px solid #d8e0ea;border-radius:8px;background:#fff;font-size:13px;outline:none}.mlg-field input:focus,.mlg-field select:focus,.mlg-field textarea:focus{border-color:#8d9bb0;box-shadow:0 0 0 3px rgba(94,108,134,.08)}.mlg-field textarea{min-height:74px;resize:vertical}.mlg-under-wrap{position:relative}.mlg-tree{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);max-height:260px;overflow:auto;background:#fff;border:1px solid #d7dfe8;border-radius:8px;box-shadow:0 14px 30px rgba(16,24,40,.14);z-index:40;padding:5px 0}.mlg-tree button{display:block;width:100%;border:0;background:#fff;text-align:left;padding:8px 12px;font-size:12px;color:#33445c;cursor:pointer}.mlg-tree button:hover,.mlg-tree button.mlg-focus{background:#edf1fb;color:#395ba8}.mlg-note{font-size:10px;color:#8a96a6;margin-top:5px}.mlg-chip{display:inline-flex;align-items:center;padding:4px 7px;border-radius:999px;background:#f1f3f7;color:#5f6c7d;font-size:10px;font-weight:700;margin-top:6px}.mlg-summary{padding:12px 14px;border:1px solid #e1e6ee;border-radius:9px;background:#fafbfe;font-size:12px;line-height:1.7}.mlg-summary-row{display:flex;justify-content:space-between;gap:12px}.mlg-footer{position:sticky;bottom:0;background:#fff;border-top:1px solid #e3e8ef;padding:10px 0 0;margin-top:20px;display:flex;justify-content:space-between;align-items:center}.mlg-savehint{font-size:12px;font-weight:800;color:#2b3b52;cursor:pointer;padding-bottom:5px;border-bottom:3px double #25364d}.mlg-savehint u{text-underline-offset:2px}.mlg-actions{display:flex;gap:8px}.mlg-actions button{border:1px solid #d7dee8;background:#fff;border-radius:8px;padding:9px 12px;font-size:11px;font-weight:700;cursor:pointer}.mlg-actions .primary{background:#1d2d42;color:#fff;border-color:#1d2d42}
-#mayaacc-ledger-config{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);right:auto;height:auto;max-height:calc(100vh - 60px);width:min(640px,94vw);background:#fff;border:1px solid #dbe4ec;border-radius:14px;box-shadow:0 24px 70px rgba(15,25,50,.35);z-index:10070;overflow:auto}.mlgc-head{position:sticky;top:0;background:#fff;border-bottom:1px solid #e4e8ef;padding:18px 20px 14px;z-index:2}.mlgc-head h3{margin:0;color:#1d2d42;font-size:16px}.mlgc-head p{margin:5px 0 0;color:#7a8798;font-size:11px;line-height:1.45}.mlgc-close{position:absolute;right:14px;top:12px;border:0;background:transparent;color:#768396;font-size:22px;cursor:pointer}.mlgc-body{padding:15px 18px 90px}.mlgc-section{margin-bottom:18px}.mlgc-section h4{margin:0 0 9px;font-size:10px;letter-spacing:.08em;color:#78869a;text-transform:uppercase}.mlgc-option{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 11px;border:1px solid #e2e7ee;border-radius:9px;background:#fbfcfe;margin:7px 0;cursor:pointer}.mlgc-option:hover,.mlgc-option.mlgc-focus{background:#edf1fb;border-color:#8ba5df;box-shadow:0 0 0 2px rgba(87,126,214,.10);outline:2px solid #7b9ae0;outline-offset:-2px}.mlgc-option strong{font-size:12px;color:#34445c;font-weight:700}.mlgc-option small{display:block;color:#8894a6;font-size:10px;line-height:1.35;margin-top:3px}.mlgc-check{position:relative;width:40px;height:22px;flex:0 0 auto}.mlgc-check input{display:none}.mlgc-check span{position:absolute;inset:0;border-radius:20px;background:#d7dde6;cursor:pointer;transition:.18s}.mlgc-check span:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.12);transition:.18s}.mlgc-check input:checked+span{background:#577ed6}.mlgc-check input:checked+span:before{transform:translateX(18px)}.mlgc-footer{position:sticky;bottom:0;background:#fff;border-top:1px solid #e3e8ef;padding:11px 18px;display:flex;justify-content:space-between;gap:8px}.mlgc-footer button{border:1px solid #d7dee8;background:#fff;border-radius:8px;padding:9px 12px;font-size:11px;font-weight:700;cursor:pointer}.mlgc-footer .primary{background:#1d2d42;color:#fff;border-color:#1d2d42}.mlgc-status{font-size:10px;color:#77849a;margin:0 0 10px}.mlg-party-only{display:none}
+#mayaacc-ledger-config{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);right:auto;height:auto;max-height:calc(100vh - 60px);width:min(1020px,94vw);background:#fff;border:1px solid #dbe4ec;border-radius:10px;box-shadow:0 24px 70px rgba(15,25,50,.35);z-index:10070;overflow:auto}.mlgc-head{position:sticky;top:0;background:#fff;border-bottom:1px solid #e4e8ef;padding:18px 20px 14px;z-index:2}.mlgc-head h3{margin:0;color:#1d2d42;font-size:16px}.mlgc-head p{margin:5px 0 0;color:#7a8798;font-size:11px;line-height:1.45}.mlgc-close{position:absolute;right:14px;top:12px;border:0;background:transparent;color:#768396;font-size:22px;cursor:pointer}.mlgc-body{padding:15px 18px 90px}.mlgc-section{margin-bottom:18px}.mlgc-section h4{margin:0 0 9px;font-size:10px;letter-spacing:.08em;color:#78869a;text-transform:uppercase}.mlgc-option{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 11px;border:1px solid #e2e7ee;border-radius:9px;background:#fbfcfe;margin:7px 0;cursor:pointer}.mlgc-option:hover,.mlgc-option.mlgc-focus{background:#edf1fb;border-color:#8ba5df;box-shadow:0 0 0 2px rgba(87,126,214,.10);outline:2px solid #7b9ae0;outline-offset:-2px}.mlgc-option strong{font-size:12px;color:#34445c;font-weight:700}.mlgc-option small{display:block;color:#8894a6;font-size:10px;line-height:1.35;margin-top:3px}.mlgc-check{position:relative;width:40px;height:22px;flex:0 0 auto}.mlgc-check input{display:none}.mlgc-check span{position:absolute;inset:0;border-radius:20px;background:#d7dde6;cursor:pointer;transition:.18s}.mlgc-check span:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.12);transition:.18s}.mlgc-check input:checked+span{background:#577ed6}.mlgc-check input:checked+span:before{transform:translateX(18px)}.mlgc-footer{position:sticky;bottom:0;background:#fff;border-top:1px solid #e3e8ef;padding:11px 18px;display:flex;justify-content:space-between;gap:8px}.mlgc-footer button{border:1px solid #d7dee8;background:#fff;border-radius:8px;padding:9px 12px;font-size:11px;font-weight:700;cursor:pointer}.mlgc-footer .primary{background:#1d2d42;color:#fff;border-color:#1d2d42}.mlgc-status{font-size:10px;color:#77849a;margin:0 0 10px}.mlg-party-only{display:none}
 #mayaacc-ledger-print{display:none}
 @media(max-width:820px){#mayaacc-ledger-panel{width:100%;min-width:0}.mlg-side{width:135px;flex-basis:135px}}@media(max-width:620px){.mlg-content{display:block}.mlg-main{padding:20px 16px}.mlg-side{display:flex;gap:8px;width:auto;flex:none;border-left:0;border-top:1px solid #e3e8ef;padding:10px 12px}.mlg-side h3{display:none}.mlg-side button{flex:1;margin:0}.mlg-grid{grid-template-columns:1fr}.mlg-field.full{grid-column:auto}}
 </style>
@@ -1535,38 +1538,37 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
 <div id="mayaacc-ledger-config" aria-hidden="true">
   <div class="mlgc-head">
     <button class="mlgc-close" type="button" onclick="mayaCloseLedgerConfig()">×</button>
-    <h3>Ledger Configuration</h3>
-    <p>F12 settings apply directly to the Ledger screen for the current company.</p>
+    <h3>Configuration</h3>
+    <p id="mlgcStatus" class="mlgc-status" style="display:none">Changes apply immediately; Save Configuration stores them for this company.</p>
   </div>
+  <span class="mlgc-ind top" style="display:none">▲</span>
   <div class="mlgc-body">
-    <p id="mlgcStatus" class="mlgc-status">Changes apply immediately; Save Configuration stores them for this company.</p>
-    <div class="mlgc-section"><h4>Ledger Screen</h4>
-      <label class="mlgc-option"><span><strong>Show Nickname</strong><small>Nickname field for every Ledger.</small></span><span class="mlgc-check"><input id="mlgcNickname" type="checkbox"><span></span></span></label>
-      <label class="mlgc-option"><span><strong>Show Mailing Address</strong><small>Address fields appear for party ledgers.</small></span><span class="mlgc-check"><input id="mlgcAddress" type="checkbox"><span></span></span></label>
-      <label class="mlgc-option"><span><strong>Show Party Contact</strong><small>Phone and WhatsApp for Sundry Debtors/Creditors.</small></span><span class="mlgc-check"><input id="mlgcPartyContact" type="checkbox"><span></span></span></label>
-      <label class="mlgc-option"><span><strong>Show Aadhaar</strong><small>Aadhaar field for party ledgers.</small></span><span class="mlgc-check"><input id="mlgcAadhaar" type="checkbox"><span></span></span></label>
-      <label class="mlgc-option"><span><strong>Show GST / PAN</strong><small>Tax identity fields for party ledgers.</small></span><span class="mlgc-check"><input id="mlgcTax" type="checkbox"><span></span></span></label>
-      <label class="mlgc-option"><span><strong>Show Bank Details</strong><small>Bank name, account, IFSC and UPI fields.</small></span><span class="mlgc-check"><input id="mlgcBank" type="checkbox"><span></span></span></label>
-      <label class="mlgc-option"><span><strong>Show Credit Control</strong><small>Credit limit and credit days fields.</small></span><span class="mlgc-check"><input id="mlgcCredit" type="checkbox"><span></span></span></label>
-      <label class="mlgc-option"><span><strong>Show WhatsApp</strong><small>Optional WhatsApp number for parties.</small></span><span class="mlgc-check"><input id="mlgcWhatsApp" type="checkbox"><span></span></span></label>
-      <label class="mlgc-option"><span><strong>Show Notes</strong><small>Optional internal notes on the Ledger.</small></span><span class="mlgc-check"><input id="mlgcNotes" type="checkbox"><span></span></span></label>
-      <label class="mlgc-option"><span><strong>Show Bill-by-Bill</strong><small>“Maintain balances Bill-by-Bill” for party ledgers.</small></span><span class="mlgc-check"><input id="mlgcBillByBill" type="checkbox"><span></span></span></label>
-      <label class="mlgc-option"><span><strong>Show Interest Calculation</strong><small>“Activate interest calculation” field.</small></span><span class="mlgc-check"><input id="mlgcInterest" type="checkbox"><span></span></span></label>
-    </div>
-    <div class="mlgc-section"><h4>Validation & Entry</h4>
-      <label class="mlgc-option"><span><strong>Require Under Group</strong><small>Ledger cannot be saved without a parent Group.</small></span><span class="mlgc-check"><input id="mlgcRequireUnder" type="checkbox"><span></span></span></label>
-      <label class="mlgc-option"><span><strong>Confirm Before Save</strong><small>Ask for confirmation before final save.</small></span><span class="mlgc-check"><input id="mlgcConfirmSave" type="checkbox"><span></span></span></label>
-    </div>
-    <div class="mlgc-section"><h4>Print</h4>
-      <label class="mlgc-option"><span><strong>Print Empty Optional Fields</strong><small>Normally blank optional fields stay hidden in print.</small></span><span class="mlgc-check"><input id="mlgcPrintEmpty" type="checkbox"><span></span></span></label>
-      <label class="mlgc-option"><span><strong>Show Full Aadhaar in Print</strong><small>Default is masked Aadhaar (last 4 digits visible).</small></span><span class="mlgc-check"><input id="mlgcFullAadhaar" type="checkbox"><span></span></span></label>
-    </div>
-    <div class="mlgc-section"><h4>Additional (Tally) Options — shown here, no effect on this screen yet</h4>
-      <label class="mlgc-option"><span><strong>Inventory Allocations</strong><small>Tally default: No.</small></span><span class="mlgc-check"><input id="mlgcInvAlloc" type="checkbox"><span></span></span></label>
-      <label class="mlgc-option"><span><strong>MSME Registration Details</strong><small>Tally default: No.</small></span><span class="mlgc-check"><input id="mlgcMsme" type="checkbox"><span></span></span></label>
-      <label class="mlgc-option"><span><strong>Type of Duties or Taxes</strong><small>Tally default: Yes.</small></span><span class="mlgc-check"><input id="mlgcDutiesType" type="checkbox"><span></span></span></label>
+    <div class="cfgcols">
+      <div class="cfgcol">
+        <label class="mlgc-option"><span>Show Nickname</span><span class="v">: Yes</span><input id="mlgcNickname" type="checkbox"></label>
+        <label class="mlgc-option"><span>Show Mailing Address</span><span class="v">: Yes</span><input id="mlgcAddress" type="checkbox"></label>
+        <label class="mlgc-option"><span>Show Party Contact</span><span class="v">: Yes</span><input id="mlgcPartyContact" type="checkbox"></label>
+        <label class="mlgc-option"><span>Show Aadhaar</span><span class="v">: Yes</span><input id="mlgcAadhaar" type="checkbox"></label>
+        <label class="mlgc-option"><span>Show GST / PAN</span><span class="v">: Yes</span><input id="mlgcTax" type="checkbox"></label>
+        <label class="mlgc-option"><span>Show Bank Details</span><span class="v">: Yes</span><input id="mlgcBank" type="checkbox"></label>
+        <label class="mlgc-option"><span>Show Credit Control</span><span class="v">: Yes</span><input id="mlgcCredit" type="checkbox"></label>
+        <label class="mlgc-option"><span>Show WhatsApp</span><span class="v">: Yes</span><input id="mlgcWhatsApp" type="checkbox"></label>
+        <label class="mlgc-option"><span>Show Notes</span><span class="v">: Yes</span><input id="mlgcNotes" type="checkbox"></label>
+      </div>
+      <div class="cfgcol">
+        <label class="mlgc-option"><span>Show Bill-by-Bill</span><span class="v">: Yes</span><input id="mlgcBillByBill" type="checkbox"></label>
+        <label class="mlgc-option"><span>Show Interest Calculation</span><span class="v">: Yes</span><input id="mlgcInterest" type="checkbox"></label>
+        <label class="mlgc-option"><span>Require Under Group</span><span class="v">: Yes</span><input id="mlgcRequireUnder" type="checkbox"></label>
+        <label class="mlgc-option"><span>Confirm Before Save</span><span class="v">: Yes</span><input id="mlgcConfirmSave" type="checkbox"></label>
+        <label class="mlgc-option"><span>Print Empty Optional Fields</span><span class="v">: Yes</span><input id="mlgcPrintEmpty" type="checkbox"></label>
+        <label class="mlgc-option"><span>Show Full Aadhaar in Print</span><span class="v">: Yes</span><input id="mlgcFullAadhaar" type="checkbox"></label>
+        <label class="mlgc-option"><span>Inventory Allocations</span><span class="v">: Yes</span><input id="mlgcInvAlloc" type="checkbox"></label>
+        <label class="mlgc-option"><span>MSME Registration Details</span><span class="v">: Yes</span><input id="mlgcMsme" type="checkbox"></label>
+        <label class="mlgc-option"><span>Type of Duties or Taxes</span><span class="v">: Yes</span><input id="mlgcDutiesType" type="checkbox"></label>
+      </div>
     </div>
   </div>
+  <span class="mlgc-ind bot" style="display:none">▼</span>
   <div class="mlgc-footer"><button type="button" onclick="mayaResetLedgerConfig()">Reset Defaults</button><button type="button" class="primary" onclick="mayaSaveLedgerConfig()">Save Configuration</button></div>
 </div>
 
@@ -1579,6 +1581,7 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
         <div class="mlg-top">
           <div class="mlg-top-left">
             <div class="mlg-trow"><label for="mlgName">Name</label><input id="mlgName" autocomplete="off" placeholder="e.g. ABC Traders"></div>
+            <div class="mlg-dup-warn" id="mlgDupWarn" style="display:none">A Ledger with this name already exists.</div>
             <div class="mlg-trow mlg-config-field" data-config="nickname"><label for="mlgNickname">(alias)</label><input id="mlgNickname" autocomplete="off" placeholder="Optional short name"></div>
           </div>
           <div class="mlg-total-open"><span>Total Opening Balance</span><div class="mlg-tob-row"><span>Debit</span><strong id="mlgTotalDr">0.00</strong></div><div class="mlg-tob-row"><span>Credit</span><strong id="mlgTotalCr">0.00</strong></div><div class="mlg-tob-row net"><span>Net</span><strong id="mlgTotalOpening">₹ 0.00</strong></div></div>
@@ -1597,18 +1600,18 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
             </div></div>
           </div>
           <div class="mlg-col-r">
-            <div class="mlg-section mlg-party-only" data-party-section="contact"><h4>Party Contact</h4><div class="mlg-grid">
-              <div class="mlg-field mlg-config-field" data-config="whatsapp"><label for="mlgWhatsapp">WhatsApp No.</label><input id="mlgWhatsapp" inputmode="tel" autocomplete="tel" placeholder="Optional"></div>
-              <div class="mlg-field"><label for="mlgEmail">Email</label><input id="mlgEmail" type="email" autocomplete="email" placeholder="Optional"></div>
-            </div></div>
             <div class="mlg-section mlg-party-only mlg-config-section" data-party-section="address"><h4>Mailing Details</h4><div class="mlg-grid">
               <div class="mlg-field full mlg-config-field" data-config="address"><label for="mlgAddress">Address</label><textarea id="mlgAddress" autocomplete="street-address" placeholder="Mailing address"></textarea></div>
-              <div class="mlg-field mlg-config-field" data-config="aadhaar"><label for="mlgAadhaar">Aadhaar No.</label><input id="mlgAadhaar" inputmode="numeric" maxlength="12" placeholder="12-digit Aadhaar"></div>
-              <div class="mlg-field mlg-config-field" data-config="partyContact"><label for="mlgPhone">Party Phone No.</label><input id="mlgPhone" inputmode="tel" autocomplete="tel" placeholder="Optional"></div>
               <div class="mlg-field mlg-config-field" data-config="address"><label for="mlgState">State</label><select id="mlgState"><option value="">Select State / UT</option></select></div>
               <div class="mlg-field mlg-config-field" data-config="address"><label for="mlgCountry">Country</label><select id="mlgCountry"><option value="India">India</option></select></div>
               <div class="mlg-field mlg-config-field" data-config="address"><label for="mlgDistrict">District</label><select id="mlgDistrict" disabled><option value="">Select State first</option></select></div>
               <div class="mlg-field mlg-config-field" data-config="address"><label for="mlgPin">PIN / ZIP</label><input id="mlgPin" inputmode="numeric" maxlength="10" placeholder="Optional"></div>
+            </div></div>
+            <div class="mlg-section mlg-party-only" data-party-section="contact"><h4>Party Contact Details</h4><div class="mlg-grid">
+              <div class="mlg-field mlg-config-field" data-config="partyContact"><label for="mlgPhone">Party Phone No.</label><input id="mlgPhone" inputmode="tel" autocomplete="tel" placeholder="Optional"></div>
+              <div class="mlg-field mlg-config-field" data-config="aadhaar"><label for="mlgAadhaar">Aadhaar No.</label><input id="mlgAadhaar" inputmode="numeric" maxlength="12" placeholder="12-digit Aadhaar"></div>
+              <div class="mlg-field"><label for="mlgEmail">Email</label><input id="mlgEmail" type="email" autocomplete="email" placeholder="Optional"></div>
+              <div class="mlg-field mlg-config-field" data-config="whatsapp"><label for="mlgWhatsapp">WhatsApp No.</label><input id="mlgWhatsapp" inputmode="tel" autocomplete="tel" placeholder="Optional"></div>
             </div></div>
             <div class="mlg-section mlg-party-only mlg-config-section" data-party-section="tax"><h4>Tax Registration Details</h4><div class="mlg-grid">
               <div class="mlg-field mlg-config-field" data-config="tax"><label for="mlgGSTType">GST Registration Type</label><select id="mlgGSTType"><option value="unregistered">Unregistered</option><option value="regular">Regular</option><option value="composition">Composition</option><option value="consumer">Consumer</option><option value="unknown">Unknown</option></select></div>
@@ -1638,7 +1641,7 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
               </div>
       <aside class="mlg-side">
         <div class="mlg-side-row off"><b>F2</b><span>Period</span></div>
-        <div class="mlg-side-row" onclick="mayaLedgerChangeCompany()"><b>F3</b><span>Company</span></div>
+        <div class="mlg-side-row" id="mlgSideF3" onclick="window.mayaF3Dropdown?window.mayaF3Dropdown():window.mayaCompanyMenu()"><b>F3</b><span>Company</span></div>
         <div class="mlg-side-row off mlg-blue"><b>F4</b></div>
         <div class="mlg-side-row off mlg-blue"><b>F5</b></div>
         <div class="mlg-side-row off mlg-blue"><b>F6</b></div>
@@ -1647,7 +1650,7 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
         <div class="mlg-side-row off mlg-blue"><b>F9</b></div>
         <div class="mlg-side-row" onclick="mayaLedgerOtherMasters()"><b>F10</b><span>Other Masters</span></div>
         <div class="mlg-side-row" onclick="mayaToggleLedgerMore()"><b>I</b><span>More Details</span></div>
-        <div class="mlg-side-row" onclick="mayaLedgerHsn()"><b>B</b><span>Get HSN/SAC Info</span></div>
+        <div class="mlg-side-row off"><b>B</b><span>Get HSN/SAC Info</span></div>
         <div class="mlg-side-row" onclick="mayaOpenLedgerGstin()"><b>L</b><span>Fetch Details Using GSTIN/UIN</span></div>
         <div class="mlg-side-row mlg-f12" tabindex="-1" onclick="mayaOpenLedgerConfig()"><b>F12</b><span>Configure</span></div>
       </aside>
@@ -1657,9 +1660,19 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
     </div>
     <div id="mlgConfirm" class="mg-confirm"><div class="mg-confirm-card"><h3>Save Ledger?</h3><p id="mlgConfirmText">Save this Ledger in the current company?</p><div class="mg-confirm-actions"><button type="button" onclick="mayaCloseLedgerConfirm()">Cancel</button><button type="button" class="primary" onclick="mayaConfirmLedgerSave()">Save</button></div></div></div>
     <div id="mlgGstin" class="mg-confirm"><div class="mg-confirm-card"><h3>Fetch Details Using GSTIN / UIN</h3><p>Enter the 15-character GSTIN. PAN and State are derived from it on this device — no internet needed.</p><input id="mlgGstinInput" maxlength="15" autocomplete="off" placeholder="e.g. 06AOGPR9753P1Z5"><p id="mlgGstinErr"></p><div class="mg-confirm-actions"><button type="button" onclick="mayaCloseLedgerGstin()">Cancel</button><button type="button" class="primary" onclick="mayaFetchLedgerGstin()">Fetch Details</button></div></div></div>
+    <div id="mlgOtherMasters" class="mlg-other" style="display:none" aria-hidden="true"><div class="mlg-other-card"><h3>Other Masters</h3><div class="mlg-other-item" data-master="Group">Group</div><div class="mlg-other-item" data-master="Ledger">Ledger</div><div class="mlg-other-item" data-master="Stock Item">Stock Item</div><div class="mlg-other-item" data-master="Stock Group">Stock Group</div><div class="mlg-other-item" data-master="Stock Category">Stock Category</div><div class="mlg-other-item" data-master="Unit">Unit</div><div class="mlg-other-item" data-master="Godown">Godown</div><div class="mlg-other-item" data-master="Cost Centre">Cost Centre</div><div class="mlg-other-item" data-master="Currency">Currency</div><div class="mlg-other-item" data-master="Voucher Type">Voucher Type</div></div></div>
   </div>
 </div>
 
+<style id="mayaacc-nb-f10">
+/* F10 Other Masters picker (new batch #2, 2026-11-21). */
+#mlgOtherMasters{position:fixed;inset:0;z-index:10080;display:flex;align-items:center;justify-content:center;background:rgba(10,15,26,.45)}
+.mlg-other-card{width:430px;background:#fff;border-radius:10px;box-shadow:0 24px 70px rgba(15,25,50,.35);overflow:hidden}
+.mlg-other-card h3{padding:13px 16px;font-size:13px;color:#172033;border-bottom:1px solid #e4e8ef;background:#fbfcfe;margin:0}
+.mlg-other-item{padding:11px 16px;font-size:13px;border-bottom:1px solid #f0f2f6;cursor:pointer;color:#1d2d42}
+.mlg-other-item:last-child{border-bottom:0}
+.mlg-other-item.sel{background:#2f6fd0;color:#fff;font-weight:700}
+</style>
 <script id="mayaacc-ledger-script">
 (function(){
   const $=id=>document.getElementById(id);
@@ -1668,7 +1681,7 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
   const companyName=()=>{try{const a=JSON.parse(localStorage.getItem('mayaacc_companies')||'[]');const c=a.find(x=>x.id===companyId());return c?.companyName||'Current Company'}catch(e){return 'Current Company'}};
   const getLedgers=()=>{try{return JSON.parse(localStorage.getItem('mayaacc_ledgers_'+companyId())||'[]')}catch(e){return[]}};
   const saveLedgers=a=>localStorage.setItem('mayaacc_ledgers_'+companyId(),JSON.stringify(a));
-  const defaults={nickname:true,address:true,partyContact:true,aadhaar:false,tax:true,bank:false,credit:false,whatsapp:false,notes:false,requireUnder:true,confirmSave:true,printEmpty:false,fullAadhaar:false,billByBill:true,interest:true,invAlloc:false,msme:false,dutiesType:true};
+  const defaults={nickname:true,address:true,partyContact:true,aadhaar:true,tax:true,bank:false,credit:false,whatsapp:false,notes:false,requireUnder:true,confirmSave:true,printEmpty:false,fullAadhaar:false,billByBill:true,interest:true,invAlloc:false,msme:false,dutiesType:true};
   const getConfig=()=>{try{return {...defaults,...JSON.parse(localStorage.getItem('mayaacc_ledger_config_'+companyId())||'{}')}}catch(e){return {...defaults}}};
   const saveConfig=c=>localStorage.setItem('mayaacc_ledger_config_'+companyId(),JSON.stringify(c));
   const standard=[['Capital Account',0],['Current Assets',0],['Bank Accounts',1],['Cash-in-Hand',1],['Deposits (Asset)',1],['Loans & Advances (Asset)',1],['Stock-in-Hand',1],['Sundry Debtors',1],['Current Liabilities',0],['Duties & Taxes',1],['Provisions',1],['Sundry Creditors',1],['Fixed Assets',0],['Investments',0],['Loans (Liability)',0],['Secured Loans',1],['Unsecured Loans',1],['Suspense Account',0],['Direct Expenses',0],['Direct Incomes',0],['Indirect Expenses',0],['Indirect Incomes',0],['Purchase Accounts',0],['Sales Accounts',0],['Miscellaneous Expenses (Asset)',0]];
@@ -1688,7 +1701,10 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
      the existing F12-config behaviour. Bank ledgers force Yes; other kinds
      reset to No when the group kind changes. */
   function syncBankToggle(k){var t=$('mlgProvideBank');if(!t)return;var kind=k||kindOf();if(kind!==lastBankKind){lastBankKind=kind;if(kind==='bank')t.value='yes';else if(kind==='other')t.value='no';}var wrap=t.closest('.mlg-field');if(wrap)wrap.style.display=(kind==='other')?'':'none';if(kind==='other'){var show=t.value==='yes';document.querySelectorAll('#mayaacc-ledger-overlay .mlg-bank-field').forEach(function(f){f.style.display=show?'':'none';});}}
-  function applyLedgerConfig(){const c=getFormConfig(),k=kindOf(),party=k==='party',root=$('mayaacc-ledger-overlay');if(!root)return;const map={nickname:c.nickname,address:c.address,partyContact:c.partyContact,aadhaar:c.aadhaar,tax:c.tax,bank:c.bank,credit:c.credit,whatsapp:c.whatsapp,notes:c.notes,billByBill:c.billByBill,interest:c.interest};Object.entries(map).forEach(([key,on])=>{root.querySelectorAll('[data-config="'+key+'"]').forEach(e=>{e.style.display=on?'':'none'})});root.querySelectorAll('[data-party-section]').forEach(e=>{const sec=e.dataset.partySection;let show=false;if(party)show=sec==='contact'?true:sec==='address'?c.address:sec==='tax'?c.tax:sec==='bank'?c.bank:sec==='credit'?c.credit:true;else if(k==='bank')show=sec==='bank';else if(k==='other')show=sec==='address'||sec==='tax'||sec==='bank';e.style.display=show?'block':'none';if(k==='bank'&&sec==='bank')e.querySelectorAll('[data-config="bank"]').forEach(f=>f.style.display='');});const g=root.querySelector('[data-kind-section="gst"]');if(g){g.style.display=k==='gst'?'block':'none';const yes=$('mlgGstApplicable')&&$('mlgGstApplicable').value==='yes';g.querySelectorAll('.mlg-gst-detail').forEach(e=>e.style.display=yes?'':'none');}root.querySelectorAll('[data-config-section="notes"]').forEach(e=>e.style.display=c.notes?'':'none');if($('mlgAadhaar'))$('mlgAadhaar').parentElement.style.display=((party&&c.aadhaar)||k==='other')?'':'none';if($('mlgcStatus'))$('mlgcStatus').textContent='Changes are applied immediately to this Ledger screen.';syncBankToggle(k);}
+  function applyLedgerConfig(){const c=getFormConfig(),k=kindOf(),party=k==='party',root=$('mayaacc-ledger-overlay');if(!root)return;const map={nickname:c.nickname,address:c.address,partyContact:c.partyContact,aadhaar:c.aadhaar,tax:c.tax,bank:c.bank,credit:c.credit,whatsapp:c.whatsapp,notes:c.notes,billByBill:c.billByBill,interest:c.interest};Object.entries(map).forEach(([key,on])=>{root.querySelectorAll('[data-config="'+key+'"]').forEach(e=>{e.style.display=on?'':'none'})});root.querySelectorAll('[data-party-section]').forEach(e=>{const sec=e.dataset.partySection;let show=false;if(party)show=sec==='contact'?true:sec==='address'?c.address:sec==='tax'?c.tax:sec==='bank'?c.bank:sec==='credit'?c.credit:true;else if(k==='bank')show=sec==='bank';else if(k==='other')show=sec==='address'||sec==='tax'||sec==='bank'||sec==='contact';e.style.display=show?'block':'none';if(k==='bank'&&sec==='bank')e.querySelectorAll('[data-config="bank"]').forEach(f=>f.style.display='');});if(k==='other'){var _em=$('mlgEmail');if(_em&&_em.parentElement)_em.parentElement.style.display='none';}const g=root.querySelector('[data-kind-section="gst"]');if(g){g.style.display=k==='gst'?'block':'none';const yes=$('mlgGstApplicable')&&$('mlgGstApplicable').value==='yes';g.querySelectorAll('.mlg-gst-detail').forEach(e=>e.style.display=yes?'':'none');}root.querySelectorAll('[data-config-section="notes"]').forEach(e=>e.style.display=c.notes?'':'none');if($('mlgAadhaar'))$('mlgAadhaar').parentElement.style.display=((party&&c.aadhaar)||k==='other')?'':'none';if($('mlgcStatus'))$('mlgcStatus').textContent='Changes are applied immediately to this Ledger screen.';syncBankToggle(k);}
+  function syncDupWarn(){var w=$('mlgDupWarn');if(!w)return;var n=($('mlgName').value||'').trim().toLowerCase();w.style.display=(n&&getLedgers().some(function(x){return String(x.name||'').trim().toLowerCase()===n;}))?'block':'none';}
+  function syncConfigValues(){['nickname','address','partyContact','aadhaar','tax','bank','credit','whatsapp','notes','requireUnder','confirmSave','printEmpty','fullAadhaar','billByBill','interest','invAlloc','msme','dutiesType'].forEach(function(k){var el=document.getElementById('mlgc'+k.charAt(0).toUpperCase()+k.slice(1));if(!el)return;var row=el.closest('.mlgc-option');var v=row?row.querySelector('.v'):null;if(v)v.textContent=': '+(el.checked?'Yes':'No');});}
+  function syncCfgIndicators(){var p=$('mayaacc-ledger-config');if(!p)return;var b=p.querySelector('.mlgc-body');if(!b)return;var t=p.querySelector('.mlgc-ind.top'),d=p.querySelector('.mlgc-ind.bot');if(t)t.style.display=b.scrollTop>0?'block':'none';if(d)d.style.display=(b.scrollTop+b.clientHeight<b.scrollHeight-4)?'block':'none';}
   function syncCfgChecks(){const c=getConfig();['nickname','address','partyContact','aadhaar','tax','bank','credit','whatsapp','notes','requireUnder','confirmSave','printEmpty','fullAadhaar','billByBill','interest','invAlloc','msme','dutiesType'].forEach(k=>{const el=document.getElementById('mlgc'+k.charAt(0).toUpperCase()+k.slice(1));if(el)el.checked=!!c[k]})}
   function getFormConfig(){const c=getConfig();['nickname','address','partyContact','aadhaar','tax','bank','credit','whatsapp','notes','requireUnder','confirmSave','printEmpty','fullAadhaar','billByBill','interest','invAlloc','msme','dutiesType'].forEach(k=>{const el=document.getElementById('mlgc'+k.charAt(0).toUpperCase()+k.slice(1));if(el)c[k]=el.checked});return c;}
   function populateLists(){if($('mlgState')){$('mlgState').innerHTML='<option value="">Select State / UT</option>'+['Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat','Haryana','Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh','Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab','Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh','Uttarakhand','West Bengal','Andaman and Nicobar Islands','Chandigarh','Dadra and Nagar Haveli and Daman and Diu','Delhi','Jammu and Kashmir','Ladakh','Lakshadweep','Puducherry'].map(x=>'<option>'+esc(x)+'</option>').join('')}}
@@ -1710,15 +1726,15 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
     d.value='';
   }
   window.mayaSyncLedgerDistrict=function(){syncDistrictOptions();};
-  function clearForm(){['mlgName','mlgNickname','mlgUnder','mlgOpening','mlgPhone','mlgWhatsapp','mlgAadhaar','mlgEmail','mlgAddress','mlgPin','mlgGSTIN','mlgPAN','mlgBankName','mlgAccount','mlgBranch','mlgIFSC','mlgUPI','mlgCreditLimit','mlgCreditDays','mlgNotes','mlgHsn'].forEach(id=>{if($(id))$(id).value=''});if($('mlgGstApplicable'))$('mlgGstApplicable').value='no';if($('mlgGstRate'))$('mlgGstRate').value='';if($('mlgItc'))$('mlgItc').value='eligible';if($('mlgState'))$('mlgState').value='';if($('mlgCountry'))$('mlgCountry').value='India';if($('mlgGSTType'))$('mlgGSTType').value='unregistered';if($('mlgBalance'))$('mlgBalance').value='dr';if($('mlgInterest'))$('mlgInterest').value='no';if($('mlgBillByBill'))$('mlgBillByBill').value='yes';if($('mlgProvideBank'))$('mlgProvideBank').value='no';lastBankKind='';var _mm=$('mlgMore');if(_mm)_mm.classList.remove('on');var _gd=$('mlgGstin');if(_gd)_gd.style.display='none';dirty=false;syncDistrictOptions();updateSummary();syncPartySections();}
+  function clearForm(){['mlgName','mlgNickname','mlgUnder','mlgOpening','mlgPhone','mlgWhatsapp','mlgAadhaar','mlgEmail','mlgAddress','mlgPin','mlgGSTIN','mlgPAN','mlgBankName','mlgAccount','mlgBranch','mlgIFSC','mlgUPI','mlgCreditLimit','mlgCreditDays','mlgNotes','mlgHsn'].forEach(id=>{if($(id))$(id).value=''});if($('mlgGstApplicable'))$('mlgGstApplicable').value='no';if($('mlgGstRate'))$('mlgGstRate').value='';if($('mlgItc'))$('mlgItc').value='eligible';if($('mlgState'))$('mlgState').value='';if($('mlgCountry'))$('mlgCountry').value='India';if($('mlgGSTType'))$('mlgGSTType').value='unregistered';if($('mlgBalance'))$('mlgBalance').value='dr';if($('mlgInterest'))$('mlgInterest').value='no';if($('mlgBillByBill'))$('mlgBillByBill').value='yes';if($('mlgProvideBank'))$('mlgProvideBank').value='no';lastBankKind='';var _mm=$('mlgMore');if(_mm)_mm.classList.remove('on');var _gd=$('mlgGstin');if(_gd)_gd.style.display='none';dirty=false;syncDistrictOptions();updateSummary();syncPartySections();syncDupWarn();}
   function open(){if(window.__mayaRecordReturn)window.__mayaRecordReturn('Ledger');if(typeof closeCreateMaster==='function')closeCreateMaster();populateLists();$('mayaacc-ledger-overlay').style.display='block';$('mayaacc-ledger-overlay').setAttribute('aria-hidden','false');$('mlgConfirm').style.display='none';if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-ledger-overlay .mlg-main');$('mlgCompanyChip').textContent=companyName();syncCfgChecks();clearForm();setTimeout(()=>{$('mlgName').focus()},20);}
-  function close(returnToMenu){closeConfig();var _gd=$('mlgGstin');if(_gd)_gd.style.display='none';if(window.mayaCloseHsnFinder)window.mayaCloseHsnFinder();$('mayaacc-ledger-overlay').style.display='none';$('mayaacc-ledger-overlay').setAttribute('aria-hidden','true');$('mlgTree').style.display='none';$('mlgConfirm').style.display='none';treeFocus=-1;if(returnToMenu!==false&&window.__mayaReturnToMenu)window.__mayaReturnToMenu();}
+  function close(returnToMenu){closeConfig();closeOtherMasters();var _gd=$('mlgGstin');if(_gd)_gd.style.display='none';if(window.mayaCloseHsnFinder)window.mayaCloseHsnFinder();$('mayaacc-ledger-overlay').style.display='none';$('mayaacc-ledger-overlay').setAttribute('aria-hidden','true');$('mlgTree').style.display='none';$('mlgConfirm').style.display='none';treeFocus=-1;if(returnToMenu!==false&&window.__mayaReturnToMenu)window.__mayaReturnToMenu();}
   function capture(){const ids=['mlgName','mlgNickname','mlgUnder','mlgInterest','mlgOpening','mlgPhone','mlgWhatsapp','mlgAadhaar','mlgEmail','mlgAddress','mlgState','mlgCountry','mlgDistrict','mlgPin','mlgGSTType','mlgGSTIN','mlgPAN','mlgBankName','mlgAccount','mlgBranch','mlgIFSC','mlgUPI','mlgCreditLimit','mlgCreditDays','mlgBillByBill','mlgNotes','mlgGstApplicable','mlgGstRate','mlgHsn','mlgItc'];const o={};ids.forEach(id=>o[id]=$(id)?.value||'');if(kindOf()==='other'&&$('mlgProvideBank')&&$('mlgProvideBank').value!=='yes'){['mlgBankName','mlgAccount','mlgBranch','mlgIFSC','mlgUPI'].forEach(function(id){o[id]='';});}o.balance=$('mlgBalance')?.value||'dr';return o;}
-  function restore(o){Object.entries(o||{}).forEach(([k,v])=>{if($(k))$(k).value=v});updateSummary();syncPartySections();}
+  function restore(o){Object.entries(o||{}).forEach(([k,v])=>{if($(k))$(k).value=v});updateSummary();syncPartySections();syncDupWarn();}
   function validate(){const c=getConfig();const n=$('mlgName').value.trim();if(!n){alert('Please enter Ledger Name.');$('mlgName').focus();return false}const under=$('mlgUnder').value.trim();if(!under){alert('Please select Under Group.');$('mlgUnder').focus();return false}if(!allGroups().some(x=>String(x[0]).toLowerCase()===under.toLowerCase())){alert('Under Group "'+under+'" does not exist. Please pick a Group from the list.');$('mlgUnder').focus();return false}if(kindOf()==='gst'&&$('mlgGstApplicable').value==='yes'&&$('mlgGstRate').value===''){alert('Select the GST Rate for this ledger.');$('mlgGstRate').focus();return false}if(getLedgers().some(x=>String(x.name||'').trim().toLowerCase()===n.toLowerCase())){alert('A Ledger with this name already exists in this company.');$('mlgName').focus();return false}if(($('mlgAadhaar').value||'').trim()&&!/^\d{12}$/.test($('mlgAadhaar').value.trim())){alert('Please enter a valid 12-digit Aadhaar number.');$('mlgAadhaar').focus();return false}if(($('mlgGSTIN').value||'').trim()&&!/^[0-9A-Z]{15}$/.test($('mlgGSTIN').value.trim().toUpperCase())){alert('Please enter a valid 15-character GSTIN.');$('mlgGSTIN').focus();return false}if(($('mlgPAN').value||'').trim()&&!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test($('mlgPAN').value.trim().toUpperCase())){alert('Please enter a valid PAN.');$('mlgPAN').focus();return false}return true;}
-  function askSave(mode){if(!validate())return;pendingSaveMode=mode;const n=$('mlgName').value.trim();if(getConfig().confirmSave){$('mlgConfirmText').textContent='Save “'+n+'” in the current company?';$('mlgConfirm').style.display='flex'}else doSave();}
+  function askSave(mode){if($('mayaacc-ledger-config')&&$('mayaacc-ledger-config').style.display==='block'){saveLedgerConfig();closeConfig();return;}if(!validate())return;pendingSaveMode=mode;const n=$('mlgName').value.trim();if(getConfig().confirmSave){$('mlgConfirmText').textContent='Save “'+n+'” in the current company?';$('mlgConfirm').style.display='flex'}else doSave();}
   function doSave(){if(!validate())return;const n=$('mlgName').value.trim(),o=capture();const arr=getLedgers();arr.push({id:'LED-'+Date.now(),name:n,nickname:o.mlgNickname,under:o.mlgUnder||null,openingBalance:o.mlgOpening,balance:o.balance,phone:o.mlgPhone,whatsapp:o.mlgWhatsapp,aadhaar:o.mlgAadhaar,email:o.mlgEmail,address:o.mlgAddress,state:o.mlgState,district:o.mlgDistrict,country:o.mlgCountry,pin:o.mlgPin,gstType:o.mlgGSTType,gstin:o.mlgGSTIN.toUpperCase(),pan:o.mlgPAN.toUpperCase(),bankName:o.mlgBankName,account:o.mlgAccount,branch:o.mlgBranch,ifsc:o.mlgIFSC.toUpperCase(),gstApplicable:o.mlgGstApplicable==='yes',gstRate:o.mlgGstApplicable==='yes'?o.mlgGstRate:'',hsn:o.mlgGstApplicable==='yes'?o.mlgHsn:'',itc:o.mlgGstApplicable==='yes'?o.mlgItc:'',upi:o.mlgUPI,creditLimit:o.mlgCreditLimit,creditDays:o.mlgCreditDays,interest:o.mlgInterest==='yes',billByBill:o.mlgBillByBill==='yes',notes:o.mlgNotes,createdAt:new Date().toISOString()});saveLedgers(arr);$('mlgConfirm').style.display='none';if(pendingSaveMode==='new'){clearForm();$('mlgName').focus()}else{close();}}
-  function openConfig(){const c=getConfig();Object.entries({nickname:'mlgcNickname',address:'mlgcAddress',partyContact:'mlgcPartyContact',aadhaar:'mlgcAadhaar',tax:'mlgcTax',bank:'mlgcBank',credit:'mlgcCredit',whatsapp:'mlgcWhatsApp',notes:'mlgcNotes',requireUnder:'mlgcRequireUnder',confirmSave:'mlgcConfirmSave',printEmpty:'mlgcPrintEmpty',fullAadhaar:'mlgcFullAadhaar',billByBill:'mlgcBillByBill',interest:'mlgcInterest',invAlloc:'mlgcInvAlloc',msme:'mlgcMsme',dutiesType:'mlgcDutiesType'}).forEach(([k,id])=>{$(id).checked=!!c[k]});$('mayaacc-ledger-config').style.display='block';$('mayaacc-ledger-config').setAttribute('aria-hidden','false');if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-ledger-config');configIndex=0;paintConfig();applyLedgerConfig();}
+  function openConfig(){const c=getConfig();Object.entries({nickname:'mlgcNickname',address:'mlgcAddress',partyContact:'mlgcPartyContact',aadhaar:'mlgcAadhaar',tax:'mlgcTax',bank:'mlgcBank',credit:'mlgcCredit',whatsapp:'mlgcWhatsApp',notes:'mlgcNotes',requireUnder:'mlgcRequireUnder',confirmSave:'mlgcConfirmSave',printEmpty:'mlgcPrintEmpty',fullAadhaar:'mlgcFullAadhaar',billByBill:'mlgcBillByBill',interest:'mlgcInterest',invAlloc:'mlgcInvAlloc',msme:'mlgcMsme',dutiesType:'mlgcDutiesType'}).forEach(([k,id])=>{$(id).checked=!!c[k]});$('mayaacc-ledger-config').style.display='block';$('mayaacc-ledger-config').setAttribute('aria-hidden','false');if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-ledger-config');configIndex=0;paintConfig();applyLedgerConfig();syncConfigValues();syncCfgIndicators();}
   function closeConfig(){if($('mayaacc-ledger-config')){$('mayaacc-ledger-config').style.display='none';$('mayaacc-ledger-config').setAttribute('aria-hidden','true');configIndex=-1;document.querySelectorAll('#mayaacc-ledger-config .mlgc-option').forEach(x=>x.classList.remove('mlgc-focus'));}}
   function configControls(){return [...document.querySelectorAll('#mayaacc-ledger-config .mlgc-option, #mayaacc-ledger-config .mlgc-footer button')];}
   function paintConfig(){const a=configControls();a.forEach((x,i)=>x.classList.toggle('mlgc-focus',i===configIndex));if(configIndex>=0&&a[configIndex])a[configIndex].scrollIntoView({block:'nearest'});}
@@ -1728,18 +1744,34 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
   function changeCompany(){if(dirty){if(!confirm('This Ledger has unsaved changes. Change company and discard the current entry?'))return;}close(false);if(typeof showCompanySelect==='function')showCompanySelect();}
   function printLedger(){const d=capture();const html='<!doctype html><html><head><meta charset="utf-8"><title>MAYAACC Ledger</title><style>body{font-family:Arial;margin:40px;color:#172033}.box{border:1px solid #dfe4ec;border-radius:10px;padding:18px;max-width:760px}.r{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #edf0f4;font-size:12px}</style></head><body><h1>'+esc(d.mlgName||'Ledger')+'</h1><p>MAYAACC • '+esc(companyName())+'</p><div class="box">'+Object.entries(d).filter(([k,v])=>k!=='mlgName'&&String(v||'').trim()).map(([k,v])=>'<div class="r"><span>'+esc(k)+'</span><strong>'+esc(v)+'</strong></div>').join('')+'</div><script>window.onload=function(){window.print()}<\/script></body></html>';const w=window.open('','_blank','width=860,height=700');if(!w){alert('Please allow popups to use Print Preview.');return}w.document.write(html);w.document.close();}
   function toggleMore(){var m=$('mlgMore');if(m)m.classList.toggle('on');}
-  function otherMasters(){if(dirty){window.mayaCloseLedger();}else{close(true);}}
+  var otherIdx=0;
+  var OTHER_MASTERS=['Group','Ledger','Stock Item','Stock Group','Stock Category','Unit','Godown','Cost Centre','Currency','Voucher Type'];
+  function openOtherMasters(){var d=$('mlgOtherMasters');if(!d)return;d.style.display='flex';d.setAttribute('aria-hidden','false');otherIdx=0;paintOtherMasters();}
+  function closeOtherMasters(){var d=$('mlgOtherMasters');if(!d)return;d.style.display='none';d.setAttribute('aria-hidden','true');}
+  function paintOtherMasters(){var items=[...document.querySelectorAll('#mlgOtherMasters .mlg-other-item')];items.forEach(function(el,i){el.classList.toggle('sel',i===otherIdx);});if(items[otherIdx])items[otherIdx].scrollIntoView({block:'nearest'});}
+  function pickOtherMaster(i){
+    var name=OTHER_MASTERS[i];if(!name)return;
+    closeOtherMasters();
+    if(name==='Ledger')return;
+    if(window.__mayaUpdateReturnItem)window.__mayaUpdateReturnItem(name);
+    var openTarget=function(){var fn={Group:window.mayaOpenGroup,'Stock Item':window.mayaOpenStockItem,'Stock Group':window.mayaOpenStockGroup,'Stock Category':window.mayaOpenStockCategory,Unit:window.mayaOpenUnit,Godown:window.mayaOpenGodown,'Cost Centre':window.mayaOpenCostCentre,Currency:window.mayaOpenCurrency,'Voucher Type':window.mayaOpenVoucherType}[name];if(typeof fn==='function')fn();else if(typeof window.createMasterAction==='function')window.createMasterAction(name);};
+    if(dirty){window.mayaCloseLedger(openTarget);}else{close(false);openTarget();}
+  }
+  function otherMasters(){openOtherMasters();}
   function ledgerHsn(){window.__mayaHsnTarget='ledger';var hp=document.querySelector('#mayaacc-hsn-finder .msih-head p');if(hp)hp.textContent='Search by code or product/service description. Select a row to bring the HSN / SAC back to this Ledger.';if(typeof window.mayaOpenHsnFinder==='function')window.mayaOpenHsnFinder();}
   var GSTIN_STATE={'01':'Jammu and Kashmir','02':'Himachal Pradesh','03':'Punjab','04':'Chandigarh','05':'Uttarakhand','06':'Haryana','07':'Delhi','08':'Rajasthan','09':'Uttar Pradesh','10':'Bihar','11':'Sikkim','12':'Arunachal Pradesh','13':'Nagaland','14':'Manipur','15':'Mizoram','16':'Tripura','17':'Meghalaya','18':'Assam','19':'West Bengal','20':'Jharkhand','21':'Odisha','22':'Chhattisgarh','23':'Madhya Pradesh','24':'Gujarat','25':'Daman and Diu','26':'Dadra and Nagar Haveli and Daman and Diu','27':'Maharashtra','28':'Andhra Pradesh','29':'Karnataka','30':'Goa','31':'Lakshadweep','32':'Kerala','33':'Tamil Nadu','34':'Puducherry','35':'Andaman and Nicobar Islands','36':'Telangana','37':'Andhra Pradesh','38':'Ladakh'};
   function openGstin(){var d=$('mlgGstin');if(!d)return;var e=$('mlgGstinErr');if(e)e.style.display='none';var inp=$('mlgGstinInput');if(inp)inp.value=($('mlgGSTIN')&&$('mlgGSTIN').value)||'';d.style.display='flex';setTimeout(function(){if(inp)inp.focus();},20);}
   function closeGstin(){var d=$('mlgGstin');if(d)d.style.display='none';}
   function fetchGstin(){var inp=$('mlgGstinInput');var v=((inp&&inp.value)||'').trim().toUpperCase();var e=$('mlgGstinErr');if(!/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(v)){if(e){e.textContent='Enter a valid 15-character GSTIN (e.g. 06AOGPR9753P1Z5).';e.style.display='block';}if(inp)inp.focus();return;}var pan=v.slice(2,12);var st=GSTIN_STATE[v.slice(0,2)]||'';if($('mlgGSTIN'))$('mlgGSTIN').value=v;if($('mlgPAN'))$('mlgPAN').value=pan;if(st&&$('mlgState')){var ok=false;var opts=$('mlgState').options;for(var i=0;i<opts.length;i++){if(opts[i].text===st||opts[i].value===st){ok=true;break;}}if(ok)$('mlgState').value=st;}syncDistrictOptions();if($('mlgGSTType'))$('mlgGSTType').value='regular';dirty=true;closeGstin();if(window.mayaToast)window.mayaToast('GSTIN details filled: PAN '+pan+(st?' \u00b7 '+st:''));updateSummary();}
   window.mayaLedgerGroups=()=>allGroups().map(x=>x[0]);window.mayaGroupKind=groupKind;window.mayaOpenLedger=open;window.mayaCloseLedger=function(after){if(window.__mayaAskQuit)window.__mayaAskQuit('Ledger',function(){close(true);if(typeof after==='function')after();});else{close(true);if(typeof after==='function')after();}};window.mayaCloseLedgerRaw=close;window.mayaSaveLedger=askSave;window.mayaCloseLedgerConfirm=()=>{$('mlgConfirm').style.display='none'};window.mayaConfirmLedgerSave=doSave;window.mayaLedgerChangeCompany=changeCompany;window.mayaOpenLedgerConfig=openConfig;window.mayaCloseLedgerConfig=closeConfig;window.mayaSaveLedgerConfig=saveLedgerConfig;window.mayaResetLedgerConfig=resetLedgerConfig;window.mayaPrintLedger=printLedger;window.mayaToggleLedgerMore=toggleMore;window.mayaLedgerOtherMasters=otherMasters;window.mayaLedgerHsn=ledgerHsn;window.mayaOpenLedgerGstin=openGstin;window.mayaCloseLedgerGstin=closeGstin;window.mayaFetchLedgerGstin=fetchGstin;
-  document.addEventListener('input',e=>{if(e.target===$('mlgUnder')){renderTree();dirty=true} else if(e.target&&e.target.id&&e.target.id.startsWith('mlg'))dirty=true;if(e.target===$('mlgState'))syncDistrictOptions();updateSummary();if(e.target===$('mlgUnder'))syncPartySections();});
+  document.addEventListener('input',e=>{if(e.target===$('mlgUnder')){renderTree();dirty=true} else if(e.target&&e.target.id&&e.target.id.startsWith('mlg'))dirty=true;if(e.target===$('mlgName'))syncDupWarn();if(e.target===$('mlgState'))syncDistrictOptions();updateSummary();if(e.target===$('mlgUnder'))syncPartySections();});
   document.addEventListener('focusin',e=>{if(e.target===$('mlgUnder'))renderTree();});
   document.addEventListener('mousedown',e=>{if(e.target===$('mayaacc-ledger-overlay'))close();});
-  document.addEventListener('change',e=>{if(e.target===$('mlgState'))syncDistrictOptions();if(e.target&&e.target.id==='mlgProvideBank'){syncBankToggle();return;}if(e.target&&e.target.id&&e.target.id.startsWith('mlgc')){saveConfig(getFormConfig());applyLedgerConfig();}});
-  document.addEventListener('keydown',e=>{const overlay=$('mayaacc-ledger-overlay');if(!overlay||window.getComputedStyle(overlay).display==='none')return;const finder=$('mayaacc-hsn-finder');if(finder&&finder.getAttribute('aria-hidden')!=='true'){if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();if(window.mayaCloseHsnFinder)window.mayaCloseHsnFinder();return;}if(e.key==='ArrowDown'||e.key==='ArrowUp'){const rows=[...document.querySelectorAll('#msihResults .msih-row')];if(rows.length){e.preventDefault();const i=Math.max(0,rows.indexOf(document.querySelector('#msihResults .msih-row.active')));const n=(i+(e.key==='ArrowDown'?1:-1)+rows.length)%rows.length;rows[n].click();rows[n].scrollIntoView({block:'nearest'});}return;}if(e.key==='Enter'){e.preventDefault();if(window.mayaSelectHsnResult)window.mayaSelectHsnResult();return;}return;}const gd=$('mlgGstin');if(gd&&gd.style.display==='flex'){if(e.key==='Escape'){e.preventDefault();closeGstin();return;}if(e.key==='Enter'){e.preventDefault();fetchGstin();return;}return;}const cfg=$('mayaacc-ledger-config');if(cfg&&cfg.style.display==='block'){if(e.key==='Escape'||e.key==='F12'){e.preventDefault();e.stopImmediatePropagation();closeConfig();return;}const els=configControls();if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();configIndex=(configIndex+(e.key==='ArrowDown'?1:-1)+els.length)%els.length;paintConfig();return;}if(e.key==='Enter'&&configIndex>=0){e.preventDefault();toggleConfig(els[configIndex]);return;}if(e.ctrlKey&&e.key.toLowerCase()==='s'){e.preventDefault();saveLedgerConfig();return;}return;}if(e.key==='Escape'){e.preventDefault();if($('mlgConfirm').style.display==='flex')$('mlgConfirm').style.display='none';else window.mayaCloseLedger();return;}if(e.key==='F12'){e.preventDefault();openConfig();return;}if(e.ctrlKey&&e.key.toLowerCase()==='s'){e.preventDefault();askSave('new');return;}if(document.activeElement===$('mlgUnder')){const bs=$('mlgTree').querySelectorAll('button');if(e.key==='ArrowDown'&&bs.length){e.preventDefault();treeFocus=(treeFocus+1)%bs.length;paintTree();return;}if(e.key==='ArrowUp'&&bs.length){e.preventDefault();treeFocus=(treeFocus-1+bs.length)%bs.length;paintTree();return;}if(e.key==='Enter'&&treeFocus>=0){e.preventDefault();selectTree(treeFocus);return;}}});
+  document.addEventListener('change',e=>{if(e.target===$('mlgState'))syncDistrictOptions();if(e.target&&e.target.id==='mlgProvideBank'){syncBankToggle();return;}if(e.target&&e.target.id&&e.target.id.startsWith('mlgc')){saveConfig(getFormConfig());applyLedgerConfig();syncConfigValues();}});
+  document.addEventListener('keydown',e=>{const overlay=$('mayaacc-ledger-overlay');if(!overlay||window.getComputedStyle(overlay).display==='none')return;const finder=$('mayaacc-hsn-finder');if(finder&&finder.getAttribute('aria-hidden')!=='true'){if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();if(window.mayaCloseHsnFinder)window.mayaCloseHsnFinder();return;}if(e.key==='ArrowDown'||e.key==='ArrowUp'){const rows=[...document.querySelectorAll('#msihResults .msih-row')];if(rows.length){e.preventDefault();const i=Math.max(0,rows.indexOf(document.querySelector('#msihResults .msih-row.active')));const n=(i+(e.key==='ArrowDown'?1:-1)+rows.length)%rows.length;rows[n].click();rows[n].scrollIntoView({block:'nearest'});}return;}if(e.key==='Enter'){e.preventDefault();if(window.mayaSelectHsnResult)window.mayaSelectHsnResult();return;}return;}const om=$('mlgOtherMasters');if(om&&om.style.display==='flex'){if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();closeOtherMasters();return;}if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();e.stopImmediatePropagation();otherIdx=(otherIdx+(e.key==='ArrowDown'?1:-1)+OTHER_MASTERS.length)%OTHER_MASTERS.length;paintOtherMasters();return;}if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();pickOtherMaster(otherIdx);return;}return;}const gd=$('mlgGstin');if(gd&&gd.style.display==='flex'){if(e.key==='Escape'){e.preventDefault();closeGstin();return;}if(e.key==='Enter'){e.preventDefault();fetchGstin();return;}return;}const cfg=$('mayaacc-ledger-config');if(cfg&&cfg.style.display==='block'){if(e.key==='Escape'||e.key==='F12'){e.preventDefault();e.stopImmediatePropagation();closeConfig();return;}const els=configControls();if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();configIndex=(configIndex+(e.key==='ArrowDown'?1:-1)+els.length)%els.length;paintConfig();return;}if(e.key==='Enter'&&configIndex>=0){e.preventDefault();var _el=els[configIndex];if(_el&&_el.tagName==='BUTTON')_el.click();else toggleConfig(_el);return;}if(e.ctrlKey&&e.key.toLowerCase()==='a'){e.preventDefault();e.stopImmediatePropagation();saveLedgerConfig();closeConfig();return;}if(e.ctrlKey&&e.key.toLowerCase()==='s'){e.preventDefault();saveLedgerConfig();return;}return;}if(e.key==='Escape'){e.preventDefault();if($('mlgConfirm').style.display==='flex')$('mlgConfirm').style.display='none';else window.mayaCloseLedger();return;}if(e.key==='F12'){e.preventDefault();openConfig();return;}if(e.key==='F10'){e.preventDefault();e.stopImmediatePropagation();openOtherMasters();return;}if(e.ctrlKey&&e.key.toLowerCase()==='s'){e.preventDefault();askSave('new');return;}if(document.activeElement===$('mlgUnder')){const bs=$('mlgTree').querySelectorAll('button');if(e.key==='ArrowDown'&&bs.length){e.preventDefault();treeFocus=(treeFocus+1)%bs.length;paintTree();return;}if(e.key==='ArrowUp'&&bs.length){e.preventDefault();treeFocus=(treeFocus-1+bs.length)%bs.length;paintTree();return;}if(e.key==='Enter'&&treeFocus>=0){e.preventDefault();selectTree(treeFocus);return;}}});
+  (function(){var _cb=document.querySelector('#mayaacc-ledger-config .mlgc-body');if(_cb)_cb.addEventListener('scroll',syncCfgIndicators);})();
+  document.addEventListener('click',function(e){var row=e.target&&e.target.closest?e.target.closest('#mayaacc-ledger-config .mlgc-option'):null;if(row){var a=configControls();var i=a.indexOf(row);if(i>=0){configIndex=i;paintConfig();}}});
+  document.querySelectorAll('#mlgOtherMasters .mlg-other-item').forEach(function(el,i){el.addEventListener('click',function(){pickOtherMaster(i);});el.addEventListener('mouseover',function(){otherIdx=i;paintOtherMasters();});});
   const oldCreate=window.createMasterAction;window.createMasterAction=function(nameAction){if(nameAction==='Ledger'){open();return;}return oldCreate?oldCreate(nameAction):undefined;};
 })();
 </script>
@@ -2642,7 +2674,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
     /* If a module-specific child layer is active, its own handler owns Enter. */
     const childIds={
       'mayaacc-group-overlay':['mayaacc-group-config','mgConfirm','mgTree'],
-      'mayaacc-ledger-overlay':['mayaacc-ledger-config','mlgConfirm','mlgTree'],
+      'mayaacc-ledger-overlay':['mayaacc-ledger-config','mlgConfirm','mlgTree','mlgOtherMasters','mayaacc-hsn-finder','maya-f3-menu'],
       'mayaacc-stock-overlay':['mayaacc-stock-config','msiConfirm','msiTree','mayaacc-hsn-finder'],
       'mayaacc-unit-overlay':['mayaacc-unit-config','muConfirm'],
       'mayaacc-godown-overlay':['mayaacc-godown-config','mgdConfirm','mgdTree'],
@@ -3328,7 +3360,8 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
       const original=window[m.save];
       window[m.save]=function(){
         const layer=activeLayer();
-        if(!layer||layer.name!==name||layer.type==='config'||layer.type==='finder'||layer.type==='confirm')return false;
+        if(!layer||layer.name!==name||layer.type==='finder'||layer.type==='confirm')return false;
+        if(layer.type==='config'&&name!=='Ledger')return false;
         return original.apply(this,arguments);
       };
     }
@@ -4173,7 +4206,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   const $=id=>document.getElementById(id);
   const shown=id=>{const el=$(id);if(!el)return false;const cs=getComputedStyle(el);return cs.display!=='none'&&cs.visibility!=='hidden'&&el.getAttribute('aria-hidden')!=='true';};
   const fieldFlows=[
-    {overlay:'mayaacc-ledger-overlay',blocked:['mayaacc-ledger-config','mlgConfirm','mlgTree'],next:{mlgName:'mlgUnder'}},
+    {overlay:'mayaacc-ledger-overlay',blocked:['mayaacc-ledger-config','mlgConfirm','mlgTree','mlgOtherMasters','mayaacc-hsn-finder','maya-f3-menu'],next:{mlgName:'mlgUnder'}},
     {overlay:'mayaacc-stock-overlay',blocked:['mayaacc-stock-config','msiConfirm','msiTree','mayaacc-hsn-finder'],next:{msiName:'msiGroup'}},
     {overlay:'mayaacc-unit-overlay',blocked:['mayaacc-unit-config','muConfirm'],next:{muName:'muSymbol'}},
     {overlay:'mayaacc-godown-overlay',blocked:['mayaacc-godown-config','mgdConfirm','mgdTree'],next:{mgdName:'mgdUnder'}}
@@ -4827,7 +4860,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
 .alter-ledger-picker-backdrop,.alter-ledger-form-backdrop{display:none;position:fixed;inset:0;background:rgba(15,27,43,.34);z-index:11020;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
 .alter-ledger-picker,.alter-ledger-form{width:min(620px,95vw);max-height:min(760px,90vh);background:#fff;border:1px solid #d6e1ec;border-radius:12px;box-shadow:0 18px 55px rgba(24,43,68,.22);overflow:hidden;display:flex;flex-direction:column}
 .alter-ledger-head{padding:18px 20px 14px;border-bottom:1px solid #e1e8ef}.alter-ledger-title{display:flex;align-items:center;justify-content:space-between;gap:14px}.alter-ledger-title h2{margin:0;font-size:18px;color:#1e3047}.alter-ledger-title button{border:0;background:transparent;color:#718096;font-size:22px;cursor:pointer;padding:2px 6px}.alter-ledger-sub{margin:5px 0 13px;color:#7a8798;font-size:12px}.alter-ledger-search{width:100%;box-sizing:border-box;border:1px solid #cfdbe7;border-radius:7px;padding:10px 12px;font-size:13px;outline:none;background:#fbfdff}.alter-ledger-list{padding:10px 12px 14px;overflow:auto;flex:1;min-height:0;overscroll-behavior:contain}.alter-ledger-row{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;border:0;border-bottom:1px solid #edf1f5;background:#fff;padding:12px;color:#26384e;font-size:14px;cursor:pointer}.alter-ledger-row:hover,.alter-ledger-row.keyboard-active{background:#e6f1fb;outline:2px solid #9bbddd;outline-offset:-2px}.alter-ledger-row .meta{display:flex;gap:8px;align-items:center;color:#7a8798;font-size:11px}.alter-ledger-badge{padding:3px 7px;border-radius:10px;background:#eef2f7;color:#607086;font-size:10px;font-weight:700}.alter-ledger-badge.created{background:#e8f5ec;color:#39704a}.alter-ledger-foot{border-top:1px solid #e1e8ef;padding:9px 18px;color:#8995a5;font-size:11px;text-align:right}
-.alter-ledger-form{width:min(760px,96vw)}.alter-ledger-form-body{padding:18px 20px;overflow:auto;min-height:0}.alf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.alf-field{display:flex;flex-direction:column;gap:6px}.alf-field.full{grid-column:1/-1}.alf-field label{font-size:12px;font-weight:700;color:#526174}.alf-field input,.alf-field select,.alf-field textarea{width:100%;box-sizing:border-box;border:1px solid #cfdbe7;border-radius:7px;padding:10px 11px;font:inherit;font-size:13px;outline:none;background:#fbfdff}.alf-field textarea{min-height:72px;resize:vertical}.alf-field input:focus,.alf-field select:focus,.alf-field textarea:focus{border-color:#8eb6dd;box-shadow:0 0 0 2px rgba(66,126,184,.1)}.alf-section{margin:0 0 18px}.alf-section h4{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#6f7d90}.alf-under-wrap{position:relative}.alf-under-list{display:none;position:absolute;z-index:3;left:0;right:0;top:100%;max-height:190px;overflow:auto;background:#fff;border:1px solid #cfdbe7;border-radius:7px;box-shadow:0 10px 30px rgba(24,43,68,.16)}.alf-under-option{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #edf1f5;background:#fff;padding:9px 11px;cursor:pointer;font-size:13px}.alf-under-option.keyboard-active,.alf-under-option:hover{background:#e6f1fb}.alf-note{font-size:11px;color:#8995a5;margin-top:4px}.alf-actions{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #e1e8ef;padding:12px 18px}.alf-actions .right{display:flex;gap:8px}.alf-btn{border:1px solid #cfdbe7;background:#fff;padding:9px 14px;border-radius:7px;font-weight:700;cursor:pointer}.alf-btn.primary{background:#172033;color:#fff;border-color:#172033}.alf-btn:disabled{opacity:.5;cursor:not-allowed}.alf-status{font-size:11px;color:#718096;align-self:center}.alf-readonly{background:#f2f5f8!important;color:#7a8798}
+.alter-ledger-form{width:min(760px,96vw)}.alter-ledger-form-body{padding:18px 20px;overflow:auto;min-height:0}.alf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.alf-field{display:flex;flex-direction:column;gap:6px}.alf-field.full{grid-column:1/-1}.alf-field label{font-size:12px;font-weight:700;color:#526174}.alf-field input,.alf-field select,.alf-field textarea{width:100%;box-sizing:border-box;border:1px solid #cfdbe7;border-radius:7px;padding:10px 11px;font:inherit;font-size:13px;outline:none;background:#fbfdff}.alf-field textarea{min-height:72px;resize:vertical}.alf-field input:focus,.alf-field select:focus,.alf-field textarea:focus{border-color:#8eb6dd;box-shadow:0 0 0 2px rgba(66,126,184,.1)}.alf-section{margin:0 0 18px}.alf-section h4{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#6f7d90}.alf-under-wrap{position:relative}.alf-under-list{display:none;position:absolute;z-index:3;left:0;right:0;top:100%;max-height:190px;overflow:auto;background:#fff;border:1px solid #cfdbe7;border-radius:7px;box-shadow:0 10px 30px rgba(24,43,68,.16)}.alf-under-option{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #edf1f5;background:#fff;padding:9px 11px;cursor:pointer;font-size:13px}.alf-under-option.keyboard-active,.alf-under-option:hover{background:#e6f1fb}.alf-note{font-size:11px;color:#8995a5;margin-top:4px}.alf-dup-warn{color:#d92d20;font-size:11px;font-weight:700;margin-top:2px}.alf-actions{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #e1e8ef;padding:12px 18px}.alf-actions .right{display:flex;gap:8px}.alf-btn{border:1px solid #cfdbe7;background:#fff;padding:9px 14px;border-radius:7px;font-weight:700;cursor:pointer}.alf-btn.primary{background:#172033;color:#fff;border-color:#172033}.alf-btn:disabled{opacity:.5;cursor:not-allowed}.alf-status{font-size:11px;color:#718096;align-self:center}.alf-readonly{background:#f2f5f8!important;color:#7a8798}
 @media(max-width:650px){.alf-grid{grid-template-columns:1fr}.alf-field.full{grid-column:auto}}
 </style>
 
@@ -4844,7 +4877,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
     <div class="alter-ledger-head"><div class="alter-ledger-title"><div><h2 id="alterLedgerFormTitle">Alter Ledger</h2><p class="alter-ledger-sub" id="alterLedgerFormOrigin">Existing company Ledger</p></div><button type="button" onclick="mayaCloseAlterLedgerForm()">×</button></div></div>
     <div class="alter-ledger-form-body">
       <div class="alf-section"><h4>Basic Details</h4><div class="alf-grid">
-        <div class="alf-field full"><label for="alfName">Ledger Name *</label><input id="alfName" autocomplete="off"></div>
+        <div class="alf-field full"><label for="alfName">Ledger Name *</label><input id="alfName" autocomplete="off"><div class="alf-dup-warn" id="alfDupWarn" style="display:none">A Ledger with this name already exists.</div></div>
         <div class="alf-field"><label for="alfNickname">Nickname</label><input id="alfNickname" autocomplete="off"></div>
         <div class="alf-field"><label for="alfUnder">Under *</label><div class="alf-under-wrap"><input id="alfUnder" autocomplete="off" placeholder="Search Group hierarchy"><div id="alfUnderList" class="alf-under-list"></div></div><div class="alf-note">↑ ↓ to select Group, Enter to choose.</div></div>
         <div class="alf-field"><label for="alfOpening">Opening Balance</label><input id="alfOpening" type="number" step="0.01"></div>
@@ -4891,7 +4924,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   function renderPicker(){const a=filtered(),root=$('alterLedgerPickerList');if(!root)return;root.innerHTML=a.length?a.map((x,i)=>{const perm=x.permanent===true;return `<button type="button" class="alter-ledger-row" data-index="${i}" data-id="${esc(x.id||'')}" data-permanent="${perm?'1':'0'}"><span><strong>${esc(x.name||'Ledger')}</strong><br><small>${esc(x.under||'No Under Group')} · ${esc(balOf(x.name))}</small></span><span class="meta"><span class="alter-ledger-badge ${perm?'':'created'}">${perm?'Permanent':'Created'}</span></span></button>`}).join(''):'<div style="padding:24px;text-align:center;color:#8995a5">No Ledger found in this company.</div>';paintPicker();$('alterLedgerPickerStatus').textContent=`${a.length} Ledger${a.length===1?'':'s'} available`;root.querySelectorAll('.alter-ledger-row').forEach(b=>b.addEventListener('click',()=>selectPicker(Number(b.dataset.index))));}
   function paintPicker(){const a=[...document.querySelectorAll('#alterLedgerPickerList .alter-ledger-row')];a.forEach((x,i)=>x.classList.toggle('keyboard-active',i===pickerIndex));if(a[pickerIndex])a[pickerIndex].scrollIntoView({block:'nearest'});}
   function selectPicker(i){const a=filtered(),x=a[i];if(!x)return;pickerIndex=i;paintPicker();selectedId=x.id;selectedPermanent=x.permanent===true;if(selectedPermanent){$('alterLedgerPickerStatus').textContent='Permanent Ledger — visible for reference but cannot be altered.';return;}closePicker();setTimeout(()=>openForm(x),0);}
-  function openForm(x){const d=$('mayaacc-alter-ledger-form');if(!d)return;selectedId=x.id;selectedPermanent=x.permanent===true;d.style.display='flex';d.setAttribute('aria-hidden','false');if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-alter-ledger-form .alter-ledger-form-body');$('alfName').value=x.name||'';$('alfNickname').value=x.nickname||'';$('alfUnder').value=x.under||'';$('alfOpening').value=x.openingBalance||'';$('alfBalance').value=x.balance||'dr';$('alfPhone').value=x.phone||'';$('alfWhatsapp').value=x.whatsapp||'';$('alfEmail').value=x.email||'';$('alfAadhaar').value=x.aadhaar||'';$('alfAddress').value=x.address||'';(function(){const cp=(f,t,v,d)=>{const src=$(f),dst=$(t);if(!src||!dst)return;if(dst.options.length<=1)dst.innerHTML=src.innerHTML;if(v&&![...dst.options].some(o=>o.value===v)){const o=document.createElement('option');o.value=v;o.textContent=v;dst.appendChild(o)}dst.value=v||d||''};cp('mlgState','alfState',x.state||'','');cp('mlgCountry','alfCountry',x.country||'','India');})();(function(){var d=$('alfDistrict');if(!d)return;var list=(x.state&&typeof window.mayaDistrictsFor==='function')?window.mayaDistrictsFor(x.state):[];d.disabled=!x.state;d.innerHTML='<option value="">'+(x.state?'Select District':'Select State first')+'</option>'+list.map(function(n){return '<option>'+esc(n)+'</option>';}).join('');d.value=(x.district&&list.indexOf(x.district)>=0)?x.district:'';})();$('alfPin').value=x.pin||'';$('alfGSTType').value=x.gstType||'unregistered';$('alfGSTIN').value=x.gstin||'';$('alfPAN').value=x.pan||'';$('alfBankName').value=x.bankName||'';$('alfAccount').value=x.account||'';$('alfBranch').value=x.branch||'';$('alfGstApplicable').value=x.gstApplicable?'yes':'no';$('alfGstRate').value=x.gstRate||'';$('alfHsn').value=x.hsn||'';$('alfItc').value=x.itc||'eligible';$('alfIFSC').value=x.ifsc||'';$('alfUPI').value=x.upi||'';$('alfCreditLimit').value=x.creditLimit||'';$('alfCreditDays').value=x.creditDays||'';$('alfNotes').value=x.notes||'';$('alterLedgerFormOrigin').textContent=(selectedPermanent?'Permanent/system Ledger — editing disabled.':'Company-created Ledger • '+companyId());$('alfSaveBtn').disabled=selectedPermanent;formFields=[...d.querySelectorAll('input:not([disabled]),select:not([disabled]),textarea:not([disabled])')];if(window.mayaAlfApplyKind)window.mayaAlfApplyKind();setTimeout(()=>{window.__mayaEnd($('alfName'));},20);}
+  function openForm(x){const d=$('mayaacc-alter-ledger-form');if(!d)return;selectedId=x.id;selectedPermanent=x.permanent===true;d.style.display='flex';d.setAttribute('aria-hidden','false');if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-alter-ledger-form .alter-ledger-form-body');$('alfName').value=x.name||'';$('alfNickname').value=x.nickname||'';$('alfUnder').value=x.under||'';$('alfOpening').value=x.openingBalance||'';$('alfBalance').value=x.balance||'dr';$('alfPhone').value=x.phone||'';$('alfWhatsapp').value=x.whatsapp||'';$('alfEmail').value=x.email||'';$('alfAadhaar').value=x.aadhaar||'';$('alfAddress').value=x.address||'';(function(){const cp=(f,t,v,d)=>{const src=$(f),dst=$(t);if(!src||!dst)return;if(dst.options.length<=1)dst.innerHTML=src.innerHTML;if(v&&![...dst.options].some(o=>o.value===v)){const o=document.createElement('option');o.value=v;o.textContent=v;dst.appendChild(o)}dst.value=v||d||''};cp('mlgState','alfState',x.state||'','');cp('mlgCountry','alfCountry',x.country||'','India');})();(function(){var d=$('alfDistrict');if(!d)return;var list=(x.state&&typeof window.mayaDistrictsFor==='function')?window.mayaDistrictsFor(x.state):[];d.disabled=!x.state;d.innerHTML='<option value="">'+(x.state?'Select District':'Select State first')+'</option>'+list.map(function(n){return '<option>'+esc(n)+'</option>';}).join('');d.value=(x.district&&list.indexOf(x.district)>=0)?x.district:'';})();$('alfPin').value=x.pin||'';$('alfGSTType').value=x.gstType||'unregistered';$('alfGSTIN').value=x.gstin||'';$('alfPAN').value=x.pan||'';$('alfBankName').value=x.bankName||'';$('alfAccount').value=x.account||'';$('alfBranch').value=x.branch||'';$('alfGstApplicable').value=x.gstApplicable?'yes':'no';$('alfGstRate').value=x.gstRate||'';$('alfHsn').value=x.hsn||'';$('alfItc').value=x.itc||'eligible';$('alfIFSC').value=x.ifsc||'';$('alfUPI').value=x.upi||'';$('alfCreditLimit').value=x.creditLimit||'';$('alfCreditDays').value=x.creditDays||'';$('alfNotes').value=x.notes||'';$('alterLedgerFormOrigin').textContent=(selectedPermanent?'Permanent/system Ledger — editing disabled.':'Company-created Ledger • '+companyId());$('alfSaveBtn').disabled=selectedPermanent;formFields=[...d.querySelectorAll('input:not([disabled]),select:not([disabled]),textarea:not([disabled])')];if(window.mayaAlfApplyKind)window.mayaAlfApplyKind();syncAlfDupWarn();setTimeout(()=>{window.__mayaEnd($('alfName'));},20);}
   function closeForm(){const d=$('mayaacc-alter-ledger-form');if(!d)return;d.style.display='none';d.setAttribute('aria-hidden','true');}
   function cancelForm(){closeForm();closePicker();setTimeout(()=>{if(typeof window.openAlterMaster==='function')window.openAlterMaster();},0);}
   function renderUnder(){const q=($('alfUnder').value||'').trim().toLowerCase();const a=groups().filter(x=>x.toLowerCase().includes(q));const root=$('alfUnderList');root.innerHTML=a.length?a.map((x,i)=>`<button type="button" class="alf-under-option" data-index="${i}">${esc(x)}</button>`).join(''):'<div style="padding:10px;color:#8995a5;font-size:12px">No Group found</div>';underIndex=Math.min(Math.max(underIndex,0),Math.max(0,a.length-1));root.style.display='block';paintUnder();root.querySelectorAll('.alf-under-option').forEach(b=>b.addEventListener('click',()=>chooseUnder(Number(b.dataset.index))));}
@@ -4916,7 +4949,10 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
       }if(e.key==='Tab'){e.preventDefault();e.stopImmediatePropagation();e.shiftKey?focusPrev():focusNext();return;}if(e.key==='Enter'&&['input','textarea','select'].includes((e.target.tagName||'').toLowerCase())){e.preventDefault();e.stopImmediatePropagation();focusNext();return;}}}
   window.mayaOpenAlterLedgerPicker=openPicker;window.mayaCloseAlterLedgerPicker=closePicker;window.mayaOpenAlterLedgerForm=openForm;window.mayaCloseAlterLedgerForm=closeForm;window.mayaCancelAlterLedgerForm=cancelForm;window.mayaSaveAlterLedger=save;
   window.alterMasterAction=function(name){if(name==='Group'&&typeof window.mayaOpenAlterGroupPicker==='function'){window.mayaOpenAlterGroupPicker();return;}if(name==='Ledger'){openPicker();return;}alert(name+' alteration module will open here.');};
-  $('alterLedgerPickerSearch')?.addEventListener('input',()=>{pickerIndex=0;renderPicker()});$('alfUnder')?.addEventListener('focus',renderUnder);$('alfUnder')?.addEventListener('input',()=>{underIndex=0;renderUnder()});$('alfUnder')?.addEventListener('blur',()=>setTimeout(closeUnder,150));
+  $('alterLedgerPickerSearch')?.addEventListener('input',()=>{pickerIndex=0;renderPicker()});
+  /* Live duplicate-name warning (own name excluded). */
+  function syncAlfDupWarn(){var w=$('alfDupWarn');if(!w)return;var n=($('alfName').value||'').trim().toLowerCase();var arr=ledgers();var idx=arr.findIndex(function(x){return x.id===selectedId;});var dup=n&&arr.some(function(x,i){return i!==idx&&String(x.name||'').trim().toLowerCase()===n;});w.style.display=dup?'block':'none';}
+  $('alfName')?.addEventListener('input',syncAlfDupWarn);$('alfUnder')?.addEventListener('focus',renderUnder);$('alfUnder')?.addEventListener('input',()=>{underIndex=0;renderUnder()});$('alfUnder')?.addEventListener('blur',()=>setTimeout(closeUnder,150));
   document.addEventListener('keydown',onKey,true);
   /* District follows the State in Alter Ledger too (same bundled master). */
   function syncAlfDistrict(){var d=$('alfDistrict');if(!d)return;var sv=$('alfState')?$('alfState').value:'';var list=(sv&&typeof window.mayaDistrictsFor==='function')?window.mayaDistrictsFor(sv):[];if(!sv){d.innerHTML='<option value="">Select State first</option>';d.disabled=true;d.value='';return;}d.disabled=false;d.innerHTML='<option value="">Select District</option>'+list.map(function(n){return '<option>'+esc(n)+'</option>';}).join('');d.value='';}
@@ -4963,13 +4999,30 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   transform:translate(-50%,-50%) !important;
   right:auto !important;
   bottom:auto !important;
-  width:min(640px,94vw) !important;
+  width:min(1020px,94vw) !important;
   height:auto !important;
   max-height:calc(100vh - 60px) !important;
   border:1px solid #dbe4ec !important;
-  border-radius:14px !important;
+  border-radius:10px !important;
   box-shadow:0 24px 70px rgba(15,25,50,.35) !important;
 }
+</style>
+<style id="mayaacc-nb-config-box">
+/* Tally-style Configuration box (new batch #1, 2026-11-21): two columns
+   of Yes/No rows, current row highlighted, scroll indicators. */
+#mayaacc-ledger-config .mlgc-head{padding:14px 20px 10px}
+#mayaacc-ledger-config .mlgc-head h3{font-size:15px}
+#mayaacc-ledger-config .mlgc-body{padding:12px 24px 14px;max-height:calc(100vh - 260px)}
+#mayaacc-ledger-config .cfgcols{display:flex;gap:36px;padding-right:22px}
+#mayaacc-ledger-config .cfgcol{flex:1;min-width:0}
+#mayaacc-ledger-config .mlgc-option{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 8px;font-size:13px;border:0;border-bottom:1px solid #f0f2f6;border-radius:6px;background:transparent;margin:0;cursor:pointer}
+#mayaacc-ledger-config .mlgc-option .v{font-weight:700;color:#172033;flex:none}
+#mayaacc-ledger-config .mlgc-option input{display:none}
+#mayaacc-ledger-config .mlgc-option:hover{background:#f4f7fd}
+#mayaacc-ledger-config .mlgc-option.mlgc-focus{background:#e8effc;outline:none;box-shadow:none}
+#mayaacc-ledger-config .mlgc-ind{position:absolute;right:10px;font-size:11px;color:#7a8798;font-weight:700;z-index:3;pointer-events:none}
+#mayaacc-ledger-config .mlgc-ind.top{top:60px}
+#mayaacc-ledger-config .mlgc-ind.bot{bottom:64px}
 </style>
 <script id="mayaacc-alter-ledger-f12-routing-final">
 (function(){
@@ -5005,6 +5058,13 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
       if(typeof window.mayaSaveLedgerConfig==='function') window.mayaSaveLedgerConfig();
       const st=cfg&&cfg.querySelector('#mlgcStatus');
       if(st) st.textContent='Configuration saved for '+(typeof window.companyName==='function'?window.companyName():'Current Company')+'.';
+      return;
+    }
+    if(shown && e.ctrlKey && !e.altKey && !e.metaKey && String(e.key||'').toLowerCase()==='a'){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if(typeof window.mayaSaveLedgerConfig==='function') window.mayaSaveLedgerConfig();
+      closeAlterLedgerConfig();
       return;
     }
     if(e.key==='F12'){
@@ -6592,6 +6652,9 @@ html.mayaacc-voucher-open,body.mayaacc-voucher-open{overflow:hidden!important;he
 #mve-quit button[data-q="y"]{background:#fff;color:#172033;border:1.5px solid #172033}
 #mve-quit button[data-q="n"]{background:#172033;color:#fff;border:1.5px solid #172033}
 #mve-quit button:focus{outline:none;box-shadow:0 0 0 3px #9db8dd}
+#mve-quit button[data-q="y"]:focus{background:#172033;color:#fff}
+#mve-quit .box:focus-within button[data-q="n"]{background:#fff;color:#172033}
+#mve-quit .box:focus-within button[data-q="n"]:focus{background:#172033;color:#fff}
 @media(max-width:1050px){.mve-party-area{grid-template-columns:minmax(160px,1.3fr) 120px minmax(160px,1fr) 120px}#mve-rightbar{width:170px;flex-basis:170px}}
 @media(max-width:760px){
   #mve-main{flex-direction:column}
@@ -9564,7 +9627,7 @@ body.maya-no-company #companySetup button[onclick="showDashboard()"]{display:non
  const $=id=>document.getElementById(id);
  const ov=()=>$('mayaacc-ledger-overlay');
  const isOpen=()=>{const o=ov();return !!o&&getComputedStyle(o).display!=='none'};
- const layerOpen=()=>{const c=$('mayaacc-ledger-config'),f=$('mlgConfirm'),g=$('mlgGstin'),h=$('mayaacc-hsn-finder');return (c&&c.style.display==='block')||(f&&f.style.display==='flex')||(g&&g.style.display==='flex')||(h&&h.getAttribute('aria-hidden')!=='true')};
+ const layerOpen=()=>{const c=$('mayaacc-ledger-config'),f=$('mlgConfirm'),g=$('mlgGstin'),h=$('mayaacc-hsn-finder'),om=$('mlgOtherMasters'),f3=$('maya-f3-menu');return (c&&c.style.display==='block')||(f&&f.style.display==='flex')||(g&&g.style.display==='flex')||(h&&h.getAttribute('aria-hidden')!=='true')||(om&&om.style.display==='flex')||(f3&&f3.style.display==='block')};
  const groups=()=>typeof window.mayaLedgerGroups==='function'?window.mayaLedgerGroups():[];
  function clearErr(){const o=ov();if(!o)return;o.querySelectorAll('.mlg-inline-err').forEach(e=>e.remove());o.querySelectorAll('.mlg-err').forEach(e=>e.classList.remove('mlg-err'))}
  function center(el){const main=ov().querySelector('.mlg-main');if(!main||!el)return;const w=el.closest('.mlg-field')||el,r=w.getBoundingClientRect(),m=main.getBoundingClientRect();main.scrollTop+=(r.top+r.height/2)-(m.top+m.height/2-24)}
@@ -11891,10 +11954,18 @@ window.__mayaModalKey=function(e){
      company menu / Company Features through it (the dispatcher swallows
      these first; this guards against reordering). */
   if((k==='F3'||k==='F11')&&document.querySelector('.maya-mod-ov.on'))return 2;
+  if(k==='F3'&&e.altKey&&!e.ctrlKey&&!e.metaKey){
+    if(window.showCompanySelect){window.showCompanySelect();return 2}
+    return 0;
+  }
+  if(k==='F3'&&e.ctrlKey&&!e.altKey&&!e.metaKey){
+    if(window.mayaShutCompany){window.mayaShutCompany();return 2}
+    return 0;
+  }
   if(k==='F3'){
     if(S.open)return 2;
     if(MENU.open){menuClose();return 2}
-    if(onWorkspace()&&!busy(['mayaacc-reports-overlay'])){window.mayaCompanyMenu();return 2}
+    if(onWorkspace()&&!busy(['mayaacc-reports-overlay'])){if(window.mayaF3Dropdown)window.mayaF3Dropdown();else window.mayaCompanyMenu();return 2}
     return 0;
   }
   if(k==='Escape'&&!S.open&&!MENU.open){
@@ -21298,7 +21369,10 @@ function modCss(){
   +'#maya-quit-confirm .maya-mod-btn{min-width:96px;height:36px;font-size:14.5px;font-weight:600;border-radius:5px;padding:0 14px}'
   +'#maya-quit-confirm .maya-mod-btn[data-act="yes"]{background:#fff;color:#172033;border:1.5px solid #172033}'
   +'#maya-quit-confirm .maya-mod-btn[data-act="no"]{background:#172033;color:#fff;border:1.5px solid #172033}'
-  +'#maya-quit-confirm .maya-mod-btn:focus{outline:none;box-shadow:0 0 0 3px #9db8dd}';
+  +'#maya-quit-confirm .maya-mod-btn:focus{outline:none;box-shadow:0 0 0 3px #9db8dd}'
+  +'#maya-quit-confirm .maya-mod-btn[data-act="yes"]:focus{background:#172033;color:#fff}'
+  +'#maya-quit-confirm:focus-within .maya-mod-btn[data-act="no"]{background:#fff;color:#172033}'
+  +'#maya-quit-confirm:focus-within .maya-mod-btn[data-act="no"]:focus{background:#172033;color:#fff}';
   document.head.appendChild(s);
 }
 function modOpen(id,title,sub,bodyHtml,footHtml){
@@ -28415,6 +28489,7 @@ else window.MayaLang.init();
 .mlg-trow label{flex:0 0 150px;font-size:13px;font-weight:600;color:#33445c}
 .mlg-trow label::after{content:"\00a0:"}
 .mlg-trow input{flex:1;min-width:0;box-sizing:border-box;padding:9px 11px;border:1px solid #d8e0ea;border-radius:6px;background:#fff;font-size:13px;font-weight:600;color:#1d2d42;outline:none}
+.mlg-dup-warn{color:#d92d20;font-size:11px;font-weight:700;margin:-4px 0 10px 158px}
 .mlg-trow input:focus{border-color:#8d9bb0;background:#fffbe6;box-shadow:0 0 0 3px rgba(94,108,134,.08)}
 .mlg-total-open{flex:0 0 300px;width:300px;text-align:left;border:1px solid #d8e0ea;border-radius:8px;background:#fff;padding:10px 14px;font-size:12px}
 .mlg-total-open>span{display:block;font-size:12px;font-weight:800;color:#1d2d42;text-transform:none;letter-spacing:0;margin-bottom:8px}
@@ -28960,7 +29035,7 @@ function __ctOpenForm(){
   return null;
 }
 function __ctDeepBusy(){
-  var ids=['mayaacc-group-config','mayaacc-ledger-config','mayaacc-stock-config','mayaacc-unit-config','mayaacc-godown-config','mayaacc-cost-centre-config','mayaacc-voucher-type-config','mayaacc-tax-gst-config','mayaacc-stock-group-config','mayaacc-currency-config','mgConfirm','mlgConfirm','msiConfirm','muConfirm','mgdConfirm','mccConfirm','mvtConfirm','mtgConfirm','msgConfirm','mscConfirm','mcurConfirm','mgTree','mlgTree','msiTree','muTree','mgdTree','mccTree','mvtTree','mtgTree','msgTree','mscTree','mayaacc-hsn-finder','maya-print-dialog','mcf-ov','mcm','createMasterDialog'];
+  var ids=['mayaacc-group-config','mayaacc-ledger-config','mayaacc-stock-config','mayaacc-unit-config','mayaacc-godown-config','mayaacc-cost-centre-config','mayaacc-voucher-type-config','mayaacc-tax-gst-config','mayaacc-stock-group-config','mayaacc-currency-config','mgConfirm','mlgConfirm','msiConfirm','muConfirm','mgdConfirm','mccConfirm','mvtConfirm','mtgConfirm','msgConfirm','mscConfirm','mcurConfirm','mgTree','mlgTree','msiTree','muTree','mgdTree','mccTree','mvtTree','mtgTree','msgTree','mscTree','mlgOtherMasters','mayaacc-hsn-finder','maya-print-dialog','mcf-ov','mcm','createMasterDialog'];
   for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);if(__ctShownEl(el))return true;}
   var mod=document.querySelector('.maya-mod-ov.on');if(mod)return true;
   return false;
@@ -28998,6 +29073,26 @@ document.addEventListener('keydown',function(e){
     var wrapped=function(e){
       try{
         var k=e.key;
+        /* Esc dismisses the topmost new layer first: the F3 dropdown and the
+           F10 Other Masters picker. They sit above the form, so Escape must
+           close only them — never the form underneath. */
+        if(k==='Escape'&&!e.ctrlKey&&!e.altKey&&!e.metaKey){
+          var _f3=document.getElementById('maya-f3-menu');
+          if(_f3&&_f3.style.display==='block'){_f3.style.display='none';return 2;}
+          var _om=document.getElementById('mlgOtherMasters');
+          if(_om&&_om.style.display==='flex'){_om.style.display='none';_om.setAttribute('aria-hidden','true');return 2;}
+        }
+        /* Enter belongs to the F10 Other Masters picker (and the HSN finder)
+           when one is open: let it reach the module's own handler instead of
+           the base Enter-to-next-field, which would move focus and swallow it. */
+        if(k==='Enter'&&!e.ctrlKey&&!e.altKey&&!e.metaKey){
+          var _om2=document.getElementById('mlgOtherMasters');
+          if(_om2&&_om2.style.display==='flex')return 0;
+          var _f3d=document.getElementById('maya-f3-menu');
+          if(_f3d&&_f3d.style.display==='block')return 0;
+          var _hf=document.getElementById('mayaacc-hsn-finder');
+          if(_hf&&_hf.getAttribute('aria-hidden')!=='true'&&getComputedStyle(_hf).display!=='none')return 0;
+        }
         if(__ctDeepBusy())return prev(e);
         var form=__ctOpenForm();
         var reportOpen=__ctShownEl(document.getElementById('mayaacc-reports-overlay'));
@@ -29008,7 +29103,12 @@ document.addEventListener('keydown',function(e){
           else if(window.mayaOpenDateDialog)window.mayaOpenDateDialog();
           return 2;
         }
+        if(k==='F3'&&e.altKey&&!e.ctrlKey&&!e.metaKey){
+          if(form&&form.close){if(window.__mayaClearReturn)window.__mayaClearReturn();form.close(function(){if(window.showCompanySelect)window.showCompanySelect();});return 2;}
+          if(window.showCompanySelect){window.showCompanySelect();return 2;}
+        }
         if(k==='F3'&&!e.ctrlKey&&!e.altKey&&!e.metaKey&&form){
+          if(window.mayaF3Dropdown){window.mayaF3Dropdown();return 2;}
           if(window.mayaCompanyMenu){window.mayaCompanyMenu();return 2;}
         }
         if(k==='F11'&&!e.ctrlKey&&!e.altKey&&!e.metaKey&&form){
@@ -29033,8 +29133,7 @@ document.addEventListener('keydown',function(e){
           if(btn){btn.click();return 2;}
         }
         if(k==='F3'&&e.ctrlKey&&!e.altKey&&!e.metaKey){
-          if(form&&form.close){form.close(function(){if(window.showCompanySelect)window.showCompanySelect();});return 2;}
-          if(window.showCompanySelect){window.showCompanySelect();return 2;}
+          if(window.mayaShutCompany){window.mayaShutCompany();return 2;}
         }
       }catch(err){}
       return prev(e);
@@ -29194,6 +29293,13 @@ function __mayaRecordReturn(name){
   else{__mayaReturnTo=null;}
 }
 window.__mayaRecordReturn=__mayaRecordReturn;
+/* Switching masters from inside a form (F10) keeps the recorded return but
+   re-points it at the new module, so quitting returns to the Create menu
+   with the new module selected. No-op when no return was recorded. */
+window.__mayaUpdateReturnItem=function(name){if(typeof __mayaReturnTo!=='undefined'&&__mayaReturnTo&&__mayaReturnTo.menu==='createMaster'){__mayaReturnTo.item=name;}};
+/* Leaving the form for Select Company / Shut (Alt+F3, Ctrl+F3, F3 menu):
+   the form close must NOT bounce back to the Create menu first. */
+window.__mayaClearReturn=function(){if(typeof __mayaReturnTo!=='undefined'){__mayaReturnTo=null;}};
 function __mayaReturnToMenu(){
   var rt=__mayaReturnTo;__mayaReturnTo=null;
   if(!rt||rt.menu!=='createMaster')return;
@@ -29335,5 +29441,137 @@ document.addEventListener('focusin',function(e){
 })();
 </script>
 
+<style id="mayaacc-nb-f3-multicompany">
+/* F3 three ways + multi-company open (new batch #6, 2026-11-21). */
+#maya-f3-menu{position:fixed;top:56px;right:16px;width:235px;background:#fff;border:1px solid #dbe4ec;border-radius:8px;box-shadow:0 12px 30px rgba(15,25,50,.25);z-index:2147483000;overflow:hidden}
+#maya-f3-menu .f3mi{padding:10px 12px;font-size:12px;border-bottom:1px solid #f0f2f6;cursor:pointer;color:#1d2d42}
+#maya-f3-menu .f3mi:last-child{border-bottom:0}
+#maya-f3-menu .f3mi b{color:#2f6fd0;margin-right:7px}
+#maya-f3-menu .f3mi.sel{background:#e8effc}
+.maya-open-co{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:12px 8px;border-bottom:1px solid #e0e6ed;cursor:pointer;border-radius:6px}
+.maya-open-co strong{font-size:14px}
+.maya-open-co small{display:block;color:#758298;margin-top:6px;font-weight:400}
+.maya-open-co.act{background:#e8effc}
+.maya-open-co.act>div>strong{font-weight:800;color:#172033}
+.maya-open-co:hover{background:#f2f6fd}
+.maya-open-co.act:hover{background:#e8effc}
+.open-companies-count{font-size:10px;letter-spacing:.06em;color:#728097;padding:8px 0 0}
+</style>
+<script id="mayaacc-f3-multicompany">
+/* F3 three ways (F3 = dropdown, Alt+F3 = Select Company, Ctrl+F3 = Shut
+   Company) + Tally-style multi-company open (new batch #6, 2026-11-21).
+   Open companies live in localStorage 'mayaacc_open_companies'; the
+   active company stays 'mayaacc_active_company' (unchanged). */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var esc=function(x){return String(x==null?'':x).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});};
+  var KEY='mayaacc_open_companies';
+  function companies(){try{return JSON.parse(localStorage.getItem('mayaacc_companies')||'[]');}catch(e){return[];}}
+  function getOpen(){try{var a=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(a))return[];var ok={};companies().forEach(function(c){ok[c.id]=1;});return a.filter(function(id){return ok[id];});}catch(e){return[];}}
+  function setOpen(a){try{localStorage.setItem(KEY,JSON.stringify(a));}catch(e){}}
+  function addOpen(id){if(!id)return;var a=getOpen();if(a.indexOf(id)<0){a.push(id);setOpen(a);}}
+  function removeOpen(id){setOpen(getOpen().filter(function(x){return x!==id;}));}
+  function activeId(){return localStorage.getItem('mayaacc_active_company')||null;}
+  function lastActivity(c){var la=(typeof window.mayaLastActivity==='function')?window.mayaLastActivity(c.id):null;var s=la||c.updatedAt;if(!s)return '—';try{return new Date(s+'T00:00:00').toLocaleDateString('en-IN');}catch(e){return '—';}}
+  function renderGatewayCompanies(){
+    var list=$('mayaOpenCompaniesList');if(!list)return;
+    var all=companies(),open=getOpen(),act=activeId();
+    if(!open.length&&act)open=[act];
+    var html=open.map(function(id){
+      var c=null;for(var i=0;i<all.length;i++){if(all[i].id===id){c=all[i];break;}}
+      if(!c)return '';
+      var info=[c.address,c.state,c.country,c.pin].filter(Boolean).join(' · ');
+      var isAct=id===act;
+      var nameHtml=isAct?'<strong id="workspaceCompanyName">'+esc(c.companyName)+'</strong><small id="workspaceCompanyInfo">'+esc(info)+'</small>':'<strong>'+esc(c.companyName)+'</strong>';
+      return '<div class="maya-open-co'+(isAct?' act':'')+'" data-company-id="'+esc(id)+'"><div>'+nameHtml+'</div><strong'+(isAct?' id="workspaceLastActivity"':'')+'>'+esc(lastActivity(c))+'</strong></div>';
+    }).join('');
+    list.innerHTML=html;
+    var cnt=$('mayaOpenCompaniesCount');if(cnt)cnt.textContent='OPEN COMPANIES — '+open.length;
+    var rows=list.querySelectorAll('[data-company-id]');
+    for(var j=0;j<rows.length;j++){rows[j].addEventListener('click',function(){var id=this.getAttribute('data-company-id');if(id&&id!==activeId()&&typeof window.showCompanyWorkspace==='function')window.showCompanyWorkspace(id);});}
+  }
+  window.mayaRenderGatewayCompanies=renderGatewayCompanies;
+  /* Shut Company: close the open form first (it asks if dirty), then
+     remove only the current company from the open list. Shutting the
+     last one returns to Select Company. */
+  window.mayaShutCompany=function(){
+    var form=null;
+    try{if(typeof __ctOpenForm==='function')form=__ctOpenForm();}catch(e){}
+    if(form&&form.close){if(window.__mayaClearReturn)window.__mayaClearReturn();form.close(function(){window.mayaShutCompany();});return;}
+    var act=activeId();
+    if(act)removeOpen(act);
+    var open=getOpen();
+    if(open.length){if(typeof window.showCompanyWorkspace==='function'){window.showCompanyWorkspace(open[open.length-1]);return;}}
+    try{localStorage.removeItem('mayaacc_active_company');}catch(e){}
+    if(typeof window.showCompanySelect==='function')window.showCompanySelect();
+  };
+  /* F3 dropdown (top-right, 3 items). */
+  var f3Idx=0;
+  function f3Menu(){return $('maya-f3-menu');}
+  function f3Items(){var m=f3Menu();return m?Array.prototype.slice.call(m.querySelectorAll('.f3mi')):[];}
+  function f3Paint(){f3Items().forEach(function(el,i){el.classList.toggle('sel',i===f3Idx);});}
+  function f3Close(){var m=f3Menu();if(m)m.style.display='none';}
+  function f3Run(i){
+    f3Close();
+    if(i===0){if(typeof window.mayaCompanyMenu==='function')window.mayaCompanyMenu();}
+    else if(i===1){var _f=null;try{if(typeof __ctOpenForm==='function')_f=__ctOpenForm();}catch(e){}if(_f&&_f.close){if(window.__mayaClearReturn)window.__mayaClearReturn();_f.close(function(){if(window.showCompanySelect)window.showCompanySelect();});}else if(typeof window.showCompanySelect==='function')window.showCompanySelect();}
+    else if(i===2){window.mayaShutCompany();}
+  }
+  window.mayaF3Dropdown=function(){
+    var m=f3Menu();if(!m)return;
+    if(m.style.display==='block'){f3Close();return;}
+    m.style.display='block';f3Idx=0;f3Paint();
+  };
+  window.addEventListener('keydown',function(e){
+    var m=f3Menu();if(!m||m.style.display!=='block')return;
+    var k=e.key;
+    if(k==='Escape'){e.preventDefault();e.stopImmediatePropagation();f3Close();return;}
+    if(k==='ArrowDown'||k==='ArrowUp'){e.preventDefault();e.stopImmediatePropagation();var n=f3Items().length;f3Idx=(f3Idx+(k==='ArrowDown'?1:-1)+n)%n;f3Paint();return;}
+    if(k==='Enter'){e.preventDefault();e.stopImmediatePropagation();f3Run(f3Idx);return;}
+  },true);
+  document.addEventListener('mousedown',function(e){
+    var m=f3Menu();if(!m||m.style.display!=='block')return;
+    var t=e.target;
+    if(m.contains(t))return;
+    if(t&&t.closest&&(t.closest('#mcoBtn')||t.closest('#mlgSideF3')))return;
+    f3Close();
+  },true);
+  /* Build the dropdown element. */
+  (function(){
+    if($('maya-f3-menu'))return;
+    var d=document.createElement('div');
+    d.id='maya-f3-menu';d.style.display='none';
+    d.innerHTML='<div class="f3mi sel" data-i="0"><b>F3</b>Company</div><div class="f3mi" data-i="1"><b>F3</b>Select Company</div><div class="f3mi" data-i="2"><b>F3</b>Shut Company</div>';
+    document.body.appendChild(d);
+    d.addEventListener('click',function(e){var it=e.target&&e.target.closest?e.target.closest('.f3mi'):null;if(it)f3Run(+it.getAttribute('data-i'));});
+    d.addEventListener('mouseover',function(e){var it=e.target&&e.target.closest?e.target.closest('.f3mi'):null;if(it){f3Idx=+it.getAttribute('data-i');f3Paint();}});
+  })();
+  /* Keep the open list + Gateway list in step when a company opens. */
+  (function(){
+    var o=window.showCompanyWorkspace;
+    if(!o||o.__mayaF3Wrapped)return;
+    var wrapped=function(id){
+      var r=o.apply(this,arguments);
+      try{
+        if(localStorage.getItem('mayaacc_active_company')===id){addOpen(id);renderGatewayCompanies();}
+      }catch(e){}
+      return r;
+    };
+    wrapped.__mayaF3Wrapped=true;
+    window.showCompanyWorkspace=wrapped;
+    var del=window.deleteCompany;
+    if(del&&!del.__mayaF3Wrapped){
+      var delWrapped=function(id){var r=del.apply(this,arguments);try{removeOpen(id);renderGatewayCompanies();}catch(e){}return r;};
+      delWrapped.__mayaF3Wrapped=true;
+      window.deleteCompany=delWrapped;
+    }
+    /* First paint, if the workspace is already showing a company. */
+    try{
+      var dash=$('dashboard');
+      if(dash&&getComputedStyle(dash).display!=='none'&&activeId()){addOpen(activeId());renderGatewayCompanies();}
+    }catch(e){}
+  })();
+})();
+</script>
 </body>
 </html>
