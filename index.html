@@ -28909,7 +28909,7 @@ document.addEventListener('keydown',function(e){
   }catch(e){}
 })();
 
-/* ---------------- shared footer keys: Ctrl+A accept + bare Q/A/D ---------------- */
+/* ---------------- shared footer keys: Ctrl+A accept + Ctrl+Q quit + bare A/D ---------------- */
 window.__mayaCreateDeleteToast=function(name){
   var msg='Nothing to delete — this is a new '+(name||'master')+'.';
   if(window.mayaToast)window.mayaToast(msg);else if(window.alert)window.alert(msg);
@@ -28945,14 +28945,18 @@ document.addEventListener('keydown',function(e){
     if(e.ctrlKey&&!e.altKey&&!e.metaKey&&(k==='a'||k==='A')){
       e.preventDefault();e.stopImmediatePropagation();form.save();return;
     }
+    /* Quit = Ctrl+Q only (Q has a double underline = Ctrl+key, per Sandeep).
+       Bare Q must never quit — while typing it would go back. */
+    if(e.ctrlKey&&!e.altKey&&!e.metaKey&&(k==='q'||k==='Q')){
+      e.preventDefault();e.stopImmediatePropagation();form.close();return;
+    }
     if(!e.ctrlKey&&!e.altKey&&!e.metaKey){
       var t=e.target;
       if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable))return;
-      /* SELECT and BUTTON targets may use Q/A/D: a letter cannot be typed
+      /* SELECT and BUTTON targets may use A/D: a letter cannot be typed
          into them, and Tally quits from a Yes/No field the same way. */
       var lk=String(k||'').toLowerCase();
-      if(lk==='q'){e.preventDefault();e.stopImmediatePropagation();form.close();}
-      else if(lk==='a'){e.preventDefault();e.stopImmediatePropagation();form.save();}
+      if(lk==='a'){e.preventDefault();e.stopImmediatePropagation();form.save();}
       else if(lk==='d'){e.preventDefault();e.stopImmediatePropagation();window.__mayaCreateDeleteToast(form.name);}
     }
   }catch(err){}
