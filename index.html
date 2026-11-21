@@ -441,7 +441,7 @@ var MAYA_COINS_LOGO_FULL_IMG="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAccA
     <div class="gateway-top">
       <div class="gateway-brand"><img id="mayaGatewayLogoImg" class="maya-logo-img" alt="MAYAACC" style="height:30px;width:auto;display:block" onerror="this.style.display='none'">MAYAACC</div>
       <div class="gateway-nav">
-        <button id="mcoBtn" onclick="window.mayaF3Dropdown?window.mayaF3Dropdown():window.mayaCompanyMenu()" title="Company menu (F3)" data-lang-html="top.company">Company &#9662; <small style="opacity:.55">F3</small></button>
+        <button id="mcoBtn" onclick="window.mayaCompanyMenu()" title="Company menu" data-lang-html="top.company">Company &#9662; <small style="opacity:.55"><u>K</u></small></button>
         <button data-shortcut="Y" onclick="mayaAction('Data')" data-lang-html="top.data">Data <small style="opacity:.55"><u>Y</u></small></button>
         <button data-shortcut="Z" onclick="mayaAction('Exchange')" data-lang-html="top.exchange">Exchange <small style="opacity:.55"><u>Z</u></small></button>
         <button class="goto" onclick="mayaAction('Go To')" data-lang-html="top.goto">Go To <small style="opacity:.55">Alt+<u>G</u></small></button>
@@ -11881,10 +11881,20 @@ const SETUP={from:'select',dirty:false};
   const su=$('companySetup');if(su){su.addEventListener('input',()=>{SETUP.dirty=true});su.addEventListener('change',()=>{SETUP.dirty=true})}
 })();
 const MENU={open:false,idx:0,el:null};
+/* Company-menu actions that leave the workspace (Select / Create / Alter
+   Company) must close the open creation form first — otherwise the form
+   (a fixed overlay) stays floating over the Select/Setup screen. The
+   form's own close asks first when it is dirty, exactly like the F3
+   dropdown's Select Company item. */
+function menuLeaveCompany(run){
+  var f=null;try{if(typeof __ctOpenForm==='function')f=__ctOpenForm();}catch(e){}
+  if(f&&f.close){if(window.__mayaClearReturn)window.__mayaClearReturn();f.close(function(){run();});}
+  else run();
+}
 const MITEMS=[
- {k:'S',l:'Select Company',f:()=>window.showCompanySelect()},
- {k:'C',l:'Create Company',f:()=>window.showCompanySetup()},
- {k:'A',l:'Alter Company',f:()=>{const id=cid();if(!id||!company().id){alert('Please open a company first.');return}window.showCompanySetup(id)}},
+ {k:'S',l:'Select Company',f:()=>menuLeaveCompany(()=>window.showCompanySelect())},
+ {k:'C',l:'Create Company',f:()=>menuLeaveCompany(()=>window.showCompanySetup())},
+ {k:'A',l:'Alter Company',f:()=>menuLeaveCompany(()=>{const id=cid();if(!id||!company().id){alert('Please open a company first.');return}window.showCompanySetup(id)})},
  {k:'F',l:'Company Features',sc:'F11',f:()=>openFeatures()}
 ];
 /* m3 (audit #3): MITEMS lives in this script's scope, not the global one
@@ -15094,7 +15104,7 @@ const TOPICS=[
 ];
 
 const SC=[
- {g:'Everywhere',k:'F1',d:'Help (this screen)'},{k:'Alt+G',d:'Go To any screen, report, ledger or voucher'},{k:'Alt+P',d:'Print menu'},{k:'F3',d:'Company menu'},{k:'F11',d:'Company Features'},{k:'Esc',d:'Go back / close'},
+ {g:'Everywhere',k:'F1',d:'Help (this screen)'},{k:'Alt+G',d:'Go To any screen, report, ledger or voucher'},{k:'Alt+P',d:'Print menu'},{k:'Alt+K',d:'Company menu'},{k:'F11',d:'Company Features'},{k:'Esc',d:'Go back / close'},
  {g:'Workspace (press the letter)',k:'C / A',d:'Create / Alter masters'},{k:'V',d:'Vouchers'},{k:'K',d:'Day Book'},{k:'O',d:'Chart of Accounts'},{k:'B',d:'Banking'},{k:'G',d:'Tax & GST'},{k:'T',d:'Trial Balance'},{k:'L',d:'Balance Sheet'},{k:'P',d:'Profit & Loss'},{k:'S',d:'Stock Summary'},{k:'R',d:'Ratio Analysis'},{k:'D',d:'Display More Reports'},{k:'H',d:'Dashboard (charts, ratios, alerts)'},{k:'N',d:'Sound Settings'},
  {g:'Top menus',k:'Y',d:'Data (backup, verify, split, repair)'},{k:'Z',d:'Exchange (e-Way Bill, GST, banking)'},{k:'I',d:'Import'},{k:'E',d:'Export'},{k:'M',d:'Share (e-mail, WhatsApp)'},
  {g:'Voucher entry',k:'F4 – F9',d:'Contra, Payment, Receipt, Journal, Sales, Purchase'},{k:'F10',d:'Other vouchers'},{k:'Ctrl+F8 / Ctrl+F9',d:'Credit Note / Debit Note'},{k:'Alt+F7',d:'Stock Journal'},{k:'F2',d:'Change the date'},{k:'Ctrl+A',d:'Accept the voucher'},{k:'Alt+C',d:'Create a ledger or item while entering'},{k:'Ctrl+H',d:'Change mode (Item / Accounting invoice)'},{k:'Ctrl+I',d:'Party details'},{k:'Alt+Q',d:'Related reports'},{k:'Ctrl+L / Ctrl+T',d:'Optional / Post-dated voucher'},{k:'Alt+D',d:'Delete the voucher'},{k:'Alt+X',d:'Cancel the voucher'},{k:'Ctrl+P',d:'Print the invoice'},{k:'Alt+W',d:'Send the bill on WhatsApp'},{k:'F12',d:'Configure the screen'},
@@ -15161,7 +15171,7 @@ const CTX={
  exchange:{t:'Exchange',s:['e-Way Bill, payment and statement screens prepare or read files. Nothing is sent to the portal or the bank from here.','Ctrl+J downloads the file shown on the screen.']},
  io:{t:'Import / Export / Share',s:['Choose a file (F) or download the template (T) on Import screens. Review the preview before you press Ctrl+A to import.','On Share screens, edit the message, then Ctrl+A opens WhatsApp or your e-mail app.']},
  master:{t:'Master form',s:['Enter moves to the next field; a field cannot be left empty when it is required.','Ctrl+A saves, Esc closes, F12 configures the form. Alt+D deletes when altering.']},
- workspace:{t:'Workspace',s:['Press Alt + the underlined letter of a top-bar item, or click it. Gateway menu items work with their bare letter.','Top bar: Data (Alt+Y), Exchange (Alt+Z), Go To (Alt+G), Import (Alt+I), Export (Alt+E), Share (Alt+M), Print (Alt+P), Help (F1).','Company (F3) switches or creates companies. F2 changes the date, Alt+F2 the period, F11 Company Features, Ctrl+B Basis of Values, Ctrl+F3 Shut Company.']},
+ workspace:{t:'Workspace',s:['Press Alt + the underlined letter of a top-bar item, or click it. Gateway menu items work with their bare letter.','Top bar: Data (Alt+Y), Exchange (Alt+Z), Go To (Alt+G), Import (Alt+I), Export (Alt+E), Share (Alt+M), Print (Alt+P), Help (F1).','Company (Alt+K) switches or creates companies. F2 changes the date, Alt+F2 the period, F11 Company Features, Ctrl+B Basis of Values, Ctrl+F3 Shut Company.']},
  start:{t:'Select company',s:['Create a company, open one from the list, or restore from a backup.','Press F1 anywhere for help.']}
 };
 function ctxHtml(){
@@ -18565,9 +18575,11 @@ var mountTopbar=function(){
       nav.appendChild(b);
     }
     /* gate the nav buttons while a blocking modal is open; the
-       Print Page button is never gated */
+       Print Page button is never gated, nor the Company button —
+       the Company menu (Alt+K) must open from every screen, even
+       while a creation form is open, or the menu looks collapsed. */
     bar.addEventListener('click',function(e){
-      if(e.target&&e.target.closest&&e.target.closest('#maya-topbar-print'))return;
+      if(e.target&&e.target.closest&&(e.target.closest('#maya-topbar-print')||e.target.closest('#mcoBtn')))return;
       if(blockingModalOpen()){
         e.preventDefault();e.stopPropagation();
         toast('Close this dialog first.');
@@ -28034,7 +28046,7 @@ window.MayaLang=(function(){
   function setHtml(el,html){if(el&&el.innerHTML!==html)el.innerHTML=html;}
   /* Top-bar shortcut underlines (Tally): single <u> = Alt+key. dataset.key is
      plain text, so the Hindi rebuild needs the underline re-applied here. */
-  function keyHtml(key){var m={'Y':'<u>Y</u>','Z':'<u>Z</u>','I':'<u>I</u>','E':'<u>E</u>','M':'<u>M</u>','Alt+G':'Alt+<u>G</u>','Alt+P':'Alt+<u>P</u>'};return m[key]||key;}
+  function keyHtml(key){var m={'Y':'<u>Y</u>','Z':'<u>Z</u>','I':'<u>I</u>','E':'<u>E</u>','M':'<u>M</u>','K':'<u>K</u>','Alt+G':'Alt+<u>G</u>','Alt+P':'Alt+<u>P</u>','Alt+K':'Alt+<u>K</u>'};return m[key]||key;}
   function apply(){
     var lang=get();
     document.querySelectorAll('[data-lang]').forEach(function(el){
@@ -28478,21 +28490,21 @@ else window.MayaLang.init();
    sidebar; dark-navy strip (approved preview). MAYAACC navy theme kept. */
 #mayaacc-ledger-panel{border-right:0}
 #mayaacc-ledger-panel .mlg-main{min-width:0}
-.mlg-crumb{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:11px;color:#7a8798;margin-bottom:10px}
+.mlg-crumb{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:11px;color:#7a8798;margin-bottom:8px}
 .mlg-crumb .mlg-chip{margin-top:0}
-#mayaacc-ledger-panel .mlg-title{margin-bottom:14px}
+#mayaacc-ledger-panel .mlg-title{margin-bottom:12px}
 #mayaacc-ledger-panel .mlg-title h2{font-size:20px}
-.mlg-top{display:flex;gap:26px;align-items:flex-start;padding-bottom:16px;border-bottom:1px solid #e3e8ef;margin-bottom:16px}
+.mlg-top{display:flex;gap:26px;align-items:flex-start;padding-bottom:13px;border-bottom:1px solid #e3e8ef;margin-bottom:13px}
 .mlg-top-left{flex:1;min-width:0}
-.mlg-trow{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.mlg-trow{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .mlg-trow:last-child{margin-bottom:0}
 .mlg-trow label{flex:0 0 150px;font-size:13px;font-weight:600;color:#33445c}
 .mlg-trow label::after{content:"\00a0:"}
-.mlg-trow input{flex:1;min-width:0;box-sizing:border-box;padding:9px 11px;border:1px solid #d8e0ea;border-radius:6px;background:#fff;font-size:13px;font-weight:600;color:#1d2d42;outline:none}
+.mlg-trow input{flex:1;min-width:0;box-sizing:border-box;padding:8px 11px;border:1px solid #d8e0ea;border-radius:6px;background:#fff;font-size:13px;font-weight:600;color:#1d2d42;outline:none}
 .mlg-dup-warn{color:#d92d20;font-size:11px;font-weight:700;margin:-4px 0 10px 158px}
 .mlg-trow input:focus{border-color:#8d9bb0;background:#fffbe6;box-shadow:0 0 0 3px rgba(94,108,134,.08)}
-.mlg-total-open{flex:0 0 300px;width:300px;text-align:left;border:1px solid #d8e0ea;border-radius:8px;background:#fff;padding:10px 14px;font-size:12px}
-.mlg-total-open>span{display:block;font-size:12px;font-weight:800;color:#1d2d42;text-transform:none;letter-spacing:0;margin-bottom:8px}
+.mlg-total-open{flex:0 0 300px;width:300px;text-align:left;border:1px solid #d8e0ea;border-radius:8px;background:#fff;padding:9px 12px;font-size:12px}
+.mlg-total-open>span{display:block;font-size:12px;font-weight:800;color:#1d2d42;text-transform:none;letter-spacing:0;margin-bottom:6px}
 .mlg-tob-row{display:flex;justify-content:space-between;padding:3px 0;color:#45546a}
 .mlg-tob-row strong{font-size:12px;color:#1d2d42;font-weight:700}
 .mlg-tob-row.net{border-top:1px solid #eef1f5;margin-top:6px;padding-top:7px}
@@ -28500,26 +28512,26 @@ else window.MayaLang.init();
 .mlg-cols{display:flex;align-items:flex-start}
 .mlg-col-l{flex:0 0 38%;padding-right:22px;border-right:1px solid #e3e8ef;min-width:0}
 .mlg-col-r{flex:1;min-width:0;padding-left:22px}
-.mlg-cols .mlg-section{margin-bottom:16px}
-.mlg-cols .mlg-section h4{margin:0 0 10px;font-size:13px;font-weight:800;color:#1d2d42;text-transform:none;letter-spacing:0;border-bottom:1px solid #dbe2ee;padding-bottom:5px}
+.mlg-cols .mlg-section{margin-bottom:13px}
+.mlg-cols .mlg-section h4{margin:0 0 8px;font-size:13px;font-weight:800;color:#1d2d42;text-transform:none;letter-spacing:0;border-bottom:1px solid #dbe2ee;padding-bottom:4px}
 .mlg-cols .mlg-grid{display:block}
-.mlg-cols .mlg-field{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.mlg-cols .mlg-field{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .mlg-cols .mlg-field:last-child{margin-bottom:0}
 .mlg-cols .mlg-field label{flex:0 0 192px;margin:0;font-size:13px;font-weight:600;color:#33445c}
 .mlg-cols .mlg-field label::after{content:"\00a0:"}
-.mlg-cols .mlg-field input,.mlg-cols .mlg-field select,.mlg-cols .mlg-field textarea{flex:1;min-width:0;border:1px solid transparent;background:transparent;font-weight:700;color:#1d2d42;padding:7px 8px}
+.mlg-cols .mlg-field input,.mlg-cols .mlg-field select,.mlg-cols .mlg-field textarea{flex:1;min-width:0;border:1px solid transparent;background:transparent;font-weight:700;color:#1d2d42;padding:6px 8px}
 .mlg-cols .mlg-field input:hover,.mlg-cols .mlg-field select:hover,.mlg-cols .mlg-field textarea:hover{border-color:#d8e0ea;background:#fff}
 .mlg-cols .mlg-field input:focus,.mlg-cols .mlg-field select:focus,.mlg-cols .mlg-field textarea:focus{border-color:#8d9bb0;background:#fffbe6;box-shadow:0 0 0 3px rgba(94,108,134,.08)}
-.mlg-cols .mlg-field textarea{min-height:54px;resize:vertical}
+.mlg-cols .mlg-field textarea{min-height:48px;resize:vertical}
 .mlg-cols .mlg-under-wrap{flex:1;min-width:0}
 .mlg-cols .mlg-under-wrap input{width:100%}
-.mlg-openrow{display:flex;align-items:center;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid #e3e8ef}
+.mlg-openrow{display:flex;align-items:center;gap:8px;margin-top:13px;padding-top:12px;border-top:1px solid #e3e8ef}
 .mlg-openrow label{flex:0 0 auto;font-size:13px;font-weight:700;color:#1d2d42}
 .mlg-openrow label::after{content:"\00a0:"}
-.mlg-openrow input{flex:0 0 170px;padding:9px 11px;border:1px solid #d8e0ea;border-radius:6px;font-size:13px;font-weight:700;color:#1d2d42;outline:none}
+.mlg-openrow input{flex:0 0 170px;padding:8px 11px;border:1px solid #d8e0ea;border-radius:6px;font-size:13px;font-weight:700;color:#1d2d42;outline:none}
 .mlg-openrow input:focus{border-color:#8d9bb0;background:#fffbe6}
-.mlg-openrow select{flex:0 0 120px;padding:9px 8px;border:1px solid #d8e0ea;border-radius:6px;font-size:13px;font-weight:700;color:#1d2d42;outline:none;background:#fff}
-.mlg-more{display:none;margin-top:18px}
+.mlg-openrow select{flex:0 0 120px;padding:8px 8px;border:1px solid #d8e0ea;border-radius:6px;font-size:13px;font-weight:700;color:#1d2d42;outline:none;background:#fff}
+.mlg-more{display:none;margin-top:15px}
 .mlg-more.on{display:block}
 #mlgGstinInput{width:100%;box-sizing:border-box;padding:10px 11px;border:1px solid #d8e0ea;border-radius:8px;font-size:13px;margin-bottom:8px;outline:none;text-transform:uppercase}
 #mlgGstinInput:focus{border-color:#8d9bb0;background:#fffbe6}
@@ -29034,6 +29046,12 @@ function __ctOpenForm(){
   for(var i=0;i<__ctFormMap.length;i++){var el=document.getElementById(__ctFormMap[i].overlay);if(__ctShownEl(el))return __ctFormMap[i];}
   return null;
 }
+/* __ctOpenForm lives inside this script's scope, so expose it: the Company
+   menu (an earlier script) and the F3 dropdown (a later script) both need
+   it to close the open creation form before leaving the workspace. Without
+   this export their typeof guard silently saw "undefined" and the form
+   stayed floating over the Select Company screen. */
+window.__ctOpenForm=__ctOpenForm;
 function __ctDeepBusy(){
   var ids=['mayaacc-group-config','mayaacc-ledger-config','mayaacc-stock-config','mayaacc-unit-config','mayaacc-godown-config','mayaacc-cost-centre-config','mayaacc-voucher-type-config','mayaacc-tax-gst-config','mayaacc-stock-group-config','mayaacc-currency-config','mgConfirm','mlgConfirm','msiConfirm','muConfirm','mgdConfirm','mccConfirm','mvtConfirm','mtgConfirm','msgConfirm','mscConfirm','mcurConfirm','mgTree','mlgTree','msiTree','muTree','mgdTree','mccTree','mvtTree','mtgTree','msgTree','mscTree','mlgOtherMasters','mayaacc-hsn-finder','maya-print-dialog','mcf-ov','mcm','createMasterDialog'];
   for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);if(__ctShownEl(el))return true;}
@@ -29290,7 +29308,12 @@ var __mayaMenuOpener=null;
 function __mayaRecordReturn(name){
   var m=$('createMasterDialog');
   if(m&&__ctShownEl(m)){__mayaReturnTo={menu:'createMaster',item:name,top:((document.getElementById('createMasterList')||{}).scrollTop||0)};}
-  else{__mayaReturnTo=null;}
+  /* else: leave the recorded return alone. Switching masters from inside
+     a form (F10) re-points it via __mayaUpdateReturnItem, and wiping it
+     here would lose the return-to-menu path — Esc -> Yes on the switched
+     form would land on the Gateway instead of the Create menu. Only
+     __mayaClearReturn (leaving for Select/Shut Company) and
+     __mayaReturnToMenu (which consumes it) clear it. */
 }
 window.__mayaRecordReturn=__mayaRecordReturn;
 /* Switching masters from inside a form (F10) keeps the recorded return but
