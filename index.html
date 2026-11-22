@@ -311,13 +311,53 @@ footer{padding:28px 6%;color:#788295;font-size:13px;border-top:1px solid #e6e9ef
 
 <style id="mayaacc-group-style">
 #mayaacc-group-overlay{display:none;position:fixed;inset:0;z-index:10020;background:rgba(10,15,26,.30);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
-#mayaacc-group-panel{position:absolute;left:0;top:0;height:100%;width:100%;min-width:0;background:rgba(255,255,255,.98);border-right:1px solid #dfe4ec;box-shadow:18px 0 45px rgba(16,24,40,.16);display:flex;flex-direction:column;overflow:hidden}
+#mayaacc-group-panel{position:absolute;left:0;top:0;height:100%;width:680px;min-width:0;background:rgba(255,255,255,.98);border-right:1px solid #dfe4ec;box-shadow:18px 0 45px rgba(16,24,40,.16);display:flex;flex-direction:column;overflow:hidden}
 .mg-content{display:flex;min-height:100%;}
-.mg-main{padding:30px 28px 110px;overflow:auto;flex:1}
+.mg-main{padding:0 24px 16px;overflow:auto;flex:1}
 .mg-side{width:148px;background:#f7f9fc;border-left:1px solid #e3e8ef;padding:24px 12px;flex:0 0 148px}
 .mg-side h3{font-size:11px;letter-spacing:.08em;color:#7b8797;margin:3px 6px 12px}.mg-side button{width:100%;padding:10px 9px;margin:0 0 8px;border:1px solid #dce3eb;border-radius:8px;background:#fff;color:#34465d;text-align:left;cursor:pointer;font-size:12px}.mg-side button:hover{background:#eef3fb}
-.mg-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}.mg-title h2{margin:0;font-size:22px;color:#18273c}.mg-close{border:0;background:transparent;font-size:22px;color:#7b8797;cursor:pointer}
+.mg-title{display:flex;align-items:center;justify-content:space-between;height:40px;border-bottom:1px solid #e5e7eb;margin-bottom:14px}.mg-title h2{margin:0;font-size:15px;font-weight:600;color:#374151}.mg-close{border:0;background:transparent;font-size:22px;color:#7b8797;cursor:pointer}
 .mg-field{margin-bottom:18px}.mg-field label{display:block;font-size:12px;font-weight:800;color:#45546a;margin-bottom:7px}.mg-field input,.mg-field select{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #d8e0ea;border-radius:8px;background:#fff;font-size:13px;outline:none}.mg-field input:focus,.mg-field select:focus{border-color:#8d9bb0;box-shadow:0 0 0 3px rgba(94,108,134,.08)}
+/* Group Tally-style panel (2026-11-22, approved preview v2): 680px panel over the
+   dimmed Gateway; Tally-sized field boxes; bold text values with dropdown lists. */
+.mg-trow{display:flex;align-items:center;min-height:46px}
+.mg-trow>label{width:300px;flex-shrink:0;font-size:14px;color:#111827}
+.mg-trow>label .sub{display:block;font-size:12.5px;color:#6b7280;font-style:italic;margin-top:2px}
+.mg-trow input{width:370px;height:30px;border:1px solid #9aa3ad;border-radius:2px;padding:0 8px;font-size:14px;color:#111827;background:#fff;outline:none}
+.mg-trow input:focus{border-color:#8d9bb0;box-shadow:0 0 0 3px rgba(94,108,134,.08)}
+.mg-trow input::placeholder{color:#9ca3af}
+.mg-under-wrap{position:relative;width:370px}
+.mg-under-wrap input{width:100%;border:0;border-radius:0;padding:0 18px 0 0;font-weight:700;box-shadow:none!important}
+.mg-under-wrap input:focus{box-shadow:none!important}
+.mg-val-arrow{position:absolute;right:2px;top:50%;transform:translateY(-50%);font-size:11px;color:#6b7280;pointer-events:none}
+.mg-val-wrap{position:relative}
+.mg-val{border:0;background:transparent;font-size:14px;font-weight:700;color:#111827;cursor:pointer;display:flex;align-items:center;gap:6px;padding:4px 0;font-family:inherit}
+.mg-val .arrow{font-size:11px;color:#6b7280;font-weight:400}
+.mg-list{display:none;position:absolute;left:0;top:calc(100% + 4px);min-width:220px;max-height:220px;overflow:auto;background:#fff;border:1px solid #d7dfe8;border-radius:8px;box-shadow:0 14px 30px rgba(16,24,40,.14);z-index:40;padding:5px 0}
+.mg-list button{display:block;width:100%;border:0;background:#fff;text-align:left;padding:8px 12px;font-size:13px;color:#33445c;cursor:pointer}
+.mg-list button:hover,.mg-list button.mg-focus{background:#edf1fb;color:#395ba8}
+.mg-divider{border:none;border-top:1px solid #e5e7eb;margin:12px 0 8px}
+.mg-more{display:none;margin-top:14px}
+/* Group sidebar detached to the FAR RIGHT edge (approved mock v2): absolute
+   against the overlay — the 680px panel stays on the left, dimmed Gateway sits
+   between panel and sidebar, F12 pinned at the sidebar bottom. */
+#mayaacc-group-overlay>.mlg-side{position:absolute;right:0;top:0;bottom:0;width:200px;background:#fff;border-left:1px solid #e3e8ef;padding:0;display:flex;flex-direction:column;z-index:5}
+#mayaacc-group-overlay>.mlg-side .mlg-f12{margin-top:auto;border-top:1px solid #e3e8ef}
+@media(max-width:900px){#mayaacc-group-overlay>.mlg-side{display:none}}
+/* Gateway right rail (approved mock v3): flex sibling of the left column —
+   starts right under the top bar, runs down to the save bar. Menu 265px,
+   28px gap between dashboard content and menu. */
+.gateway-layout{display:flex;align-items:stretch;min-height:calc(100vh - 48px - 30px)}
+.gateway-left{flex:1;min-width:0;display:flex;flex-direction:column}
+body.workspace-mode #dashboard .gateway-body{grid-template-columns:minmax(0,1fr) 265px;column-gap:28px}
+body.workspace-mode #dashboard .gateway-main{padding-right:16px}
+#maya-gateway-rail{width:200px;flex:0 0 200px;background:#fff;border-left:1px solid #e3e8ef;display:flex;flex-direction:column;min-height:0}
+#maya-gateway-rail .mlg-f12{margin-top:auto;margin-bottom:30px;border-top:1px solid #e3e8ef}
+#maya-gateway-rail .mlg-side-row[data-live]{cursor:pointer}
+#maya-gateway-rail .mlg-side-row[data-live]:hover{background:#f2f6fd}
+@media(max-width:900px){body.workspace-mode #dashboard .gateway-body{grid-template-columns:1fr}#maya-gateway-rail{display:none}}
+@media(max-height:640px){#maya-gateway-rail .mlg-side-row{padding-top:7px;padding-bottom:7px}}
+
 /* v12 #3: Group fields in two columns (Name / Under / Method full width) so the whole form fits above the footer now that the panel is full width. */
 .mg-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
 .mg-grid .mg-field.full{grid-column:1/-1}
@@ -457,6 +497,7 @@ var MAYA_COINS_LOGO_FULL_IMG="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAccA
       </div>
     </div>
 <script>try{var _g=document.getElementById('mayaGatewayLogoImg');if(_g&&window.MAYA_COINS_LOGO_IMG)_g.src=window.MAYA_COINS_LOGO_IMG;}catch(e){}</script>
+    <div class="gateway-layout"><div class="gateway-left">
     <div class="gateway-sub"><span class="workspace-breadcrumb">MAYAACC / Company Workspace</span><span class="workspace-greeting-header" id="workspaceGreetingHeader">Welcome to MAYAACC.</span><span class="workspace-close" id="workspaceClose" onclick="showCompanySelect()">×</span></div>
     <div class="gateway-body">
       <div class="gateway-main">
@@ -503,6 +544,20 @@ var MAYA_COINS_LOGO_FULL_IMG="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAccA
         <button data-shortcut="H" onclick="mayaAction('Dashboard')" data-lang-html="gw.dash">Das<strong>h</strong>board</button>
       </aside>
     </div>
+    </div><aside id="maya-gateway-rail" aria-label="Quick actions">
+      <div class="mlg-side-row off" data-live="date" onclick="window.mayaOpenDateDialog&&window.mayaOpenDateDialog()"><b>F2</b><span>Date</span></div>
+      <div class="mlg-side-row" onclick="window.mayaF3Dropdown?window.mayaF3Dropdown():window.mayaCompanyMenu()"><b>F3</b><span>Company</span></div>
+      <div class="mlg-side-row off mlg-blue"><b>F4</b></div>
+      <div class="mlg-side-row off mlg-blue"><b>F5</b></div>
+      <div class="mlg-side-row off mlg-blue"><b>F6</b></div>
+      <div class="mlg-side-row off mlg-blue"><b>F7</b></div>
+      <div class="mlg-side-row off mlg-blue"><b>F8</b></div>
+      <div class="mlg-side-row off mlg-blue"><b>F9</b></div>
+      <div class="mlg-side-row" onclick="window.mayaOpenOtherMasters&&window.mayaOpenOtherMasters('Gateway')"><b>F10</b><span>Other Masters</span></div>
+      <div class="mlg-side-row"><b>I</b><span>More Details</span></div>
+      <div class="mlg-side-row off"><b>B</b><span>Get HSN/SAC Info</span></div>
+      <div class="mlg-side-row mlg-f12" tabindex="-1"><b>F12</b><span>Configure</span></div>
+    </aside></div>
   </div>
 </section>
 
@@ -1251,7 +1306,7 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
   const ws=()=>document.querySelector('#dashboard');
   const buttons=()=>Array.from(document.querySelectorAll('#dashboard .gateway-menu button'))
     .filter(b=>getComputedStyle(b).display!=='none'&&!b.disabled);
-  const active=()=>{const x=ws();return x&&getComputedStyle(x).display!=='none'&&!document.querySelector('#mayaacc-voucher-entry-overlay.is-open,#mayaacc-reports-overlay.is-open,#mayaacc-alter-other.is-open,#mtlp-ov.on,#mtlu-ov.on,#mtl-type-ov.on');};
+  const active=()=>{const x=ws();if(!x||getComputedStyle(x).display==='none')return false;if(document.querySelector('#mayaacc-voucher-entry-overlay.is-open,#mayaacc-reports-overlay.is-open,#mayaacc-alter-other.is-open,#mtlp-ov.on,#mtlu-ov.on,#mtl-type-ov.on'))return false;const ovIds=['mayaacc-group-overlay','mayaacc-ledger-overlay','mayaacc-stock-overlay','mayaacc-unit-overlay','mayaacc-godown-overlay','mayaacc-cost-centre-overlay','mayaacc-voucher-type-overlay','mayaacc-tax-gst-overlay'];for(let i=0;i<ovIds.length;i++){const el=document.getElementById(ovIds[i]);if(el&&getComputedStyle(el).display!=='none'&&el.getAttribute('aria-hidden')!=='true')return false;}return true;};
   const clear=()=>{buttons().forEach(b=>b.classList.remove('maya-workspace-focus'));};
   const move=(step)=>{
     const bs=buttons(); if(!bs.length)return;
@@ -1351,31 +1406,46 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
   <div id="mayaacc-group-panel" role="dialog" aria-modal="true" aria-labelledby="mgTitle">
     <div class="mg-content">
       <div class="mg-main">
-        <div class="mg-title"><h2 id="mgTitle">Create Group</h2><button class="mg-close" type="button" onclick="mayaCloseGroup()">×</button></div>
-        <div class="mg-grid">
-        <div class="mg-field full"><label for="mgName">Group Name*</label><input id="mgName" autocomplete="off"></div>
-        <div class="mg-field full"><label for="mgUnder">Under</label><div class="mg-under-wrap"><input id="mgUnder" autocomplete="off" placeholder="Search group hierarchy"><div id="mgTree" class="mg-tree"></div></div></div>
-        <div class="mg-field"><label for="mgAffect">Affect Reports</label><select id="mgAffect"><option value="yes">Yes</option><option value="no">No</option></select></div>
-        <div class="mg-field"><label for="mgSubLedger">Group behaves like a sub-ledger</label><select id="mgSubLedger"><option value="no">No</option><option value="yes">Yes</option></select></div>
-        <div class="mg-field"><label for="mgNett">Nett Debit/Credit Balances for Reporting</label><select id="mgNett"><option value="no">No</option><option value="yes">Yes</option></select></div>
-        <div class="mg-field"><label for="mgCalc">Used for calculation</label><select id="mgCalc"><option value="no">No</option><option value="yes">Yes</option></select></div>
-        <div class="mg-field full"><label for="mgAlloc">Method to allocate when used in purchase invoice</label><select id="mgAlloc"><option value="na">Not Applicable</option><option value="fifo">FIFO</option><option value="lifo">LIFO</option><option value="avg">Average</option></select></div>
+        <div class="mg-title"><h2 id="mgTitle">Group Creation</h2><button class="mg-close" type="button" onclick="mayaCloseGroup()">×</button></div>
+        <div class="mg-trow"><label for="mgName">Name :</label><input id="mgName" autocomplete="off" placeholder="e.g. Sundry Debtors"></div>
+        <div class="mg-trow"><label for="mgAlias">(alias) :</label><input id="mgAlias" autocomplete="off" placeholder="Optional short name"></div>
+        <div class="mg-trow"><label for="mgUnder">Under :</label><div class="mg-under-wrap"><input id="mgUnder" autocomplete="off" placeholder="Search group hierarchy"><span class="mg-val-arrow">▾</span><div id="mgTree" class="mg-tree"></div></div></div>
+        <hr class="mg-divider">
+        <div class="mg-trow" data-mg-field="subLedger"><label>Group behaves like a sub-ledger :</label><div class="mg-val-wrap"><button type="button" class="mg-val" id="mgSubLedgerBtn">No <span class="arrow">▾</span></button><div class="mg-list" id="mgSubLedgerList"><button type="button" data-v="no">No</button><button type="button" data-v="yes">Yes</button></div></div><select id="mgSubLedger" style="display:none"><option value="no">No</option><option value="yes">Yes</option></select></div>
+        <div class="mg-trow" data-mg-field="nett"><label>Nett Debit/Credit Balances for Reporting :</label><div class="mg-val-wrap"><button type="button" class="mg-val" id="mgNettBtn">No <span class="arrow">▾</span></button><div class="mg-list" id="mgNettList"><button type="button" data-v="no">No</button><button type="button" data-v="yes">Yes</button></div></div><select id="mgNett" style="display:none"><option value="no">No</option><option value="yes">Yes</option></select></div>
+        <div class="mg-trow" data-mg-field="calc"><label>Used for calculation (for example: taxes, discounts) :<span class="sub">(for sales invoice entries)</span></label><div class="mg-val-wrap"><button type="button" class="mg-val" id="mgCalcBtn">No <span class="arrow">▾</span></button><div class="mg-list" id="mgCalcList"><button type="button" data-v="no">No</button><button type="button" data-v="yes">Yes</button></div></div><select id="mgCalc" style="display:none"><option value="no">No</option><option value="yes">Yes</option></select></div>
+        <div class="mg-trow" data-mg-field="alloc"><label>Method to allocate when used in purchase invoice :</label><div class="mg-val-wrap"><button type="button" class="mg-val" id="mgAllocBtn">♦ Not Applicable <span class="arrow">▾</span></button><div class="mg-list" id="mgAllocList"><button type="button" data-v="na">Not Applicable</button><button type="button" data-v="fifo">FIFO</button><button type="button" data-v="lifo">LIFO</button><button type="button" data-v="avg">Average</button></div></div><select id="mgAlloc" style="display:none"><option value="na">Not Applicable</option><option value="fifo">FIFO</option><option value="lifo">LIFO</option><option value="avg">Average</option></select></div>
+        <select id="mgAffect" style="display:none"><option value="yes">Yes</option><option value="no">No</option></select>
+        <div class="mg-more" id="mgMore">
+          <div class="mg-info">
+            <div class="mg-info-row"><span>Group Type</span><strong id="mgType">Primary Group</strong></div>
+            <div class="mg-info-row"><span>Parent</span><strong id="mgParent">Not selected</strong></div>
+            <div class="mg-info-row"><span>Report Effect</span><strong id="mgEffect">Yes</strong></div>
+          </div>
+          <div class="mg-preview"><strong>Hierarchy Preview</strong><div id="mgPreview">New Group</div></div>
         </div>
-        <div class="mg-info">
-          <div class="mg-info-row"><span>Group Type</span><strong id="mgType">Primary Group</strong></div>
-          <div class="mg-info-row"><span>Parent</span><strong id="mgParent">Not selected</strong></div>
-          <div class="mg-info-row"><span>Report Effect</span><strong id="mgEffect">Yes</strong></div>
-        </div>
-        <div class="mg-preview"><strong>Hierarchy Preview</strong><div id="mgPreview">New Group</div></div>
-              </div>
-      <aside class="mg-side"><h3>OPTIONS</h3><button type="button" onclick="mayaGroupChangeCompany()">Change Company</button></aside>
+      </div>
+
     </div>
     <div class="mg-footer">
-      <div class="mg-actions"><button type="button" class="primary" onclick="mayaSaveGroup(true)">Save &amp; New</button></div>
-      <div class="maya-create-foot"><span class="mcf-seg" onclick="mayaCloseGroup()"><u class="maya-u-dbl">Q</u> Quit</span><span class="mcf-seg" onclick="mayaSaveGroup(false)"><u>A</u> Accept</span><span class="mcf-seg off" onclick="window.__mayaCreateDeleteToast&&window.__mayaCreateDeleteToast('Group')"><u>D</u> Delete</span><span class="mcf-seg" onclick="mayaGroupConfigure()"><b>F12</b> Configure</span></div>
+      <div class="maya-create-foot"><span class="mcf-seg" onclick="mayaCloseGroup()"><u class="maya-u-dbl">Q</u> Quit</span><span class="mcf-seg" onclick="mayaSaveGroup(false)"><u>A</u> Accept</span><span class="mcf-seg off" onclick="window.__mayaCreateDeleteToast&&window.__mayaCreateDeleteToast('Group')"><u>D</u> Delete</span></div>
     </div>
     <div id="mgConfirm" class="mg-confirm"><div class="mg-confirm-card"><h3>Save Group?</h3><p id="mgConfirmText">Save this group in the current company?</p><div class="mg-confirm-actions"><button type="button" onclick="mayaCloseGroupConfirm()">Cancel</button><button type="button" class="primary" onclick="mayaConfirmGroupSave()">Save</button></div></div></div>
   </div>
+  <aside class="mlg-side">
+    <div class="mlg-side-row off"><b>F2</b><span>Period</span></div>
+    <div class="mlg-side-row" onclick="window.mayaF3Dropdown?window.mayaF3Dropdown():window.mayaCompanyMenu()"><b>F3</b><span>Company</span></div>
+    <div class="mlg-side-row off mlg-blue"><b>F4</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F5</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F6</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F7</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F8</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F9</b></div>
+    <div class="mlg-side-row" onclick="window.mayaOpenOtherMasters&&window.mayaOpenOtherMasters('Group')"><b>F10</b><span>Other Masters</span></div>
+    <div class="mlg-side-row" onclick="window.mayaToggleGroupMore&&window.mayaToggleGroupMore()"><b>I</b><span>More Details</span></div>
+    <div class="mlg-side-row off"><b>B</b><span>Get HSN/SAC Info</span></div>
+    <div class="mlg-side-row mlg-f12" tabindex="-1" onclick="mayaGroupConfigure()"><b>F12</b><span>Configure</span></div>
+  </aside>
 </div>
 
 <script id="mayaacc-group-script">
@@ -1396,9 +1466,9 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
   const configKey=()=> 'mayaacc_group_config_'+companyId();
   const getConfig=()=>{try{return {...defaultConfig,...JSON.parse(localStorage.getItem(configKey())||'{}')}}catch(e){return {...defaultConfig}}};
   const saveConfig=c=>localStorage.setItem(configKey(),JSON.stringify(c));
-  const dirty=()=>Boolean(name.value.trim()||under.value.trim()||$('mgAffect').value!=='yes');
-  const captureDraft=()=>({name:name.value,under:under.value,affect:$('mgAffect').value});
-  function updateInfo(){const p=under.value.trim(),c=getConfig();$('mgParent').textContent=p||'Not selected';$('mgType').textContent=p?'Sub-group':'Primary Group';$('mgEffect').textContent=$('mgAffect').value==='yes'?'Yes':'No';$('mgPreview').textContent=(p?p+'  →  ':'')+(name.value.trim()||'New Group');$('mgType').parentElement.style.display=c.showType?'flex':'none';$('mgParent').parentElement.style.display=c.showParent?'flex':'none';$('mgEffect').parentElement.style.display=c.showEffect?'flex':'none';document.querySelector('.mg-preview').style.display=c.showPreview?'block':'none';[['mgSubLedger','subLedger'],['mgNett','nett'],['mgCalc','calc'],['mgAlloc','alloc']].forEach(([id,k])=>{const f=$(id)?$(id).closest('.mg-field'):null;if(f)f.style.display=c[k]?'':'none';});if(!c.allowNoReport&&$('mgAffect').value==='no')$('mgAffect').value='yes';}
+  const dirty=()=>Boolean(name.value.trim()||($('mgAlias')&&$('mgAlias').value.trim())||under.value.trim()||$('mgAffect').value!=='yes');
+  const captureDraft=()=>({name:name.value,under:under.value,affect:$('mgAffect').value,alias:($('mgAlias')||{}).value||''});
+  function updateInfo(){const p=under.value.trim(),c=getConfig();$('mgParent').textContent=p||'Not selected';$('mgType').textContent=p?'Sub-group':'Primary Group';$('mgEffect').textContent=$('mgAffect').value==='yes'?'Yes':'No';$('mgPreview').textContent=(p?p+'  →  ':'')+(name.value.trim()||'New Group');$('mgType').parentElement.style.display=c.showType?'flex':'none';$('mgParent').parentElement.style.display=c.showParent?'flex':'none';$('mgEffect').parentElement.style.display=c.showEffect?'flex':'none';document.querySelector('.mg-preview').style.display=c.showPreview?'block':'none';[['mgSubLedger','subLedger'],['mgNett','nett'],['mgCalc','calc'],['mgAlloc','alloc']].forEach(([id,k])=>{const f=document.querySelector('[data-mg-field="'+k+'"]');if(f)f.style.display=c[k]?'':'none';});syncMgVals();if(!c.allowNoReport&&$('mgAffect').value==='no')$('mgAffect').value='yes';}
   function listMatches(){const q=under.value.trim().toLowerCase();return allGroups().filter(x=>x[0].toLowerCase().includes(q));}
   function renderTree(){const m=listMatches();tree.innerHTML=m.map((x,i)=>`<button type="button" data-name="${esc(x[0])}" style="padding-left:${12+x[1]*22}px">${esc(x[0])}</button>`).join('');focusIndex=m.length?0:-1;tree.querySelectorAll('button').forEach((b,i)=>{b.addEventListener('mousedown',e=>e.preventDefault());b.addEventListener('click',()=>selectTree(i));});highlightTree();tree.style.display=m.length?'block':'none';}
   function highlightTree(){
@@ -1409,12 +1479,21 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
     }
   }
   function selectTree(i){const b=tree.querySelectorAll('button')[i];if(!b)return;under.value=b.dataset.name;tree.style.display='none';focusIndex=-1;updateInfo();}
+  /* Tally-style value lists for the 4 behaviour rows (2026-11-22): bold text
+     values with a dropdown list; the hidden selects keep the stored values. */
+  const MG_VALS={subLedger:{btn:'mgSubLedgerBtn',list:'mgSubLedgerList',sel:'mgSubLedger',labels:{no:'No',yes:'Yes'}},nett:{btn:'mgNettBtn',list:'mgNettList',sel:'mgNett',labels:{no:'No',yes:'Yes'}},calc:{btn:'mgCalcBtn',list:'mgCalcList',sel:'mgCalc',labels:{no:'No',yes:'Yes'}},alloc:{btn:'mgAllocBtn',list:'mgAllocList',sel:'mgAlloc',labels:{na:'\u2666 Not Applicable',fifo:'FIFO',lifo:'LIFO',avg:'Average'}}};
+  let mgListOpen=null, mgListFocus=-1;
+  function syncMgVals(){Object.keys(MG_VALS).forEach(function(k){var v=MG_VALS[k],s=$(v.sel),b=$(v.btn);if(s&&b){var lbl=v.labels[s.value]||s.value;b.innerHTML=lbl+' <span class="arrow">\u25be</span>';}});}
+  function closeMgLists(){if(mgListOpen){var l=$(MG_VALS[mgListOpen].list);if(l)l.style.display='none';mgListOpen=null;mgListFocus=-1;}}
+  function openMgList(k){closeMgLists();var l=$(MG_VALS[k].list);if(!l)return;l.style.display='block';mgListOpen=k;var items=l.querySelectorAll('button'),cur=$(MG_VALS[k].sel).value;mgListFocus=0;items.forEach(function(b,i){if(b.dataset.v===cur)mgListFocus=i;b.classList.toggle('mg-focus',b.dataset.v===cur);});}
+  function pickMgList(k,i){var l=$(MG_VALS[k].list);if(!l)return;var b=l.querySelectorAll('button')[i];if(!b)return;$(MG_VALS[k].sel).value=b.dataset.v;syncMgVals();updateInfo();closeMgLists();var btn=$(MG_VALS[k].btn);if(btn)btn.focus();}
+  function toggleMore(){var m=$('mgMore');if(!m)return;m.style.display=m.style.display==='block'?'none':'block';}
   function open(){
     if(window.__mayaRecordReturn)window.__mayaRecordReturn('Group');
     if(typeof closeCreateMaster==='function')closeCreateMaster();
     const c=getConfig();
     configClose();overlay.style.display='block';overlay.setAttribute('aria-hidden','false');$('mgConfirm').style.display='none';if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-group-overlay .mg-main');
-    name.value=groupChangeDraft?.name||''; under.value=groupChangeDraft?.under|| (c.rememberParent?(localStorage.getItem('mayaacc_last_group_parent_'+companyId())||''):''); $('mgAffect').value=groupChangeDraft?.affect || (c.defaultAffect?'yes':'no'); $('mgSubLedger').value='no'; $('mgNett').value='no'; $('mgCalc').value='no'; $('mgAlloc').value='na';
+    name.value=groupChangeDraft?.name||''; under.value=groupChangeDraft?.under|| (c.rememberParent?(localStorage.getItem('mayaacc_last_group_parent_'+companyId())||''):''); $('mgAffect').value=groupChangeDraft?.affect || (c.defaultAffect?'yes':'no'); $('mgSubLedger').value='no'; $('mgNett').value='no'; $('mgCalc').value='no'; $('mgAlloc').value='na'; if($('mgAlias'))$('mgAlias').value=groupChangeDraft?.alias||''; syncMgVals(); closeMgLists(); var _mm=$('mgMore'); if(_mm)_mm.style.display='none';
     groupChangeDraft=null; groupChangePending=false;
     tree.style.display='none';focusIndex=-1;updateInfo();
     if(c.autoUnder){setTimeout(()=>under.focus(),20);}else{setTimeout(()=>name.focus(),20);}
@@ -1429,8 +1508,8 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
   function doSave(){
     const n=name.value.trim(), key='mayaacc_groups_'+companyId(), arr=customGroups();
     if(arr.some(x=>String(x.name||'').trim().toLowerCase()===n.toLowerCase())||standard.some(x=>x[0].toLowerCase()===n.toLowerCase())){alert('A group with this name already exists in this company.');$('mgConfirm').style.display='none';name.focus();return;}
-    arr.push({id:'GRP-'+Date.now(),name:n,under:under.value.trim()||null,affectsReports:$('mgAffect').value==='yes',subLedger:$('mgSubLedger').value==='yes',nett:$('mgNett').value==='yes',calc:$('mgCalc').value==='yes',alloc:$('mgAlloc').value,createdAt:new Date().toISOString()});localStorage.setItem(key,JSON.stringify(arr));if(under.value.trim())localStorage.setItem('mayaacc_last_group_parent_'+companyId(),under.value.trim());$('mgConfirm').style.display='none';
-    if(pendingSaveMode==='new'){const c=getConfig();name.value='';under.value='';$('mgAffect').value=c.defaultAffect?'yes':'no';$('mgSubLedger').value='no';$('mgNett').value='no';$('mgCalc').value='no';$('mgAlloc').value='na';updateInfo();name.focus();} else close(true);
+    arr.push({id:'GRP-'+Date.now(),name:n,under:under.value.trim()||null,alias:($('mgAlias')||{}).value.trim()||null,affectsReports:$('mgAffect').value==='yes',subLedger:$('mgSubLedger').value==='yes',nett:$('mgNett').value==='yes',calc:$('mgCalc').value==='yes',alloc:$('mgAlloc').value,createdAt:new Date().toISOString()});localStorage.setItem(key,JSON.stringify(arr));if(under.value.trim())localStorage.setItem('mayaacc_last_group_parent_'+companyId(),under.value.trim());$('mgConfirm').style.display='none';
+    if(pendingSaveMode==='new'){const c=getConfig();name.value='';under.value='';if($('mgAlias'))$('mgAlias').value='';$('mgAffect').value=c.defaultAffect?'yes':'no';$('mgSubLedger').value='no';$('mgNett').value='no';$('mgCalc').value='no';$('mgAlloc').value='na';syncMgVals();updateInfo();name.focus();} else close(true);
   }
   let configFocusIndex=-1;
   function configControls(){return [...document.querySelectorAll('#mayaacc-group-config .mgc-option, #mayaacc-group-config .mgc-footer button')];}
@@ -1465,7 +1544,7 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
     const b=$('groupCompanyReturnBanner');if(b)b.style.display='block';
     if(typeof showCompanySelect==='function')showCompanySelect();
   }
-  window.mayaOpenGroup=open;window.mayaCloseGroup=function(after){if(window.__mayaAskQuit)window.__mayaAskQuit('Group',function(){configClose();close(true);if(typeof after==='function')after();});else{configClose();close(true);if(typeof after==='function')after();}};window.mayaCloseGroupRaw=function(){configClose();close(true);};window.mayaCloseGroupConfirm=()=>{$('mgConfirm').style.display='none'};window.mayaConfirmGroupSave=doSave;window.mayaSaveGroup=(andNew)=>askSave(andNew?'new':'close');window.mayaGroupChangeCompany=changeCompany;window.mayaGroupConfigure=configOpen;window.mayaCloseGroupConfig=configClose;window.mayaSaveGroupConfig=saveGroupConfig;window.mayaResetGroupConfig=resetGroupConfig;window.mayaIsChangingGroupCompany=()=>groupChangePending;window.mayaCancelGroupCompanyChange=()=>{groupChangePending=false;groupChangeDraft=null;const b=$('groupCompanyReturnBanner');if(b)b.style.display='none';};window.mayaReopenGroupAfterCompanyChange=()=>{groupChangePending=false;const b=$('groupCompanyReturnBanner');if(b)b.style.display='none';open();};window.mayaHasGroupChangeDraft=()=>!!groupChangeDraft;
+  window.mayaOpenGroup=open;window.mayaCloseGroup=function(after){if(window.__mayaAskQuit)window.__mayaAskQuit('Group',function(){configClose();close(true);if(typeof after==='function')after();});else{configClose();close(true);if(typeof after==='function')after();}};window.mayaCloseGroupRaw=function(){configClose();close(true);};window.mayaCloseGroupConfirm=()=>{$('mgConfirm').style.display='none'};window.mayaConfirmGroupSave=doSave;window.mayaSaveGroup=(andNew)=>askSave(andNew?'new':'close');window.mayaGroupChangeCompany=changeCompany;window.mayaGroupConfigure=configOpen;window.mayaCloseGroupConfig=configClose;window.mayaSaveGroupConfig=saveGroupConfig;window.mayaResetGroupConfig=resetGroupConfig;window.mayaIsChangingGroupCompany=()=>groupChangePending;window.mayaCancelGroupCompanyChange=()=>{groupChangePending=false;groupChangeDraft=null;const b=$('groupCompanyReturnBanner');if(b)b.style.display='none';};window.mayaReopenGroupAfterCompanyChange=()=>{groupChangePending=false;const b=$('groupCompanyReturnBanner');if(b)b.style.display='none';open();};window.mayaHasGroupChangeDraft=()=>!!groupChangeDraft;window.mayaGroupDirty=dirty;window.mayaToggleGroupMore=toggleMore;window.mayaCloseGroupRawNoReturn=function(){configClose();close(false);};window.mayaCloseGroupLists=closeMgLists;
   const originalOpenCompany=window.openCompany;
   window.openCompany=function(id){
     if(groupChangePending){
@@ -1497,7 +1576,8 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
   document.addEventListener('input',e=>{if(e.target===under)renderTree();if(e.target===name)updateInfo();});
   document.addEventListener('change',e=>{if(e.target===$('mgAffect'))updateInfo();});
   document.addEventListener('focusin',e=>{if(e.target===under)renderTree();});
-  document.addEventListener('mousedown',e=>{if(e.target===overlay)window.mayaCloseGroup();if($('mayaacc-group-config').style.display==='block' && !e.target.closest('#mayaacc-group-config') && e.target.closest('#mayaacc-group-overlay'))configClose();});
+  document.addEventListener('click',e=>{const b=e.target.closest?e.target.closest('.mg-val'):null;if(b){const k=Object.keys(MG_VALS).find(function(key){return MG_VALS[key].btn===b.id;});if(k){if(mgListOpen===k)closeMgLists();else openMgList(k);}return;}const it=e.target.closest?e.target.closest('.mg-list button'):null;if(it){const wrap=it.closest('.mg-list');const k2=Object.keys(MG_VALS).find(function(key){return MG_VALS[key].list===(wrap&&wrap.id);});if(k2){const items=[...wrap.querySelectorAll('button')];pickMgList(k2,items.indexOf(it));}}});
+  document.addEventListener('mousedown',e=>{if(mgListOpen&&!(e.target.closest&&e.target.closest('.mg-val-wrap')))closeMgLists();if($('mayaacc-group-config').style.display==='block' && !e.target.closest('#mayaacc-group-config') && e.target.closest('#mayaacc-group-overlay'))configClose();});
   document.addEventListener('keydown',e=>{
     if(!overlay||window.getComputedStyle(overlay).display==='none')return;
     const cfg=$('mayaacc-group-config');
@@ -1513,6 +1593,25 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
       if(e.ctrlKey&&e.key.toLowerCase()==='s'){e.preventDefault();saveGroupConfig();return;}
       return;
     }
+    const _om=$('mlgOtherMasters');
+    if(_om&&_om.style.display==='flex'){
+      if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();if(window.mayaCloseOtherMasters)window.mayaCloseOtherMasters();return;}
+      if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();e.stopImmediatePropagation();const _items=[...document.querySelectorAll('#mlgOtherMasters .mlg-other-item')];if(_items.length){let _i=_items.findIndex(function(el){return el.classList.contains('sel');});_i=(_i+(e.key==='ArrowDown'?1:-1)+_items.length)%_items.length;_items.forEach(function(el,j){el.classList.toggle('sel',j===_i);});_items[_i].scrollIntoView({block:'nearest'});}return;}
+      if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();const _items=[...document.querySelectorAll('#mlgOtherMasters .mlg-other-item')];let _i=_items.findIndex(function(el){return el.classList.contains('sel');});if(_i<0)_i=0;if(window.mayaPickOtherMaster)window.mayaPickOtherMaster(_i);return;}
+      e.preventDefault();e.stopImmediatePropagation();return;
+    }
+    if(e.key==='F10'){e.preventDefault();e.stopImmediatePropagation();closeMgLists();tree.style.display='none';focusIndex=-1;if(window.mayaOpenOtherMasters)window.mayaOpenOtherMasters('Group');return;}
+    if(mgListOpen){
+      const _lb=$(MG_VALS[mgListOpen].list);const _items=_lb?[..._lb.querySelectorAll('button')]:[];
+      if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();const _b=$(MG_VALS[mgListOpen].btn);closeMgLists();if(_b)_b.focus();return;}
+      if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();e.stopImmediatePropagation();if(_items.length){mgListFocus=(mgListFocus+(e.key==='ArrowDown'?1:-1)+_items.length)%_items.length;_items.forEach(function(b,j){b.classList.toggle('mg-focus',j===mgListFocus);});_items[mgListFocus].scrollIntoView({block:'nearest'});}return;}
+      if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopImmediatePropagation();pickMgList(mgListOpen,mgListFocus<0?0:mgListFocus);return;}
+      if(e.key==='Tab'){closeMgLists();return;}
+      e.preventDefault();e.stopImmediatePropagation();return;
+    }
+    if((e.key==='Enter'||e.key===' ')&&document.activeElement&&document.activeElement.classList&&document.activeElement.classList.contains('mg-val')){e.preventDefault();e.stopImmediatePropagation();const _k=Object.keys(MG_VALS).find(function(key){return MG_VALS[key].btn===document.activeElement.id;});if(_k){if(mgListOpen===_k)closeMgLists();else openMgList(_k);}return;}
+    if(e.key==='Enter'&&document.activeElement===$('mgAlias')){e.preventDefault();under.focus();return;}
+    if(e.key==='Enter'&&document.activeElement===under&&tree.style.display!=='block'){e.preventDefault();const _b=$('mgSubLedgerBtn');if(_b)_b.focus();return;}
     if(e.key==='Escape'){e.preventDefault();if($('mgConfirm').style.display==='flex'){$('mgConfirm').style.display='none'}else window.mayaCloseGroup();return;}
     if(e.key==='F12'){e.preventDefault();mayaGroupConfigure();return;}
     if(e.ctrlKey&&e.key.toLowerCase()==='s'){e.preventDefault();askSave('new');return;}
@@ -1525,6 +1624,42 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
 </script>
 
 
+<script id="mayaacc-gateway-rail-script">
+/* Gateway F-key rail + shared F10-picker keys (2026-11-22). The F10 picker
+   (#mlgOtherMasters) lives at body level so it can open from the Ledger,
+   the Group panel and the Gateway. The Ledger and Group handlers own picker
+   keys while their overlays are open; this handler covers the Gateway. */
+(function(){
+  'use strict';
+  function pickerOpen(){var d=document.getElementById('mlgOtherMasters');return d&&d.style.display==='flex';}
+  function pickerItems(){return Array.prototype.slice.call(document.querySelectorAll('#mlgOtherMasters .mlg-other-item'));}
+  function pickerMove(d){var items=pickerItems();if(!items.length)return;var i=-1;items.forEach(function(el,j){if(el.classList.contains('sel'))i=j;});i=(i+d+items.length)%items.length;items.forEach(function(el,j){el.classList.toggle('sel',j===i);});if(items[i])items[i].scrollIntoView({block:'nearest'});}
+  function pickerPick(){var items=pickerItems();var i=-1;items.forEach(function(el,j){if(el.classList.contains('sel'))i=j;});if(i<0)i=0;if(window.mayaPickOtherMaster)window.mayaPickOtherMaster(i);}
+  function formOpen(){
+    try{if(window.__ctOpenForm&&window.__ctOpenForm())return true;}catch(e){}
+    var ids=['mayaacc-group-overlay','mayaacc-ledger-overlay','mayaacc-stock-overlay','mayaacc-unit-overlay','mayaacc-godown-overlay','mayaacc-cost-centre-overlay','mayaacc-voucher-type-overlay','mayaacc-tax-gst-overlay','mayaacc-stock-group-overlay','mayaacc-stock-cat-overlay','mayaacc-currency-overlay','mayaacc-reports-overlay','mayaacc-voucher-entry-overlay','mayaacc-alter-group-form','mayaacc-alter-ledger-form','alterMasterDialog','createMasterDialog'];
+    for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);if(el&&getComputedStyle(el).display!=='none'&&el.getAttribute('aria-hidden')!=='true')return true;}
+    return false;
+  }
+  document.addEventListener('keydown',function(e){
+    if(pickerOpen()){
+      var lo=document.getElementById('mayaacc-ledger-overlay'),go=document.getElementById('mayaacc-group-overlay');
+      if((lo&&getComputedStyle(lo).display!=='none')||(go&&getComputedStyle(go).display!=='none'))return;
+      if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();if(window.mayaCloseOtherMasters)window.mayaCloseOtherMasters();return;}
+      if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();e.stopImmediatePropagation();pickerMove(e.key==='ArrowDown'?1:-1);return;}
+      if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();pickerPick();return;}
+      e.preventDefault();e.stopImmediatePropagation();return;
+    }
+    if(e.key==='F10'&&!e.ctrlKey&&!e.altKey&&!e.metaKey){
+      if(formOpen())return;
+      var db=document.getElementById('dashboard');
+      if(!db||getComputedStyle(db).display==='none')return;
+      e.preventDefault();e.stopImmediatePropagation();
+      if(window.mayaOpenOtherMasters)window.mayaOpenOtherMasters('Gateway');
+    }
+  });
+})();
+</script>
 <style id="mayaacc-ledger-style">
 #mayaacc-ledger-overlay{display:none;position:fixed;inset:0;z-index:10030;background:rgba(10,15,26,.30);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
 #mayaacc-ledger-panel{position:absolute;left:0;top:0;height:100%;width:100%;min-width:0;background:rgba(255,255,255,.99);border-right:1px solid #dfe4ec;box-shadow:18px 0 45px rgba(16,24,40,.16);display:flex;flex-direction:column;overflow:hidden}
@@ -1660,9 +1795,9 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
     </div>
     <div id="mlgConfirm" class="mg-confirm"><div class="mg-confirm-card"><h3>Save Ledger?</h3><p id="mlgConfirmText">Save this Ledger in the current company?</p><div class="mg-confirm-actions"><button type="button" onclick="mayaCloseLedgerConfirm()">Cancel</button><button type="button" class="primary" onclick="mayaConfirmLedgerSave()">Save</button></div></div></div>
     <div id="mlgGstin" class="mg-confirm"><div class="mg-confirm-card"><h3>Fetch Details Using GSTIN / UIN</h3><p>Enter the 15-character GSTIN. PAN and State are derived from it on this device — no internet needed.</p><input id="mlgGstinInput" maxlength="15" autocomplete="off" placeholder="e.g. 06AOGPR9753P1Z5"><p id="mlgGstinErr"></p><div class="mg-confirm-actions"><button type="button" onclick="mayaCloseLedgerGstin()">Cancel</button><button type="button" class="primary" onclick="mayaFetchLedgerGstin()">Fetch Details</button></div></div></div>
-    <div id="mlgOtherMasters" class="mlg-other" style="display:none" aria-hidden="true"><div class="mlg-other-card"><h3>Other Masters</h3><div class="mlg-other-item" data-master="Group">Group</div><div class="mlg-other-item" data-master="Ledger">Ledger</div><div class="mlg-other-item" data-master="Stock Item">Stock Item</div><div class="mlg-other-item" data-master="Stock Group">Stock Group</div><div class="mlg-other-item" data-master="Stock Category">Stock Category</div><div class="mlg-other-item" data-master="Unit">Unit</div><div class="mlg-other-item" data-master="Godown">Godown</div><div class="mlg-other-item" data-master="Cost Centre">Cost Centre</div><div class="mlg-other-item" data-master="Currency">Currency</div><div class="mlg-other-item" data-master="Voucher Type">Voucher Type</div></div></div>
   </div>
 </div>
+    <div id="mlgOtherMasters" class="mlg-other" style="display:none" aria-hidden="true"><div class="mlg-other-card"><h3>Other Masters</h3><div class="mlg-other-item" data-master="Group">Group</div><div class="mlg-other-item" data-master="Ledger">Ledger</div><div class="mlg-other-item" data-master="Stock Item">Stock Item</div><div class="mlg-other-item" data-master="Stock Group">Stock Group</div><div class="mlg-other-item" data-master="Stock Category">Stock Category</div><div class="mlg-other-item" data-master="Unit">Unit</div><div class="mlg-other-item" data-master="Godown">Godown</div><div class="mlg-other-item" data-master="Cost Centre">Cost Centre</div><div class="mlg-other-item" data-master="Currency">Currency</div><div class="mlg-other-item" data-master="Voucher Type">Voucher Type</div></div></div>
 
 <style id="mayaacc-nb-f10">
 /* F10 Other Masters picker (new batch #2, 2026-11-21). */
@@ -1772,16 +1907,25 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
   function printLedger(){const d=capture();const html='<!doctype html><html><head><meta charset="utf-8"><title>MAYAACC Ledger</title><style>body{font-family:Arial;margin:40px;color:#172033}.box{border:1px solid #dfe4ec;border-radius:10px;padding:18px;max-width:760px}.r{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #edf0f4;font-size:12px}</style></head><body><h1>'+esc(d.mlgName||'Ledger')+'</h1><p>MAYAACC • '+esc(companyName())+'</p><div class="box">'+Object.entries(d).filter(([k,v])=>k!=='mlgName'&&String(v||'').trim()).map(([k,v])=>'<div class="r"><span>'+esc(k)+'</span><strong>'+esc(v)+'</strong></div>').join('')+'</div><script>window.onload=function(){window.print()}<\/script></body></html>';const w=window.open('','_blank','width=860,height=700');if(!w){alert('Please allow popups to use Print Preview.');return}w.document.write(html);w.document.close();}
   function toggleMore(){var m=$('mlgMore');if(m)m.classList.toggle('on');}
   var otherIdx=0;
+  var otherSourceName=null, otherSourceClose=null;
+  function otherSourceCloser(name){
+    if(name==='Group'){return function(cb){var d=window.mayaGroupDirty;if(d&&d()){if(window.mayaCloseGroup)window.mayaCloseGroup(cb);}else{if(window.mayaCloseGroupRawNoReturn)window.mayaCloseGroupRawNoReturn();cb();}};}
+    if(name==='Gateway'){return function(cb){cb();};}
+    return null;
+  }
   var OTHER_MASTERS=['Group','Ledger','Stock Item','Stock Group','Stock Category','Unit','Godown','Cost Centre','Currency','Voucher Type'];
-  function openOtherMasters(){var d=$('mlgOtherMasters');if(!d)return;customSelClose();var _t=$('mlgTree');if(_t)_t.style.display='none';treeFocus=-1;d.style.display='flex';d.setAttribute('aria-hidden','false');otherIdx=0;paintOtherMasters();}
+  function openOtherMasters(srcName){var d=$('mlgOtherMasters');if(!d)return;customSelClose();var _t=$('mlgTree');if(_t)_t.style.display='none';treeFocus=-1;otherSourceName=srcName||null;otherSourceClose=srcName?otherSourceCloser(srcName):null;d.style.display='flex';d.setAttribute('aria-hidden','false');otherIdx=0;paintOtherMasters();}
   function closeOtherMasters(){var d=$('mlgOtherMasters');if(!d)return;d.style.display='none';d.setAttribute('aria-hidden','true');}
   function paintOtherMasters(){var items=[...document.querySelectorAll('#mlgOtherMasters .mlg-other-item')];items.forEach(function(el,i){el.classList.toggle('sel',i===otherIdx);});if(items[otherIdx])items[otherIdx].scrollIntoView({block:'nearest'});}
   function pickOtherMaster(i){
     var name=OTHER_MASTERS[i];if(!name)return;
     closeOtherMasters();
-    if(name==='Ledger')return;
+    if(name===otherSourceName){otherSourceName=null;otherSourceClose=null;return;}
     if(window.__mayaUpdateReturnItem)window.__mayaUpdateReturnItem(name);
     var openTarget=function(){var fn={Group:window.mayaOpenGroup,'Stock Item':window.mayaOpenStockItem,'Stock Group':window.mayaOpenStockGroup,'Stock Category':window.mayaOpenStockCategory,Unit:window.mayaOpenUnit,Godown:window.mayaOpenGodown,'Cost Centre':window.mayaOpenCostCentre,Currency:window.mayaOpenCurrency,'Voucher Type':window.mayaOpenVoucherType}[name];if(typeof fn==='function')fn();else if(typeof window.createMasterAction==='function')window.createMasterAction(name);};
+    var _sc=otherSourceClose;otherSourceName=null;otherSourceClose=null;
+    if(_sc){_sc(openTarget);return;}
+    if(name==='Ledger')return;
     if(dirty){window.mayaCloseLedger(openTarget);}else{close(false);openTarget();}
   }
   function otherMasters(){openOtherMasters();}
@@ -1790,7 +1934,7 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
   function openGstin(){var d=$('mlgGstin');if(!d)return;var e=$('mlgGstinErr');if(e)e.style.display='none';var inp=$('mlgGstinInput');if(inp)inp.value=($('mlgGSTIN')&&$('mlgGSTIN').value)||'';d.style.display='flex';setTimeout(function(){if(inp)inp.focus();},20);}
   function closeGstin(){var d=$('mlgGstin');if(d)d.style.display='none';}
   function fetchGstin(){var inp=$('mlgGstinInput');var v=((inp&&inp.value)||'').trim().toUpperCase();var e=$('mlgGstinErr');if(!/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(v)){if(e){e.textContent='Enter a valid 15-character GSTIN (e.g. 06AOGPR9753P1Z5).';e.style.display='block';}if(inp)inp.focus();return;}var pan=v.slice(2,12);var st=GSTIN_STATE[v.slice(0,2)]||'';if($('mlgGSTIN'))$('mlgGSTIN').value=v;if($('mlgPAN'))$('mlgPAN').value=pan;if(st&&$('mlgState')){var ok=false;var opts=$('mlgState').options;for(var i=0;i<opts.length;i++){if(opts[i].text===st||opts[i].value===st){ok=true;break;}}if(ok)$('mlgState').value=st;}syncDistrictOptions();if($('mlgGSTType'))$('mlgGSTType').value='regular';dirty=true;closeGstin();if(window.mayaToast)window.mayaToast('GSTIN details filled: PAN '+pan+(st?' \u00b7 '+st:''));updateSummary();}
-  window.mayaLedgerGroups=()=>allGroups().map(x=>x[0]);window.mayaGroupKind=groupKind;window.mayaOpenLedger=open;window.mayaCloseLedger=function(after){if(window.__mayaAskQuit)window.__mayaAskQuit('Ledger',function(){close(true);if(typeof after==='function')after();});else{close(true);if(typeof after==='function')after();}};window.mayaCloseLedgerRaw=close;window.mayaSaveLedger=askSave;window.mayaCloseLedgerConfirm=()=>{$('mlgConfirm').style.display='none'};window.mayaConfirmLedgerSave=doSave;window.mayaLedgerChangeCompany=changeCompany;window.mayaOpenLedgerConfig=openConfig;window.mayaCloseLedgerConfig=closeConfig;window.mayaSaveLedgerConfig=saveLedgerConfig;window.mayaResetLedgerConfig=resetLedgerConfig;window.mayaPrintLedger=printLedger;window.mayaToggleLedgerMore=toggleMore;window.mayaLedgerOtherMasters=otherMasters;window.mayaCloseLedgerLists=customSelClose;window.mayaLedgerHsn=ledgerHsn;window.mayaOpenLedgerGstin=openGstin;window.mayaCloseLedgerGstin=closeGstin;window.mayaFetchLedgerGstin=fetchGstin;
+  window.mayaLedgerGroups=()=>allGroups().map(x=>x[0]);window.mayaGroupKind=groupKind;window.mayaOpenLedger=open;window.mayaCloseLedger=function(after){if(window.__mayaAskQuit)window.__mayaAskQuit('Ledger',function(){close(true);if(typeof after==='function')after();});else{close(true);if(typeof after==='function')after();}};window.mayaCloseLedgerRaw=close;window.mayaSaveLedger=askSave;window.mayaCloseLedgerConfirm=()=>{$('mlgConfirm').style.display='none'};window.mayaConfirmLedgerSave=doSave;window.mayaLedgerChangeCompany=changeCompany;window.mayaOpenLedgerConfig=openConfig;window.mayaCloseLedgerConfig=closeConfig;window.mayaSaveLedgerConfig=saveLedgerConfig;window.mayaResetLedgerConfig=resetLedgerConfig;window.mayaPrintLedger=printLedger;window.mayaToggleLedgerMore=toggleMore;window.mayaLedgerOtherMasters=otherMasters;window.mayaCloseLedgerLists=customSelClose;window.mayaLedgerHsn=ledgerHsn;window.mayaOpenLedgerGstin=openGstin;window.mayaCloseLedgerGstin=closeGstin;window.mayaFetchLedgerGstin=fetchGstin;window.mayaOpenOtherMasters=function(src){openOtherMasters(src);};window.mayaPickOtherMaster=pickOtherMaster;window.mayaCloseOtherMasters=closeOtherMasters;
   document.addEventListener('input',e=>{if(e.target===$('mlgUnder')){renderTree();dirty=true} else if(e.target&&e.target.id&&e.target.id.startsWith('mlg'))dirty=true;if(e.target===$('mlgName'))syncDupWarn();if(e.target===$('mlgState'))syncDistrictOptions();updateSummary();if(e.target===$('mlgUnder'))syncPartySections();});
   document.addEventListener('focusin',e=>{if(e.target===$('mlgUnder'))renderTree();});
   document.addEventListener('mousedown',e=>{if(e.target===$('mayaacc-ledger-overlay'))close();});
@@ -2705,7 +2849,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
     const overlay=activeOverlay();if(!overlay)return;
     /* If a module-specific child layer is active, its own handler owns Enter. */
     const childIds={
-      'mayaacc-group-overlay':['mayaacc-group-config','mgConfirm','mgTree'],
+      'mayaacc-group-overlay':['mayaacc-group-config','mgConfirm','mgTree','mlgOtherMasters'],
       'mayaacc-ledger-overlay':['mayaacc-ledger-config','mlgConfirm','mlgTree','mlgOtherMasters','mayaacc-hsn-finder','maya-f3-menu','mlgStateList','mlgDistrictList','mlgCountryList','mlgGSTTypeList','mlgGstRateList'],
       'mayaacc-stock-overlay':['mayaacc-stock-config','msiConfirm','msiTree','mayaacc-hsn-finder'],
       'mayaacc-unit-overlay':['mayaacc-unit-config','muConfirm'],
@@ -3346,7 +3490,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
     return cs.display!=='none' && cs.visibility!=='hidden' && el.getAttribute('aria-hidden')!=='true';
   };
   const modules={
-    Group:{overlay:'mayaacc-group-overlay',config:'mayaacc-group-config',confirm:'mgConfirm',tree:'mgTree',
+    Group:{overlay:'mayaacc-group-overlay',config:'mayaacc-group-config',confirm:'mgConfirm',tree:'mgTree',lists:['mgSubLedgerList','mgNettList','mgCalcList','mgAllocList'],closeList:'mayaCloseGroupLists',
       open:'mayaOpenGroup',close:'mayaCloseGroup',save:'mayaSaveGroup',confirmSave:'mayaConfirmGroupSave',closeConfig:'mayaCloseGroupConfig'},
     Ledger:{overlay:'mayaacc-ledger-overlay',config:'mayaacc-ledger-config',confirm:'mlgConfirm',tree:'mlgTree',lists:['mlgStateList','mlgDistrictList','mlgCountryList','mlgGSTTypeList','mlgGstRateList'],closeList:'mayaCloseLedgerLists',
       open:'mayaOpenLedger',close:'mayaCloseLedger',save:'mayaSaveLedger',confirmSave:'mayaConfirmLedgerSave',closeConfig:'mayaCloseLedgerConfig'},
@@ -3498,6 +3642,8 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
       config:'mayaacc-group-config',
       confirm:'mgConfirm',
       tree:'mgTree',
+      lists:['mgSubLedgerList','mgNettList','mgCalcList','mgAllocList'],
+      closeList:'mayaCloseGroupLists',
       finder:null,
       close:'mayaCloseGroup',
       closeConfig:'mayaCloseGroupConfig',
@@ -3771,7 +3917,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   const $=id=>document.getElementById(id);
   const CONFIRM_SAVE={Group:'mayaConfirmGroupSave',Ledger:'mayaConfirmLedgerSave','Stock Item':'mayaConfirmStockSave',Unit:'mayaConfirmUnitSave',Godown:'mayaConfirmGodownSave','Cost Centre':'mayaConfirmCostCentreSave','Voucher Type':'mayaConfirmVoucherTypeSave'};
   const modules={
-    Group:{overlay:'mayaacc-group-overlay',config:'mayaacc-group-config',confirm:'mgConfirm',tree:'mgTree',finder:null,close:'mayaCloseGroup',closeConfig:'mayaCloseGroupConfig',closeConfirm:'mayaCloseGroupConfirm',saveConfig:'mayaSaveGroupConfig',save:'mayaSaveGroup'},
+    Group:{overlay:'mayaacc-group-overlay',config:'mayaacc-group-config',confirm:'mgConfirm',tree:'mgTree',lists:['mgSubLedgerList','mgNettList','mgCalcList','mgAllocList'],closeList:'mayaCloseGroupLists',finder:null,close:'mayaCloseGroup',closeConfig:'mayaCloseGroupConfig',closeConfirm:'mayaCloseGroupConfirm',saveConfig:'mayaSaveGroupConfig',save:'mayaSaveGroup'},
     Ledger:{overlay:'mayaacc-ledger-overlay',config:'mayaacc-ledger-config',confirm:'mlgConfirm',tree:'mlgTree',lists:['mlgStateList','mlgDistrictList','mlgCountryList','mlgGSTTypeList','mlgGstRateList'],closeList:'mayaCloseLedgerLists',finder:null,close:'mayaCloseLedger',closeConfig:'mayaCloseLedgerConfig',closeConfirm:'mayaCloseLedgerConfirm',saveConfig:'mayaSaveLedgerConfig',save:'mayaSaveLedger'},
     'Stock Item':{overlay:'mayaacc-stock-overlay',config:'mayaacc-stock-config',confirm:'msiConfirm',tree:'msiTree',finder:'mayaacc-hsn-finder',close:'mayaCloseStockItem',closeConfig:'mayaCloseStockConfig',closeConfirm:'mayaCloseStockConfirm',saveConfig:'mayaSaveStockConfig',save:'mayaSaveStockItem'},
     Unit:{overlay:'mayaacc-unit-overlay',config:'mayaacc-unit-config',confirm:'muConfirm',tree:null,finder:null,close:'mayaCloseUnit',closeConfig:'mayaCloseUnitConfig',closeConfirm:'mayaCloseUnitConfirm',saveConfig:'mayaSaveUnitConfig',save:'mayaSaveUnit'},
@@ -18192,6 +18338,14 @@ body.maya-ledger-topbar-dark #maya-topbar .workspace-account{border-left-color:r
 body.maya-ledger-topbar-dark #maya-topbar .workspace-account span{color:rgba(255,255,255,.85)}
 body.maya-ledger-topbar-dark #maya-topbar .workspace-logout{background:transparent;border-color:rgba(255,255,255,.6);color:#fff}
 body.maya-ledger-topbar-dark #maya-topbar .workspace-logout:hover{background:rgba(255,255,255,.12)}
+body.maya-group-topbar-dark #maya-topbar .gateway-top{background:#172033;border-bottom-color:#172033;color:#fff}
+body.maya-group-topbar-dark #maya-topbar .gateway-brand{color:#fff}
+body.maya-group-topbar-dark #maya-topbar .gateway-nav button{color:#fff}
+body.maya-group-topbar-dark #maya-topbar .gateway-nav .goto{background:transparent;border-color:rgba(255,255,255,.45);color:#fff}
+body.maya-group-topbar-dark #maya-topbar .workspace-account{border-left-color:rgba(255,255,255,.25)}
+body.maya-group-topbar-dark #maya-topbar .workspace-account span{color:rgba(255,255,255,.85)}
+body.maya-group-topbar-dark #maya-topbar .workspace-logout{background:transparent;border-color:rgba(255,255,255,.6);color:#fff}
+body.maya-group-topbar-dark #maya-topbar .workspace-logout:hover{background:rgba(255,255,255,.12)}
 #mcm{z-index:2147482900!important}
 body.maya-topbar-on #dashboard{padding-top:var(--maya-topbar-h,48px)!important}
 body.maya-topbar-on #companySelect,
@@ -18592,7 +18746,7 @@ var topbarShouldShow=function(){
      EXCEPTION (preview match, 2026-11-21): the Ledger Creation screen shows
      the top bar above the form, exactly like the approved preview. The
      body.maya-topbar-on CSS already offsets #mayaacc-ledger-overlay below it. */
-  var co=['mayaacc-group-overlay','mayaacc-stock-overlay','mayaacc-unit-overlay','mayaacc-godown-overlay','mayaacc-cost-centre-overlay','mayaacc-voucher-type-overlay','mayaacc-tax-gst-overlay','mayaacc-stock-group-overlay','mayaacc-stock-cat-overlay','mayaacc-currency-overlay'];
+  var co=['mayaacc-stock-overlay','mayaacc-unit-overlay','mayaacc-godown-overlay','mayaacc-cost-centre-overlay','mayaacc-voucher-type-overlay','mayaacc-tax-gst-overlay','mayaacc-stock-group-overlay','mayaacc-stock-cat-overlay','mayaacc-currency-overlay'];
   for(var i=0;i<co.length;i++){if(isOpenEl($(co[i])))return false;}
   return true;
 };
@@ -18622,6 +18776,8 @@ var updateTopbar=function(){
   /* preview match — COLOURS: navy top bar only while Ledger Creation is open */
   var _lo=$('mayaacc-ledger-overlay');
   document.body.classList.toggle('maya-ledger-topbar-dark', !!(on && _lo && isOpenEl(_lo)));
+  var _go=$('mayaacc-group-overlay');
+  document.body.classList.toggle('maya-group-topbar-dark', !!(on && _go && isOpenEl(_go)));
 };
 var mountTopbar=function(){
   var gt=document.querySelector('.gateway-top');
@@ -28627,6 +28783,18 @@ else window.MayaLang.init();
 /* F12 moved to the sidebar (Sandeep, 2026-11-21): the strip is Q/A/D only, so the
    last segment (D Delete) must NOT be pushed right by the shared last-child rule. */
 #mayaacc-ledger-panel>.mlg-footer .maya-create-foot .mcf-seg:last-child{margin-left:0;border-left:0}
+/* Group strip: dark navy, Q/A/D only (F12 lives in the sidebar) — mirrors Ledger. */
+#mayaacc-group-panel>.mg-footer{padding:0;background:#172033;border-top:0}
+#mayaacc-group-panel>.mg-footer .maya-create-foot{background:#172033;color:#fff}
+#mayaacc-group-panel>.mg-footer .maya-create-foot .mcf-seg{border-right-color:rgba(255,255,255,.22)}
+#mayaacc-group-panel>.mg-footer .maya-create-foot .mcf-seg u{color:#fff}
+#mayaacc-group-panel>.mg-footer .maya-create-foot .mcf-seg u.maya-u-dbl{color:#4ade80}
+#mayaacc-group-panel>.mg-footer .maya-create-foot .mcf-seg b{color:#7aa5ff}
+#mayaacc-group-panel>.mg-footer .maya-create-foot .mcf-seg.off{color:#7e8fa8}
+#mayaacc-group-panel>.mg-footer .maya-create-foot .mcf-seg.off u{color:#7e8fa8}
+#mayaacc-group-panel>.mg-footer .maya-create-foot .mcf-seg:hover{background:rgba(255,255,255,.08)}
+#mayaacc-group-panel>.mg-footer .maya-create-foot .mcf-seg.off:hover{background:transparent}
+#mayaacc-group-panel>.mg-footer .maya-create-foot .mcf-seg:last-child{margin-left:0;border-left:0}
 @media(max-width:820px){.mlg-cols{display:block}.mlg-col-l{border-right:0;padding-right:0;margin-bottom:16px}.mlg-col-r{padding-left:0}.mlg-top{display:block}.mlg-total-open{width:100%;flex:none;margin-top:14px;box-sizing:border-box}#mayaacc-ledger-panel .mlg-side{width:135px;flex-basis:135px}}
 @media(max-width:620px){#mayaacc-ledger-panel .mlg-content{display:block}#mayaacc-ledger-panel .mlg-side{display:flex;flex-wrap:wrap;width:auto;flex:none;border-left:0;border-top:1px solid #e3e8ef;padding:0}.mlg-side-row{flex:1 1 30%;border-bottom:1px solid #eef1f5}.mlg-trow label,.mlg-cols .mlg-field label{flex-basis:110px}}
 </style>
