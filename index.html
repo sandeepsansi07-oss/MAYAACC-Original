@@ -341,26 +341,26 @@ footer{padding:28px 6%;color:#788295;font-size:13px;border-top:1px solid #e6e9ef
 /* Group sidebar detached to the FAR RIGHT edge (approved mock v2): absolute
    against the overlay — the 680px panel stays on the left, dimmed Gateway sits
    between panel and sidebar, F12 pinned at the sidebar bottom. */
-#mayaacc-group-overlay>.mlg-side{position:absolute;right:0;top:0;bottom:0;width:200px;background:#fff;border-left:1px solid #e3e8ef;padding:0;display:flex;flex-direction:column;z-index:5}
+#mayaacc-group-overlay>.mlg-side{position:absolute;right:0;top:0;bottom:0;width:160px;background:#fff;border-left:1px solid #e3e8ef;padding:0;display:flex;flex-direction:column;z-index:5}
 #mayaacc-group-overlay>.mlg-side .mlg-f12{margin-top:auto;border-top:1px solid #e3e8ef}
 @media(max-width:900px){#mayaacc-group-overlay>.mlg-side{display:none}}
 /* Gateway right rail (approved mock v3): flex sibling of the left column —
    starts right under the top bar, runs down to the save bar. Menu 265px,
-   symmetric 56px gaps around the Workspace menu: 56px dashboard<->menu
+   symmetric 76px gaps around the Workspace menu: 76px dashboard<->menu
    (grid column-gap) and 56px menu<->rail (layout flex gap). The welcome
    strip (.gateway-sub) spans the full length to the rail: margin-right
-   -56px cancels the flex gap above the content (wide screens only). */
-.gateway-layout{display:flex;align-items:stretch;gap:56px;min-height:calc(100vh - 48px - 30px)}
+   -76px cancels the flex gap above the content (wide screens only). */
+.gateway-layout{display:flex;align-items:stretch;gap:76px;min-height:calc(100vh - 48px - 30px)}
 .gateway-left{flex:1;min-width:0;display:flex;flex-direction:column}
-@media(min-width:901px){.gateway-sub{margin-right:-56px}}
-body.workspace-mode #dashboard .gateway-body{grid-template-columns:minmax(0,1fr) 265px;column-gap:56px}
+@media(min-width:901px){.gateway-sub{margin-right:-76px}}
+body.workspace-mode #dashboard .gateway-body{grid-template-columns:minmax(0,1fr) 265px;column-gap:76px}
 body.workspace-mode #dashboard .gateway-main{padding:36px 24px 32px 44px}
-#maya-gateway-rail{width:200px;flex:0 0 200px;background:#fff;border-left:1px solid #e3e8ef;display:flex;flex-direction:column;min-height:0}
+#maya-gateway-rail{width:160px;flex:0 0 160px;background:#fff;border-left:1px solid #e3e8ef;display:flex;flex-direction:column;min-height:0}
 #maya-gateway-rail .mlg-f12{margin-top:auto;margin-bottom:30px;border-top:1px solid #e3e8ef}
 #maya-gateway-rail .mlg-side-row[data-live]{cursor:pointer}
 #maya-gateway-rail .mlg-side-row[data-live]:hover{background:#f2f6fd}
 @media(max-width:900px){body.workspace-mode #dashboard .gateway-body{grid-template-columns:1fr}#maya-gateway-rail{display:none}}
-@media(max-height:640px){#maya-gateway-rail .mlg-side-row{padding-top:7px;padding-bottom:7px}}
+@media(max-height:640px){#maya-gateway-rail .mlg-side-row,.mlg-side .mlg-side-row{padding:6px 10px}}
 
 /* v12 #3: Group fields in two columns (Name / Under / Method full width) so the whole form fits above the footer now that the panel is full width. */
 .mg-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
@@ -372,7 +372,7 @@ body.workspace-mode #dashboard .gateway-main{padding:36px 24px 32px 44px}
 @media(max-width:560px){.mg-content{display:block}.mg-side{display:flex;gap:8px;width:auto;flex:none;border-left:0;border-top:1px solid #e3e8ef;padding:10px 12px}.mg-side h3{display:none}.mg-side button{flex:1;margin:0}}
 
 /* Group Change Company + Configure F12 */
-#mayaacc-group-config{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);right:auto;height:auto;max-height:calc(100vh - 60px);width:min(640px,94vw);background:#fff;border:1px solid #dbe4ec;border-radius:14px;box-shadow:0 24px 70px rgba(15,25,50,.35);z-index:10250;overflow:auto}
+#mayaacc-group-config{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);right:auto;height:auto;max-height:calc(100vh - 60px);width:min(1020px,94vw);background:#fff;border:1px solid #dbe4ec;border-radius:10px;box-shadow:0 24px 70px rgba(15,25,50,.35);z-index:10250;overflow:auto}
 .mgc-head{position:sticky;top:0;background:#fff;border-bottom:1px solid #e4e8ef;padding:18px 20px 14px;z-index:2}.mgc-head h3{margin:0;color:#1d2d42;font-size:16px}.mgc-head p{margin:5px 0 0;color:#7a8798;font-size:11px;line-height:1.45}.mgc-close{position:absolute;right:14px;top:12px;border:0;background:transparent;color:#768396;font-size:22px;cursor:pointer}
 .mgc-body{padding:16px 18px 30px}.mgc-section{margin-bottom:18px}.mgc-section h4{margin:0 0 9px;font-size:10px;letter-spacing:.08em;color:#78869a;text-transform:uppercase}.mgc-option{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 11px;border:1px solid #e2e7ee;border-radius:9px;background:#fbfcfe;margin:7px 0;cursor:pointer}.mgc-option:hover{background:#f5f8fc}.mgc-option.mgc-focus{background:#edf1fb;border-color:#8ba5df;box-shadow:0 0 0 2px rgba(87,126,214,.10);outline:2px solid #7b9ae0;outline-offset:-2px}.mgc-option strong{font-size:12px;color:#34445c;font-weight:700}.mgc-option small{display:block;color:#8894a6;font-size:10px;line-height:1.35;margin-top:3px}.mgc-check{position:relative;width:40px;height:22px;flex:0 0 auto}.mgc-check input{display:none}.mgc-check span{position:absolute;inset:0;border-radius:20px;background:#d7dde6;cursor:pointer;transition:.18s}.mgc-check span:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.12);transition:.18s}.mgc-check input:checked+span{background:#577ed6}.mgc-check input:checked+span:before{transform:translateX(18px)}
 .mgc-footer{position:sticky;bottom:0;background:#fff;border-top:1px solid #e3e8ef;padding:12px 18px;display:flex;justify-content:space-between;gap:8px}.mgc-footer button{border:1px solid #d7dee8;background:#fff;border-radius:8px;padding:9px 12px;font-size:11px;font-weight:700;cursor:pointer}.mgc-footer .primary{background:#1d2d42;color:#fff;border-color:#1d2d42}.mgc-status{font-size:10px;color:#77849a;margin:0 0 10px}.mgc-divider{height:1px;background:#e9edf2;margin:16px 0}
@@ -1343,68 +1343,44 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
 
 
 <div id="mayaacc-group-config" aria-hidden="true">
-  <div class="mgc-head">
-    <button class="mgc-close" type="button" onclick="mayaCloseGroupConfig()" aria-label="Close configuration">×</button>
+  <div class="mlgc-head">
+    <button class="mlgc-close" type="button" onclick="mayaCloseGroupConfig()">×</button>
     <h3>Group Configuration</h3>
-    <p>Configure the Group screen for the current company. Press F12 to open or close this panel.</p>
+    <p id="mgcStatus" class="mlgc-status">Configuration is stored separately for the active company.</p>
   </div>
-  <div class="mgc-body">
-    <p id="mgcStatus" class="mgc-status">Changes are applied after you save configuration.</p>
-
-    <div class="mgc-section">
-      <h4>Display</h4>
-      <label class="mgc-option"><span><strong>Show Group Type</strong><small>Display Primary Group / Sub-group information.</small></span><span class="mgc-check"><input id="mgcShowType" type="checkbox"><span></span></span></label>
-      <label class="mgc-option"><span><strong>Show Parent</strong><small>Display the selected parent group in the information block.</small></span><span class="mgc-check"><input id="mgcShowParent" type="checkbox"><span></span></span></label>
-      <label class="mgc-option"><span><strong>Show Report Effect</strong><small>Display whether the group affects reports.</small></span><span class="mgc-check"><input id="mgcShowEffect" type="checkbox"><span></span></span></label>
-      <label class="mgc-option"><span><strong>Show Hierarchy Preview</strong><small>Show the parent → new group preview before saving.</small></span><span class="mgc-check"><input id="mgcShowPreview" type="checkbox"><span></span></span></label>
-    </div>
-
-    <div class="mgc-divider"></div>
-
-    <div class="mgc-section">
-      <h4>Entry Behaviour</h4>
-      <label class="mgc-option"><span><strong>Open Under automatically</strong><small>Focus and open the hierarchy when Create Group starts.</small></span><span class="mgc-check"><input id="mgcAutoUnder" type="checkbox"><span></span></span></label>
-      <label class="mgc-option"><span><strong>Remember last Parent</strong><small>Use the last selected parent as the next Group's default.</small></span><span class="mgc-check"><input id="mgcRememberParent" type="checkbox"><span></span></span></label>
-      <label class="mgc-option"><span><strong>Confirm before Save</strong><small>Show the Save Group confirmation before committing.</small></span><span class="mgc-check"><input id="mgcConfirmSave" type="checkbox"><span></span></span></label>
-    </div>
-
-    <div class="mgc-divider"></div>
-
-    <div class="mgc-section">
-      <h4>Defaults & Reports</h4>
-      <label class="mgc-option"><span><strong>Default Affect Reports = Yes</strong><small>New Group forms start with Yes selected.</small></span><span class="mgc-check"><input id="mgcDefaultAffect" type="checkbox"><span></span></span></label>
-      <label class="mgc-option"><span><strong>Allow non-reporting groups</strong><small>Allow Affect Reports = No for personal / note-style groups.</small></span><span class="mgc-check"><input id="mgcAllowNoReport" type="checkbox"><span></span></span></label>
-    </div>
-
-    <div class="mgc-divider"></div>
-
-    <div class="mgc-section">
-      <h4>Behaviour Fields (Tally)</h4>
-      <label class="mgc-option"><span><strong>Show sub-ledger behaviour</strong><small>“Group behaves like a sub-ledger” row.</small></span><span class="mgc-check"><input id="mgcSubLedger" type="checkbox"><span></span></span></label>
-      <label class="mgc-option"><span><strong>Show Nett balances</strong><small>“Nett Debit/Credit Balances for Reporting” row.</small></span><span class="mgc-check"><input id="mgcNett" type="checkbox"><span></span></span></label>
-      <label class="mgc-option"><span><strong>Show calculation</strong><small>“Used for calculation” row.</small></span><span class="mgc-check"><input id="mgcCalc" type="checkbox"><span></span></span></label>
-      <label class="mgc-option"><span><strong>Show allocation method</strong><small>“Method to allocate when used in purchase invoice” row.</small></span><span class="mgc-check"><input id="mgcAlloc" type="checkbox"><span></span></span></label>
-    </div>
-
-    <div class="mgc-divider"></div>
-
-    <div class="mgc-section">
-      <h4>Statutory Details (Tally — shown here, no effect on this screen yet)</h4>
-      <label class="mgc-option"><span><strong>Provide GST Details</strong><small>Tally default: Yes.</small></span><span class="mgc-check"><input id="mgcGstDetails" type="checkbox"><span></span></span></label>
-      <label class="mgc-option"><span><strong>Provide HSN / SAC details</strong><small>Tally default: Yes.</small></span><span class="mgc-check"><input id="mgcHsnDetails" type="checkbox"><span></span></span></label>
-      <label class="mgc-option"><span><strong>Provide HSN / SAC description</strong><small>Tally default: Yes.</small></span><span class="mgc-check"><input id="mgcHsnDesc" type="checkbox"><span></span></span></label>
-      <label class="mgc-option"><span><strong>Provide Nature of Transaction</strong><small>Tally default: No.</small></span><span class="mgc-check"><input id="mgcNature" type="checkbox"><span></span></span></label>
-      <label class="mgc-option"><span><strong>Provide breakup of Tax Rate</strong><small>Tally default: No.</small></span><span class="mgc-check"><input id="mgcTaxBreakup" type="checkbox"><span></span></span></label>
-      <label class="mgc-option"><span><strong>Provide Cess Rate details</strong><small>Tally default: No.</small></span><span class="mgc-check"><input id="mgcCess" type="checkbox"><span></span></span></label>
-      <label class="mgc-option"><span><strong>Enable Reverse Charge</strong><small>Tally default: No.</small></span><span class="mgc-check"><input id="mgcReverseCharge" type="checkbox"><span></span></span></label>
-      <label class="mgc-option"><span><strong>Enable GST on MRP</strong><small>Tally default: No.</small></span><span class="mgc-check"><input id="mgcGstMrp" type="checkbox"><span></span></span></label>
-      <label class="mgc-option"><span><strong>Eligible for Input Tax Credit</strong><small>Tally default: No.</small></span><span class="mgc-check"><input id="mgcItc" type="checkbox"><span></span></span></label>
+  <span class="mlgc-ind top" style="display:none">▲</span>
+  <div class="mlgc-body">
+    <div class="cfgcols">
+      <div class="cfgcol">
+        <label class="mlgc-option"><span>Show Group Type</span><span class="v">: Yes</span><input id="mgcShowType" type="checkbox"></label>
+        <label class="mlgc-option"><span>Show Parent</span><span class="v">: Yes</span><input id="mgcShowParent" type="checkbox"></label>
+        <label class="mlgc-option"><span>Show Report Effect</span><span class="v">: Yes</span><input id="mgcShowEffect" type="checkbox"></label>
+        <label class="mlgc-option"><span>Show Hierarchy Preview</span><span class="v">: Yes</span><input id="mgcShowPreview" type="checkbox"></label>
+        <label class="mlgc-option"><span>Open Under automatically</span><span class="v">: Yes</span><input id="mgcAutoUnder" type="checkbox"></label>
+        <label class="mlgc-option"><span>Remember last Parent</span><span class="v">: Yes</span><input id="mgcRememberParent" type="checkbox"></label>
+        <label class="mlgc-option"><span>Confirm before Save</span><span class="v">: Yes</span><input id="mgcConfirmSave" type="checkbox"></label>
+        <label class="mlgc-option"><span>Default Affect Reports = Yes</span><span class="v">: Yes</span><input id="mgcDefaultAffect" type="checkbox"></label>
+        <label class="mlgc-option"><span>Allow non-reporting groups</span><span class="v">: Yes</span><input id="mgcAllowNoReport" type="checkbox"></label>
+        <label class="mlgc-option"><span>Show sub-ledger behaviour</span><span class="v">: Yes</span><input id="mgcSubLedger" type="checkbox"></label>
+        <label class="mlgc-option"><span>Show Nett balances</span><span class="v">: Yes</span><input id="mgcNett" type="checkbox"></label>
+      </div>
+      <div class="cfgcol">
+        <label class="mlgc-option"><span>Show calculation</span><span class="v">: Yes</span><input id="mgcCalc" type="checkbox"></label>
+        <label class="mlgc-option"><span>Show allocation method</span><span class="v">: Yes</span><input id="mgcAlloc" type="checkbox"></label>
+        <label class="mlgc-option"><span>Provide GST Details</span><span class="v">: Yes</span><input id="mgcGstDetails" type="checkbox"></label>
+        <label class="mlgc-option"><span>Provide HSN / SAC details</span><span class="v">: Yes</span><input id="mgcHsnDetails" type="checkbox"></label>
+        <label class="mlgc-option"><span>Provide HSN / SAC description</span><span class="v">: Yes</span><input id="mgcHsnDesc" type="checkbox"></label>
+        <label class="mlgc-option"><span>Provide Nature of Transaction</span><span class="v">: Yes</span><input id="mgcNature" type="checkbox"></label>
+        <label class="mlgc-option"><span>Provide breakup of Tax Rate</span><span class="v">: Yes</span><input id="mgcTaxBreakup" type="checkbox"></label>
+        <label class="mlgc-option"><span>Provide Cess Rate details</span><span class="v">: Yes</span><input id="mgcCess" type="checkbox"></label>
+        <label class="mlgc-option"><span>Enable Reverse Charge</span><span class="v">: Yes</span><input id="mgcReverseCharge" type="checkbox"></label>
+        <label class="mlgc-option"><span>Enable GST on MRP</span><span class="v">: Yes</span><input id="mgcGstMrp" type="checkbox"></label>
+        <label class="mlgc-option"><span>Eligible for Input Tax Credit</span><span class="v">: Yes</span><input id="mgcItc" type="checkbox"></label>
+      </div>
     </div>
   </div>
-  <div class="mgc-footer">
-    <button type="button" onclick="mayaResetGroupConfig()">Reset Defaults</button>
-    <button type="button" class="primary" onclick="mayaSaveGroupConfig()">Save Configuration</button>
-  </div>
+  <span class="mlgc-ind bot" style="display:none">▼</span>
+  <div class="mlgc-footer"><button type="button" onclick="mayaResetGroupConfig()">Reset Defaults</button><button type="button" class="primary" onclick="mayaSaveGroupConfig()">Save Configuration</button></div>
 </div>
 <div id="mayaacc-group-overlay" aria-hidden="true">
   <div id="mayaacc-group-panel" role="dialog" aria-modal="true" aria-labelledby="mgTitle">
@@ -1516,28 +1492,30 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
     if(pendingSaveMode==='new'){const c=getConfig();name.value='';under.value='';if($('mgAlias'))$('mgAlias').value='';$('mgAffect').value=c.defaultAffect?'yes':'no';$('mgSubLedger').value='no';$('mgNett').value='no';$('mgCalc').value='no';$('mgAlloc').value='na';syncMgVals();updateInfo();name.focus();} else close(true);
   }
   let configFocusIndex=-1;
-  function configControls(){return [...document.querySelectorAll('#mayaacc-group-config .mgc-option, #mayaacc-group-config .mgc-footer button')];}
+  function configControls(){return [...document.querySelectorAll('#mayaacc-group-config .mlgc-option, #mayaacc-group-config .mlgc-footer button')];}
   function paintConfigFocus(scroll=true){
     const els=configControls();
-    els.forEach(x=>x.classList.remove('mgc-focus'));
+    els.forEach(x=>x.classList.remove('mlgc-focus'));
     if(!els.length){configFocusIndex=-1;return;}
     configFocusIndex=Math.max(0,Math.min(configFocusIndex,els.length-1));
     const el=els[configFocusIndex];
-    el.classList.add('mgc-focus');
+    el.classList.add('mlgc-focus');
     if(scroll)el.scrollIntoView({block:'nearest'});
   }
-  function setConfigForm(){const c=getConfig();[['mgcShowType','showType'],['mgcShowParent','showParent'],['mgcShowEffect','showEffect'],['mgcShowPreview','showPreview'],['mgcAutoUnder','autoUnder'],['mgcRememberParent','rememberParent'],['mgcConfirmSave','confirmSave'],['mgcDefaultAffect','defaultAffect'],['mgcAllowNoReport','allowNoReport'],['mgcSubLedger','subLedger'],['mgcNett','nett'],['mgcCalc','calc'],['mgcAlloc','alloc'],['mgcGstDetails','gstDetails'],['mgcHsnDetails','hsnDetails'],['mgcHsnDesc','hsnDesc'],['mgcNature','nature'],['mgcTaxBreakup','taxBreakup'],['mgcCess','cess'],['mgcReverseCharge','reverseCharge'],['mgcGstMrp','gstMrp'],['mgcItc','itc']].forEach(([id,k])=>{if($(id))$(id).checked=!!c[k];});$('mgcStatus').textContent='Configuration is stored separately for the active company.';configFocusIndex=0;paintConfigFocus(false);}
-  function configOpen(){setConfigForm();$('mayaacc-group-config').style.display='block';$('mayaacc-group-config').setAttribute('aria-hidden','false');if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-group-config');setTimeout(()=>paintConfigFocus(false),0);}
-  function configClose(){if($('mayaacc-group-config')){$('mayaacc-group-config').style.display='none';$('mayaacc-group-config').setAttribute('aria-hidden','true');configFocusIndex=-1;configControls().forEach(x=>x.classList.remove('mgc-focus'));}}
+  function setConfigForm(){const c=getConfig();[['mgcShowType','showType'],['mgcShowParent','showParent'],['mgcShowEffect','showEffect'],['mgcShowPreview','showPreview'],['mgcAutoUnder','autoUnder'],['mgcRememberParent','rememberParent'],['mgcConfirmSave','confirmSave'],['mgcDefaultAffect','defaultAffect'],['mgcAllowNoReport','allowNoReport'],['mgcSubLedger','subLedger'],['mgcNett','nett'],['mgcCalc','calc'],['mgcAlloc','alloc'],['mgcGstDetails','gstDetails'],['mgcHsnDetails','hsnDetails'],['mgcHsnDesc','hsnDesc'],['mgcNature','nature'],['mgcTaxBreakup','taxBreakup'],['mgcCess','cess'],['mgcReverseCharge','reverseCharge'],['mgcGstMrp','gstMrp'],['mgcItc','itc']].forEach(([id,k])=>{if($(id))$(id).checked=!!c[k];});$('mgcStatus').textContent='Configuration is stored separately for the active company.';syncGroupCfgValues();syncGroupCfgIndicators();configFocusIndex=0;paintConfigFocus(false);}
+  function configOpen(){setConfigForm();$('mayaacc-group-config').style.display='block';$('mayaacc-group-config').setAttribute('aria-hidden','false');if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-group-config');setTimeout(()=>paintConfigFocus(false),0);syncGroupCfgIndicators();}
+  function configClose(){if($('mayaacc-group-config')){$('mayaacc-group-config').style.display='none';$('mayaacc-group-config').setAttribute('aria-hidden','true');configFocusIndex=-1;configControls().forEach(x=>x.classList.remove('mlgc-focus'));}}
   function configValue(id){return !!$(id)?.checked;}
   function saveGroupConfig(){const c={showType:configValue('mgcShowType'),showParent:configValue('mgcShowParent'),showEffect:configValue('mgcShowEffect'),showPreview:configValue('mgcShowPreview'),autoUnder:configValue('mgcAutoUnder'),rememberParent:configValue('mgcRememberParent'),confirmSave:configValue('mgcConfirmSave'),defaultAffect:configValue('mgcDefaultAffect'),allowNoReport:configValue('mgcAllowNoReport'),subLedger:configValue('mgcSubLedger'),nett:configValue('mgcNett'),calc:configValue('mgcCalc'),alloc:configValue('mgcAlloc'),gstDetails:configValue('mgcGstDetails'),hsnDetails:configValue('mgcHsnDetails'),hsnDesc:configValue('mgcHsnDesc'),nature:configValue('mgcNature'),taxBreakup:configValue('mgcTaxBreakup'),cess:configValue('mgcCess'),reverseCharge:configValue('mgcReverseCharge'),gstMrp:configValue('mgcGstMrp'),itc:configValue('mgcItc')};saveConfig(c);if(!c.allowNoReport){$('mgAffect').value='yes';}else if(c.defaultAffect){$('mgAffect').value='yes';}updateInfo();configClose();alert('Group configuration saved for this company.');}
   function resetGroupConfig(){saveConfig({...defaultConfig});setConfigForm();updateInfo();}
   function activateConfigControl(el){
     if(!el)return;
-    if(el.classList.contains('mgc-option')){
-      const cb=el.querySelector('input[type="checkbox"]');if(cb){cb.checked=!cb.checked;cb.dispatchEvent(new Event('change',{bubbles:true}));}
+    if(el.classList.contains('mlgc-option')){
+      const cb=el.querySelector('input[type="checkbox"]');if(cb){cb.checked=!cb.checked;cb.dispatchEvent(new Event('change',{bubbles:true}));syncGroupCfgValues();}
     }else if(el.tagName==='BUTTON'){el.click();}
   }
+  function syncGroupCfgValues(){[['mgcShowType'],['mgcShowParent'],['mgcShowEffect'],['mgcShowPreview'],['mgcAutoUnder'],['mgcRememberParent'],['mgcConfirmSave'],['mgcDefaultAffect'],['mgcAllowNoReport'],['mgcSubLedger'],['mgcNett'],['mgcCalc'],['mgcAlloc'],['mgcGstDetails'],['mgcHsnDetails'],['mgcHsnDesc'],['mgcNature'],['mgcTaxBreakup'],['mgcCess'],['mgcReverseCharge'],['mgcGstMrp'],['mgcItc']].forEach(([id])=>{var el=$(id);if(!el)return;var row=el.closest('.mlgc-option');var v=row?row.querySelector('.v'):null;if(v)v.textContent=': '+(el.checked?'Yes':'No');});}
+  function syncGroupCfgIndicators(){var p=$('mayaacc-group-config');if(!p)return;var b=p.querySelector('.mlgc-body');if(!b)return;var t=p.querySelector('.mlgc-ind.top'),d=p.querySelector('.mlgc-ind.bot');if(t)t.style.display=b.scrollTop>0?'block':'none';if(d)d.style.display=(b.scrollTop+b.clientHeight<b.scrollHeight-4)?'block':'none';}
   function changeCompany(){
     if(dirty()){
       const ok=confirm('You have an unsaved Group entry. Change company and keep this entry to continue after selection?');
@@ -1578,10 +1556,12 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
     if(groupChangePending&&typeof window.renderCompanies==='function')window.renderCompanies();
   };
   document.addEventListener('input',e=>{if(e.target===under)renderTree();if(e.target===name)updateInfo();});
-  document.addEventListener('change',e=>{if(e.target===$('mgAffect'))updateInfo();});
+  document.addEventListener('change',e=>{if(e.target===$('mgAffect'))updateInfo();if(e.target&&e.target.id&&e.target.id.startsWith('mgc'))syncGroupCfgValues();});
   document.addEventListener('focusin',e=>{if(e.target===under)renderTree();});
   document.addEventListener('click',e=>{const b=e.target.closest?e.target.closest('.mg-val'):null;if(b){const k=Object.keys(MG_VALS).find(function(key){return MG_VALS[key].btn===b.id;});if(k){if(mgListOpen===k)closeMgLists();else openMgList(k);}return;}const it=e.target.closest?e.target.closest('.mg-list button'):null;if(it){const wrap=it.closest('.mg-list');const k2=Object.keys(MG_VALS).find(function(key){return MG_VALS[key].list===(wrap&&wrap.id);});if(k2){const items=[...wrap.querySelectorAll('button')];pickMgList(k2,items.indexOf(it));}}});
   document.addEventListener('mousedown',e=>{if(mgListOpen&&!(e.target.closest&&e.target.closest('.mg-val-wrap')))closeMgLists();if($('mayaacc-group-config').style.display==='block' && !e.target.closest('#mayaacc-group-config') && e.target.closest('#mayaacc-group-overlay'))configClose();});
+  (function(){var _cb=document.querySelector('#mayaacc-group-config .mlgc-body');if(_cb)_cb.addEventListener('scroll',syncGroupCfgIndicators);})();
+  document.addEventListener('click',function(e){var row=e.target&&e.target.closest?e.target.closest('#mayaacc-group-config .mlgc-option'):null;if(row){var a=configControls();var i=a.indexOf(row);if(i>=0){configFocusIndex=i;paintConfigFocus(false);}}});
   document.addEventListener('keydown',e=>{
     if(!overlay||window.getComputedStyle(overlay).display==='none')return;
     const cfg=$('mayaacc-group-config');
@@ -2441,7 +2421,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   flex-direction:column !important;
   overflow:hidden !important;
 }
-#mayaacc-group-config[aria-hidden="false"] .mgc-body,
+#mayaacc-group-config[aria-hidden="false"] .mlgc-body,
 #mayaacc-ledger-config[aria-hidden="false"] .mlgc-body,
 #mayaacc-stock-config[aria-hidden="false"] .msic-body,
 #mayaacc-unit-config[aria-hidden="false"] .mugc-body,
@@ -2453,8 +2433,8 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   overscroll-behavior:contain !important;
   scroll-behavior:auto !important;
 }
-#mayaacc-group-config[aria-hidden="false"] .mgc-head,
-#mayaacc-group-config[aria-hidden="false"] .mgc-footer,
+#mayaacc-group-config[aria-hidden="false"] .mlgc-head,
+#mayaacc-group-config[aria-hidden="false"] .mlgc-footer,
 #mayaacc-ledger-config[aria-hidden="false"] .mlgc-head,
 #mayaacc-ledger-config[aria-hidden="false"] .mlgc-footer,
 #mayaacc-stock-config[aria-hidden="false"] .msic-head,
@@ -2474,7 +2454,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
 </style>
 <style id="mayaacc-f12-scroll-fix">
 #mayaacc-group-config,#mayaacc-ledger-config,#mayaacc-stock-config,#mayaacc-unit-config,#mayaacc-godown-config{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scroll-behavior:auto;}
-#mayaacc-group-config .mgc-body,#mayaacc-ledger-config .mlgc-body,#mayaacc-stock-config .msic-body,#mayaacc-unit-config .mugc-body,#mayaacc-godown-config .mugc-body{min-height:0;}
+#mayaacc-group-config .mlgc-body,#mayaacc-ledger-config .mlgc-body,#mayaacc-stock-config .msic-body,#mayaacc-unit-config .mugc-body,#mayaacc-godown-config .mugc-body{min-height:0;}
 </style>
 <script id="mayaacc-layered-back-script">
 (function(){
@@ -2492,7 +2472,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   ];
 
   const configSelector={
-    'mayaacc-group-config':'.mgc-option, .mgc-footer button',
+    'mayaacc-group-config':'.mlgc-option, .mlgc-footer button',
     'mayaacc-ledger-config':'.mlgc-option, .mlgc-footer button',
     'mayaacc-stock-config':'.msic-option, .msic-footer button',
     'mayaacc-unit-config':'.mugc-option, .mugc-footer button',
@@ -2501,7 +2481,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
     'mayaacc-voucher-type-config':'.mvtc-option, .mvtc-footer button'
   };
   const configBody={
-    'mayaacc-group-config':'.mgc-body',
+    'mayaacc-group-config':'.mlgc-body',
     'mayaacc-ledger-config':'.msic-body',
     'mayaacc-stock-config':'.msic-body',
     'mayaacc-unit-config':'.mugc-body',
@@ -3001,7 +2981,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
 
 
 <style id="mayaacc-group-final-patch-style">
-#mayaacc-group-config .mgc-head,#mayaacc-group-config .mgc-body,#mayaacc-group-config .mgc-footer{font-family:Inter,Arial,sans-serif}
+#mayaacc-group-config .mlgc-head,#mayaacc-group-config .mlgc-body,#mayaacc-group-config .mlgc-footer{font-family:Inter,Arial,sans-serif}
 </style>
 <script id="mayaacc-group-final-patch">
 (function(){
@@ -3056,7 +3036,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
 #mayaacc-group-config,#mayaacc-ledger-config,#mayaacc-stock-config,#mayaacc-unit-config,#mayaacc-godown-config{
   overflow:hidden !important;
 }
-#mayaacc-group-config .mgc-body,#mayaacc-ledger-config .mlgc-body,#mayaacc-stock-config .msic-body,#mayaacc-unit-config .mugc-body,#mayaacc-godown-config .mugc-body{
+#mayaacc-group-config .mlgc-body,#mayaacc-ledger-config .mlgc-body,#mayaacc-stock-config .msic-body,#mayaacc-unit-config .mugc-body,#mayaacc-godown-config .mugc-body{
   overflow-y:auto !important;
   overflow-x:hidden !important;
   min-height:0 !important;
@@ -3073,7 +3053,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
 <script id="mayaacc-universal-f12-arrow-fix-script">
 (function(){
   const CFG={
-    'mayaacc-group-config':{row:'.mgc-option,.mgc-footer button',body:'.mgc-body'},
+    'mayaacc-group-config':{row:'.mlgc-option,.mlgc-footer button',body:'.mlgc-body'},
     'mayaacc-ledger-config':{row:'.mlgc-option,.mlgc-footer button',body:'.mlgc-body'},
     'mayaacc-stock-config':{row:'.msic-option,.msic-footer button',body:'.msic-body'},
     'mayaacc-unit-config':{row:'.mugc-option,.mugc-footer button',body:'.mugc-body'},
@@ -3161,7 +3141,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   flex-direction:column !important;
   overflow:hidden !important;
 }
-#mayaacc-group-config[aria-hidden="false"] .mgc-body,
+#mayaacc-group-config[aria-hidden="false"] .mlgc-body,
 #mayaacc-ledger-config[aria-hidden="false"] .mlgc-body,
 #mayaacc-stock-config[aria-hidden="false"] .msic-body,
 #mayaacc-unit-config[aria-hidden="false"] .mugc-body,
@@ -3182,7 +3162,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
 (function(){
   const $=id=>document.getElementById(id);
   const CFG={
-    'mayaacc-group-config':{overlay:'mayaacc-group-overlay',row:'.mgc-option',body:'.mgc-body',open:'mayaGroupConfigure',close:'mayaCloseGroupConfig'},
+    'mayaacc-group-config':{overlay:'mayaacc-group-overlay',row:'.mlgc-option',body:'.mlgc-body',open:'mayaGroupConfigure',close:'mayaCloseGroupConfig'},
     'mayaacc-ledger-config':{overlay:'mayaacc-ledger-overlay',row:'.mlgc-option',body:'.mlgc-body',open:'mayaOpenLedgerConfig',close:'mayaCloseLedgerConfig'},
     'mayaacc-stock-config':{overlay:'mayaacc-stock-overlay',row:'.msic-option',body:'.msic-body',open:'mayaOpenStockConfig',close:'mayaCloseStockConfig'},
     'mayaacc-unit-config':{overlay:'mayaacc-unit-overlay',row:'.mugc-option',body:'.mugc-body',open:'mayaOpenUnitConfig',close:'mayaCloseUnitConfig'},
@@ -3958,7 +3938,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
     if(!layer)return [];
     const root=$(layer.id); if(!root)return [];
     const selectors={
-      Group:'.mgc-option, .mgc-footer button',
+      Group:'.mlgc-option, .mlgc-footer button',
       Ledger:'.mlgc-option, .mlgc-footer button',
       'Stock Item':'.msic-option, .msic-footer button',
       Unit:'.mugc-option, .mugc-footer button',
@@ -5237,6 +5217,20 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
 #mayaacc-ledger-config .mlgc-ind{position:absolute;right:10px;font-size:11px;color:#7a8798;font-weight:700;z-index:3;pointer-events:none}
 #mayaacc-ledger-config .mlgc-ind.top{top:60px}
 #mayaacc-ledger-config .mlgc-ind.bot{bottom:64px}
+/* Group Configuration box (2026-11-23): same Tally-style box as Ledger, with Group's own toggles. */
+#mayaacc-group-config .mlgc-head{padding:14px 20px 10px}
+#mayaacc-group-config .mlgc-head h3{font-size:15px}
+#mayaacc-group-config .mlgc-body{padding:12px 24px 14px;max-height:calc(100vh - 260px)}
+#mayaacc-group-config .cfgcols{display:flex;gap:36px;padding-right:22px}
+#mayaacc-group-config .cfgcol{flex:1;min-width:0}
+#mayaacc-group-config .mlgc-option{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 8px;font-size:13px;border:0;border-bottom:1px solid #f0f2f6;border-radius:6px;background:transparent;margin:0;cursor:pointer}
+#mayaacc-group-config .mlgc-option .v{font-weight:700;color:#172033;flex:none}
+#mayaacc-group-config .mlgc-option input{display:none}
+#mayaacc-group-config .mlgc-option:hover{background:#f4f7fd}
+#mayaacc-group-config .mlgc-option.mlgc-focus{background:#e8effc;outline:none;box-shadow:none}
+#mayaacc-group-config .mlgc-ind{position:absolute;right:10px;font-size:11px;color:#7a8798;font-weight:700;z-index:3;pointer-events:none}
+#mayaacc-group-config .mlgc-ind.top{top:60px}
+#mayaacc-group-config .mlgc-ind.bot{bottom:64px}
 </style>
 <script id="mayaacc-alter-ledger-f12-routing-final">
 (function(){
@@ -18777,11 +18771,8 @@ var updateTopbar=function(){
   var pb=$('maya-topbar-print');
   if(pb)pb.style.display=(on&&topbarPrintVisible())?'':'none';
   document.body.classList.toggle('maya-topbar-on',on);
-  /* preview match — COLOURS: navy top bar only while Ledger Creation is open */
-  var _lo=$('mayaacc-ledger-overlay');
-  document.body.classList.toggle('maya-ledger-topbar-dark', !!(on && _lo && isOpenEl(_lo)));
-  var _go=$('mayaacc-group-overlay');
-  document.body.classList.toggle('maya-group-topbar-dark', !!(on && _go && isOpenEl(_go)));
+  /* dark navy top bar wherever it already shows (2026-11-23): same bar on every screen */
+  document.body.classList.toggle('maya-ledger-topbar-dark', !!on);
 };
 var mountTopbar=function(){
   var gt=document.querySelector('.gateway-top');
@@ -28764,13 +28755,13 @@ else window.MayaLang.init();
 #mlgGstinInput{width:100%;box-sizing:border-box;padding:10px 11px;border:1px solid #d8e0ea;border-radius:8px;font-size:13px;margin-bottom:8px;outline:none;text-transform:uppercase}
 #mlgGstinInput:focus{border-color:#8d9bb0;background:#fffbe6}
 #mlgGstinErr{display:none;margin:0 0 12px;font-size:11px;color:#b3261e;line-height:1.4}
-#mayaacc-ledger-panel .mlg-side{width:176px;flex:0 0 176px;background:#fff;border-left:1px solid #e3e8ef;padding:0}
-.mlg-side-row{display:flex;gap:8px;align-items:baseline;padding:10px 12px;border-bottom:1px solid #eef1f5;font-size:12.5px;color:#33445c;cursor:pointer}
+#mayaacc-ledger-panel .mlg-side{width:160px;flex:0 0 160px;background:#fff;border-left:1px solid #e3e8ef;padding:0}
+.mlg-side-row{display:flex;gap:8px;align-items:baseline;padding:8px 10px;border-bottom:1px solid #f2f4f7;font-size:11.5px;color:#33445c;cursor:pointer}
 .mlg-side-row:hover{background:#f2f6fd}
-.mlg-side-row b{color:#2f6fd0;min-width:24px;font-weight:800}
+.mlg-side-row b{color:#5b7aa8;min-width:20px;font-weight:700}
 .mlg-side-row.off{color:#9aa5b1;cursor:default}
 .mlg-side-row.off b{color:#9aa5b1}
-.mlg-side-row.off.mlg-blue b{color:#2f6fd0}
+.mlg-side-row.off.mlg-blue b{color:#5b7aa8}
 .mlg-side-row.off:hover{background:transparent}
 /* Ledger strip: dark navy (approved preview) — other forms keep white. */
 #mayaacc-ledger-panel>.mlg-footer .maya-create-foot{background:#172033;color:#fff}
