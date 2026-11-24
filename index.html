@@ -356,7 +356,7 @@ footer{padding:28px 6%;color:#788295;font-size:13px;border-top:1px solid #e6e9ef
 body.workspace-mode #dashboard .gateway-body{grid-template-columns:minmax(0,1fr) 265px;column-gap:76px}
 body.workspace-mode #dashboard .gateway-main{padding:36px 24px 32px 44px}
 #maya-gateway-rail{width:160px;flex:0 0 160px;background:#fff;border-left:1px solid #e3e8ef;display:flex;flex-direction:column;min-height:0}
-#maya-gateway-rail .mlg-f12{margin-top:auto;margin-bottom:30px;border-top:1px solid #e3e8ef}
+#maya-gateway-rail .mlg-f11{margin-top:auto;margin-bottom:30px;border-top:1px solid #e3e8ef}
 #maya-gateway-rail .mlg-side-row[data-live]{cursor:pointer}
 #maya-gateway-rail .mlg-side-row[data-live]:hover{background:#f2f6fd}
 @media(max-width:900px){body.workspace-mode #dashboard .gateway-body{grid-template-columns:1fr}#maya-gateway-rail{display:none}}
@@ -551,7 +551,7 @@ var MAYA_COINS_LOGO_FULL_IMG="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAccA
     </div><aside id="maya-gateway-rail" aria-label="Quick actions">
       <div class="mlg-side-row" data-live="date" onclick="window.mayaOpenDateDialog&&window.mayaOpenDateDialog()"><b>F2</b><span>Date</span></div>
       <div class="mlg-side-row" onclick="window.mayaF3Dropdown?window.mayaF3Dropdown():window.mayaCompanyMenu()"><b>F3</b><span>Company</span></div>
-      <div class="mlg-side-row mlg-f12" tabindex="-1"><b>F12</b><span>Configure</span></div>
+      <div class="mlg-side-row mlg-f11" data-live="features" tabindex="-1" onclick="if(window.mayaCompanyFeatures)window.mayaCompanyFeatures()"><b>F11</b><span>Company Features</span></div>
     </aside></div>
   </div>
 </section>
@@ -1885,11 +1885,12 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
   var otherSourceName=null, otherSourceClose=null;
   function otherSourceCloser(name){
     if(name==='Group'){return function(cb){var d=window.mayaGroupDirty;if(d&&d()){if(window.mayaCloseGroup)window.mayaCloseGroup(cb);}else{if(window.mayaCloseGroupRawNoReturn)window.mayaCloseGroupRawNoReturn();cb();}};}
+    if(name==='Currency'){return function(cb){if(window.__mayaFormDirty&&window.__mayaFormDirty('Currency')){if(window.mayaCloseCurrency)window.mayaCloseCurrency(cb);}else{if(window.mayaCloseCurrencyRaw)window.mayaCloseCurrencyRaw(false);cb();}};}
     if(name==='Gateway'){return function(cb){cb();};}
     return null;
   }
   var OTHER_MASTERS=['Group','Ledger','Stock Item','Stock Group','Stock Category','Unit','Godown','Cost Centre','Currency','Voucher Type'];
-  function openOtherMasters(srcName){var d=$('mlgOtherMasters');if(!d)return;customSelClose();var _t=$('mlgTree');if(_t)_t.style.display='none';treeFocus=-1;otherSourceName=srcName||null;otherSourceClose=srcName?otherSourceCloser(srcName):null;d.style.display='flex';d.setAttribute('aria-hidden','false');otherIdx=0;paintOtherMasters();}
+  function openOtherMasters(srcName){var d=$('mlgOtherMasters');if(!d)return;customSelClose();var _t=$('mlgTree');if(_t)_t.style.display='none';treeFocus=-1;otherSourceName=srcName||null;otherSourceClose=srcName?otherSourceCloser(srcName):null;d.style.display='flex';d.setAttribute('aria-hidden','false');var _si=srcName?OTHER_MASTERS.indexOf(srcName):-1;otherIdx=_si>=0?_si:0;paintOtherMasters();}
   function closeOtherMasters(){var d=$('mlgOtherMasters');if(!d)return;d.style.display='none';d.setAttribute('aria-hidden','true');}
   function paintOtherMasters(){var items=[...document.querySelectorAll('#mlgOtherMasters .mlg-other-item')];items.forEach(function(el,i){el.classList.toggle('sel',i===otherIdx);});if(items[otherIdx])items[otherIdx].scrollIntoView({block:'nearest'});}
   function pickOtherMaster(i){
@@ -24355,10 +24356,10 @@ function saveCurrency(code,symbol,rate,rateDate,extra){
     }
     found.rate=rate;found.rateDate=rateDate;
     if(symbol)found.symbol=String(symbol).trim()||found.symbol;
-    if(extra){if(extra.name)found.name=String(extra.name).trim();if(extra.formalName!==undefined)found.formalName=String(extra.formalName).trim();if(extra.decimals!==undefined&&isFinite(Number(extra.decimals)))found.decimals=Math.max(0,Math.min(4,Math.round(Number(extra.decimals))));if(extra.showMillions!==undefined)found.showMillions=!!extra.showMillions;}
+    if(extra){if(extra.name)found.name=String(extra.name).trim();if(extra.formalName!==undefined)found.formalName=String(extra.formalName).trim();if(extra.decimals!==undefined&&isFinite(Number(extra.decimals)))found.decimals=Math.max(0,Math.min(4,Math.round(Number(extra.decimals))));if(extra.showMillions!==undefined)found.showMillions=!!extra.showMillions;if(extra.suffix!==undefined)found.suffix=!!extra.suffix;if(extra.addSpace!==undefined)found.addSpace=!!extra.addSpace;if(extra.wordAfterDecimal!==undefined)found.wordAfterDecimal=String(extra.wordAfterDecimal).trim();if(extra.wordDecimals!==undefined&&isFinite(Number(extra.wordDecimals)))found.wordDecimals=Math.max(0,Math.min(4,Math.round(Number(extra.wordDecimals))));}
   }else{
     var rec={code:code,symbol:String(symbol||code).trim()||code,rate:rate,rateDate:rateDate,history:[]};
-    if(extra){if(extra.name)rec.name=String(extra.name).trim();if(extra.formalName!==undefined)rec.formalName=String(extra.formalName).trim();if(extra.decimals!==undefined&&isFinite(Number(extra.decimals)))rec.decimals=Math.max(0,Math.min(4,Math.round(Number(extra.decimals))));else rec.decimals=2;if(extra.showMillions!==undefined)rec.showMillions=!!extra.showMillions;}
+    if(extra){if(extra.name)rec.name=String(extra.name).trim();if(extra.formalName!==undefined)rec.formalName=String(extra.formalName).trim();if(extra.decimals!==undefined&&isFinite(Number(extra.decimals)))rec.decimals=Math.max(0,Math.min(4,Math.round(Number(extra.decimals))));else rec.decimals=2;if(extra.showMillions!==undefined)rec.showMillions=!!extra.showMillions;if(extra.suffix!==undefined)rec.suffix=!!extra.suffix;if(extra.addSpace!==undefined)rec.addSpace=!!extra.addSpace;if(extra.wordAfterDecimal!==undefined)rec.wordAfterDecimal=String(extra.wordAfterDecimal).trim();if(extra.wordDecimals!==undefined&&isFinite(Number(extra.wordDecimals)))rec.wordDecimals=Math.max(0,Math.min(4,Math.round(Number(extra.wordDecimals))));else rec.wordDecimals=2;}
     list.push(rec);
   }
   writeLS(curKey(),list);
@@ -28533,16 +28534,27 @@ else window.MayaLang.init();
 
 /* --- Currency: full-width form (Tally) --- */
 #mayaacc-currency-overlay{display:none;position:fixed;inset:0;z-index:10045;background:rgba(10,15,26,.30);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
-#mayaacc-currency-panel{position:absolute;left:0;top:0;height:100%;width:100%;background:rgba(255,255,255,.99);display:flex;flex-direction:column;overflow:hidden}
-.mcur-content{display:flex;min-height:100%}
-.mcur-main{padding:30px 28px 110px;overflow:auto;flex:1}
-.mcur-side{width:148px;background:#f7f9fc;border-left:1px solid #e3e8ef;padding:24px 12px;flex:0 0 148px}
-.mcur-side h3{font-size:11px;letter-spacing:.08em;color:#7b8797;margin:3px 6px 12px}
-.mcur-side button{width:100%;padding:10px 9px;margin:0 0 8px;border:1px solid #dce3eb;border-radius:8px;background:#fff;color:#34465d;text-align:left;cursor:pointer;font-size:12px}
-.mcur-side button:hover{background:#eef3fb}
-.mcur-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-.mcur-title h2{margin:0;font-size:22px;color:#18273c}
+#mayaacc-currency-panel{position:absolute;left:0;top:0;width:600px;max-width:calc(100vw - 220px);max-height:100%;background:#fff;border-right:1px solid #dfe4ec;box-shadow:18px 0 45px rgba(16,24,40,.16);display:flex;flex-direction:column;overflow:hidden}
+.mcur-content{display:flex;min-height:0;flex:1 1 auto}
+.mcur-main{padding:0 24px 16px;overflow-y:auto;overflow-x:hidden;flex:1;min-width:0}
+/* Currency sidebar detached to the FAR RIGHT edge (like Group v2): absolute
+   against the overlay — the 600px panel stays on the left, dimmed Gateway
+   sits between panel and sidebar, F12 pinned at the sidebar bottom. */
+#mayaacc-currency-overlay>.mcur-side{position:absolute;right:0;top:0;bottom:0;width:200px;background:#fff;border-left:1px solid #e3e8ef;padding:0;display:flex;flex-direction:column;z-index:5}
+#mayaacc-currency-overlay>.mcur-side .mlg-f12{margin-top:auto;border-top:1px solid #e3e8ef}
+@media(max-width:900px){#mayaacc-currency-overlay>.mcur-side{display:none}}
+.mcur-title{display:flex;align-items:center;justify-content:space-between;height:40px;border-bottom:1px solid #e5e7eb;margin-bottom:14px}
+.mcur-title h2{margin:0;font-size:15px;font-weight:600;color:#374151}
 .mcur-close{border:0;background:transparent;font-size:22px;color:#7b8797;cursor:pointer}
+/* Tally-style field rows (like Group .mg-trow): label left, box right. */
+.mcur-trow{display:flex;align-items:center;min-height:44px}
+.mcur-trow>label{width:290px;flex-shrink:0;font-size:14px;color:#111827}
+.mcur-trow>label .colon{color:#6b7280;margin-left:2px}
+.mcur-trow input,.mcur-trow select{width:260px;height:30px;border:1px solid #9aa3ad;border-radius:2px;padding:0 8px;font-size:14px;color:#111827;background:#fff;outline:none}
+.mcur-trow input:focus,.mcur-trow select:focus{border-color:#2f6fd0;box-shadow:0 0 0 3px rgba(47,111,208,.15)}
+.mcur-trow input::placeholder{color:#9ca3af}
+.mcur-more{display:none;border-top:1px dashed #d7dce3;margin-top:6px;padding-top:4px}
+.mcur-more-head{font-size:11px;letter-spacing:1px;color:#78869a;text-transform:uppercase;padding:8px 0 2px}
 .mcur-note{margin:0 0 18px;padding:10px 12px;background:#eef3fd;border:1px solid #c5d0e3;border-radius:9px;font-size:12.5px;color:#1d2a44}
 .mcur-section{margin-bottom:18px}
 .mcur-section h4{margin:0 0 10px;font-size:10px;letter-spacing:.08em;color:#78869a;text-transform:uppercase}
@@ -28552,11 +28564,12 @@ else window.MayaLang.init();
 .mcur-field label{display:block;font-size:12px;font-weight:800;color:#45546a;margin-bottom:7px}
 .mcur-field input,.mcur-field select{width:100%;box-sizing:border-box;padding:10px 11px;border:1px solid #d8e0ea;border-radius:8px;background:#fff;font-size:13px;outline:none}
 .mcur-field input:focus,.mcur-field select:focus{border-color:#8d9bb0;box-shadow:0 0 0 3px rgba(94,108,134,.08)}
-.mcur-rate-head,.mcur-rate-row{display:grid;grid-template-columns:64px 52px 1fr 110px 130px auto;gap:8px;align-items:center;padding:6px 8px;border-bottom:1px solid #eef2f8;font-size:12.5px}
+.mcur-rate-head,.mcur-rate-row{display:grid;grid-template-columns:52px 44px 1fr 96px 118px;gap:6px 8px;align-items:center;padding:6px 4px;border-bottom:1px solid #eef2f8;font-size:12.5px}
 .mcur-rate-head{font-size:11px;font-weight:800;color:#78869a;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #dbe4f0}
 .mcur-rate-row input{height:29px;border:1px solid #aebbd0;border-radius:7px;padding:0 7px;font:inherit;width:100%;box-sizing:border-box}
 .mcur-rate-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mcur-rate-btns{display:flex;gap:6px}
+.mcur-rate-btns{display:flex;gap:6px;grid-column:1/-1;justify-content:flex-end}
+.mcur-base-note{grid-column:4/6;font-size:12px;color:#6b7a90}
 .mcur-rate-btns button{height:29px;padding:0 9px;border-radius:7px;border:1px solid #aebbd0;background:#fff;cursor:pointer;font:inherit;font-size:11.5px;color:#1d2a44}
 .mcur-rate-btns button:hover{background:#eef3fb}
 .mcur-base-tag{font-size:11px;font-weight:700;color:#1f5fd6;background:#eef3fd;border-radius:99px;padding:3px 8px}
@@ -28591,8 +28604,7 @@ else window.MayaLang.init();
 .mcurc-footer{position:sticky;bottom:0;background:#fff;border-top:1px solid #e3e8ef;padding:11px 18px;display:flex;justify-content:space-between;gap:8px}
 .mcurc-footer button{border:1px solid #d7dee8;background:#fff;border-radius:8px;padding:9px 12px;font-size:11px;font-weight:700;cursor:pointer}
 .mcurc-footer .primary{background:#1d2d42;color:#fff;border-color:#1d2d42}
-@media(max-width:760px){.mcur-side{width:132px;flex-basis:132px}.mcur-grid{grid-template-columns:1fr}.mcur-field.full{grid-column:auto}}
-@media(max-width:560px){.mcur-content{display:block}.mcur-side{display:flex;gap:8px;width:auto;flex:none;border-left:0;border-top:1px solid #e3e8ef;padding:10px 12px}.mcur-side h3{display:none}.mcur-side button{flex:1;margin:0}}
+@media(max-width:760px){.mcur-grid{grid-template-columns:1fr}.mcur-field.full{grid-column:auto}}
 
 /* Create menu: compact rows so all 12 options + 3 section headers fit on a
    768px screen without scrolling (the regrouped menu pushed Tax/GST below
@@ -28674,9 +28686,7 @@ else window.MayaLang.init();
     <p id="mcurcStatus" class="mgc-status">Changes apply to the active Currency screen.</p>
     <div class="mcurc-section"><h4>Currency Screen</h4>
       <label class="mcurc-option"><span><strong>Show Formal Name</strong><small>Show the formal (full) name field.</small></span><span class="mcurc-check"><input id="mcurcFormal" type="checkbox" checked><span></span></span></label>
-      <label class="mcurc-option"><span><strong>Show Decimal Places</strong><small>Show the decimal places field.</small></span><span class="mcurc-check"><input id="mcurcDecimals" type="checkbox" checked><span></span></span></label>
-      <label class="mcurc-option"><span><strong>Show Rate History</strong><small>Show the History button on each currency row.</small></span><span class="mcurc-check"><input id="mcurcHistory" type="checkbox" checked><span></span></span></label>
-      <label class="mcurc-option"><span><strong>Show Ledger Assignment</strong><small>Show the "which currency is each ledger in" section.</small></span><span class="mcurc-check"><input id="mcurcAssign" type="checkbox" checked><span></span></span></label>
+      <label class="mcurc-option"><span><strong>Show Word After Decimal</strong><small>Show the “Word representing amount after decimal” field.</small></span><span class="mcurc-check"><input id="mcurcWord" type="checkbox" checked><span></span></span></label>
     </div>
     <div class="mcurc-section"><h4>Validation</h4>
       <label class="mcurc-option"><span><strong>Confirm Before Save</strong><small>Show the Save confirmation before committing.</small></span><span class="mcurc-check"><input id="mcurcConfirm" type="checkbox" checked><span></span></span></label>
@@ -28689,29 +28699,45 @@ else window.MayaLang.init();
   <div id="mayaacc-currency-panel" role="dialog" aria-modal="true" aria-labelledby="mcurTitle">
     <div class="mcur-content">
       <div class="mcur-main">
-        <div class="mcur-title"><div><h2 id="mcurTitle">Create Currency</h2><div class="mug-chip" id="mcurCompanyChip">Current Company</div></div><button class="mcur-close" type="button" onclick="mayaCloseCurrency()">×</button></div>
+        <div class="mcur-title"><div><h2 id="mcurTitle">Currency Creation</h2><div class="mug-chip" id="mcurCompanyChip">Current Company</div></div><button class="mcur-close" type="button" onclick="mayaCloseCurrency()">×</button></div>
         <div class="mcur-note" id="mcurNote"></div>
-        <div class="mcur-section"><h4>Currency Details</h4><div class="mcur-grid">
-          <div class="mcur-field full"><label for="mcurName">Currency Name*</label><input id="mcurName" autocomplete="off" placeholder="e.g. US Dollar"></div>
-          <div class="mcur-field"><label for="mcurCode">ISO Code*</label><input id="mcurCode" autocomplete="off" maxlength="3" placeholder="USD" style="text-transform:uppercase"></div>
-          <div class="mcur-field"><label for="mcurSymbol">Symbol*</label><input id="mcurSymbol" autocomplete="off" placeholder="e.g. $"></div>
-          <div class="mcur-field" data-mcur-field="formal"><label for="mcurFormal">Formal Name</label><input id="mcurFormal" autocomplete="off" placeholder="e.g. United States Dollar"></div>
-          <div class="mcur-field" data-mcur-field="decimals"><label for="mcurDecimals">Decimal Places</label><select id="mcurDecimals"><option value="0">0</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option></select></div>
-          <div class="mcur-field"><label for="mcurRate">Rate to ₹ (₹ per 1 unit)*</label><input id="mcurRate" type="number" step="any" min="0" placeholder="e.g. 88.50"></div>
-          <div class="mcur-field"><label for="mcurRateDate">Rate Date</label><input id="mcurRateDate" type="date"></div>
-          <div class="mcur-field"><label for="mcurMillions">Show amounts in millions</label><select id="mcurMillions"><option value="no">No</option><option value="yes">Yes</option></select></div>
-        </div></div>
-        <div class="mcur-section" data-mcur-section="rates"><h4>Currencies &amp; Exchange Rates (₹ per 1 unit)</h4><div class="mcur-rate-head"><span>Code</span><span>Symbol</span><span>Name</span><span>Rate (₹)</span><span>Rate Date</span><span></span></div><div id="mcurTable"></div></div>
-        <div class="mcur-section" data-mcur-section="assign"><h4>Which currency is each ledger in?</h4><div class="mcur-assign"><select id="mcurLedger"></select><select id="mcurCur"></select><button type="button" class="mvb-btn pri" onclick="mcurAssign()">Assign</button></div><div id="mcurAssigned"></div></div>
-              </div>
-      <aside class="mcur-side"><h3>OPTIONS</h3><button type="button" onclick="mayaCurrencyChangeCompany()">Change Company</button></aside>
+        <div class="mcur-trow"><label for="mcurSymbol">Symbol <span class="colon">:</span></label><input id="mcurSymbol" autocomplete="off" placeholder="e.g. $"></div>
+        <div class="mcur-trow" data-mcur-field="formal"><label for="mcurFormal">Formal name <span class="colon">:</span></label><input id="mcurFormal" autocomplete="off" placeholder="e.g. US Dollar"></div>
+        <div class="mcur-trow"><label for="mcurCode">ISO Currency Code <span class="colon">:</span></label><input id="mcurCode" autocomplete="off" maxlength="3" placeholder="e.g. USD" style="text-transform:uppercase"></div>
+        <div class="mcur-trow" data-mcur-field="decimals"><label for="mcurDecimals">Number of decimal places <span class="colon">:</span></label><select id="mcurDecimals"><option value="0">0</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option></select></div>
+        <div class="mcur-trow"><label for="mcurMillions">Show amount in millions <span class="colon">:</span></label><select id="mcurMillions"><option value="no">No</option><option value="yes">Yes</option></select></div>
+        <div class="mcur-trow" data-mcur-field="suffix"><label for="mcurSuffix">Suffix symbol to amount <span class="colon">:</span></label><select id="mcurSuffix"><option value="no">No</option><option value="yes">Yes</option></select></div>
+        <div class="mcur-trow" data-mcur-field="space"><label for="mcurSpace">Add space between amount and symbol <span class="colon">:</span></label><select id="mcurSpace"><option value="no">No</option><option value="yes">Yes</option></select></div>
+        <div class="mcur-trow" data-mcur-field="word"><label for="mcurWord">Word representing amount after decimal <span class="colon">:</span></label><input id="mcurWord" autocomplete="off" placeholder="e.g. Paisa"></div>
+        <div class="mcur-trow" data-mcur-field="worddec"><label for="mcurWordDec">No. of decimal places for amount in words <span class="colon">:</span></label><select id="mcurWordDec"><option value="0">0</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option></select></div>
+        <div class="mcur-more" id="mcurMore" style="display:none">
+          <div class="mcur-more-head">More Details — Ctrl+I</div>
+          <div class="mcur-trow"><label for="mcurRate">Rate to ₹ (₹ per 1 unit) <span class="colon">:</span></label><input id="mcurRate" type="number" step="any" min="0" placeholder="e.g. 88.50"></div>
+          <div class="mcur-trow"><label for="mcurRateDate">Rate Date <span class="colon">:</span></label><input id="mcurRateDate" type="date"></div>
+          <div class="mcur-section" data-mcur-section="rates"><h4>Currencies &amp; Exchange Rates (₹ per 1 unit)</h4><div class="mcur-rate-head"><span>Code</span><span>Symbol</span><span>Name</span><span>Rate (₹)</span><span>Rate Date</span></div><div id="mcurTable"></div></div>
+          <div class="mcur-section" data-mcur-section="assign"><h4>Which currency is each ledger in?</h4><div class="mcur-assign"><select id="mcurLedger"></select><select id="mcurCur"></select><button type="button" class="mvb-btn pri" onclick="mcurAssign()">Assign</button></div><div id="mcurAssigned"></div></div>
+        </div>
+      </div>
     </div>
     <div class="mcur-footer">
-      <div class="mcur-actions"><button type="button" class="primary" onclick="mayaSaveCurrency(true)">Save &amp; New</button></div>
-      <div class="maya-create-foot"><span class="mcf-seg" onclick="mayaCloseCurrency()"><u class="maya-u-dbl">Q</u> Quit</span><span class="mcf-seg" onclick="mayaSaveCurrency(false)"><u>A</u> Accept</span><span class="mcf-seg off" onclick="window.__mayaCreateDeleteToast&&window.__mayaCreateDeleteToast('Currency')"><u>D</u> Delete</span><span class="mcf-seg" onclick="mayaOpenCurrencyConfig()"><b>F12</b> Configure</span></div>
+      <div class="maya-create-foot"><span class="mcf-seg" onclick="mayaCloseCurrency()"><u class="maya-u-dbl">Q</u> Quit</span><span class="mcf-seg" onclick="mayaSaveCurrency(false)"><u>A</u> Accept</span><span class="mcf-seg off" onclick="window.__mayaCreateDeleteToast&&window.__mayaCreateDeleteToast('Currency')"><u>D</u> Delete</span></div>
     </div>
     <div id="mcurConfirm" class="mg-confirm"><div class="mg-confirm-card"><h3>Save Currency?</h3><p id="mcurConfirmText">Save this Currency in the current company?</p><div class="mg-confirm-actions"><button type="button" onclick="mayaCloseCurrencyConfirm()">Cancel</button><button type="button" class="primary" onclick="mayaConfirmCurrencySave()">Save</button></div></div></div>
   </div>
+  <aside class="mcur-side">
+    <div class="mlg-side-row off"><b>F2</b><span>Period</span></div>
+    <div class="mlg-side-row" onclick="window.mayaF3Dropdown?window.mayaF3Dropdown():window.mayaCompanyMenu()"><b>F3</b><span>Company</span></div>
+    <div class="mlg-side-row off mlg-blue"><b>F4</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F5</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F6</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F7</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F8</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F9</b></div>
+    <div class="mlg-side-row" onclick="window.mayaOpenOtherMasters&&window.mayaOpenOtherMasters('Currency')"><b>F10</b><span>Other Masters</span></div>
+    <div class="mlg-side-row" onclick="window.mayaToggleCurrencyMore&&window.mayaToggleCurrencyMore()"><b><u class="maya-u-dbl">I</u></b><span>More Details</span></div>
+    <div class="mlg-side-row off"><b>H</b><span>Helper</span></div>
+    <div class="mlg-side-row mlg-f12" tabindex="-1" onclick="mayaOpenCurrencyConfig()"><b>F12</b><span>Configure</span></div>
+  </aside>
 </div>
 
 <style id="mayaacc-quit-strip-style">
@@ -28835,7 +28861,7 @@ else window.MayaLang.init();
 var $=function(id){return document.getElementById(id);};
 var STANDARD_GROUPS=['Primary Stock Group','Finished Goods','Raw Materials','Consumables','Trading Goods','Packing Materials'];
 function cid(){try{if(window.MayaBooks&&MayaBooks.cid)return MayaBooks.cid();}catch(e){}try{return localStorage.getItem('mayaacc_active_company')||'';}catch(e){return '';}}
-function companyName(){try{var cs=(typeof myCompanies==='function')?myCompanies():[];var c=cs.find(function(x){return x.id===cid();});return c?c.companyName:'Current Company';}catch(e){return 'Current Company';}}
+function companyName(){try{var cs=JSON.parse(localStorage.getItem('mayaacc_companies')||'[]');var c=cs.find(function(x){return x.id===cid();});return c?c.companyName:'Current Company';}catch(e){return 'Current Company';}}
 function toast(m){if(window.mayaToast)window.mayaToast(m);else if(window.alert)window.alert(m);}
 function readLS(key){try{var r=localStorage.getItem(key);return r?JSON.parse(r):[];}catch(e){return[];}}
 function writeLS(key,v){try{localStorage.setItem(key,JSON.stringify(v));}catch(e){}}
@@ -29013,13 +29039,12 @@ function mcurValues(){return window.__mayaValues||null;}
 function mcurEsc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function mcurLedgers(){try{return JSON.parse(localStorage.getItem('mayaacc_ledgers_'+cid())||'[]');}catch(e){return[];}}
 function mcurConfigKey(c){return 'mayaacc_currency_config_'+(c||'');}
-function mcurGetConfig(){try{var r=localStorage.getItem(mcurConfigKey(cid()));if(r)return Object.assign({formal:true,decimals:true,history:true,assign:true,confirm:true},JSON.parse(r));}catch(e){}return {formal:true,decimals:true,history:true,assign:true,confirm:true};}
+function mcurGetConfig(){try{var r=localStorage.getItem(mcurConfigKey(cid()));if(r)return Object.assign({formal:true,decimals:true,history:true,assign:true,confirm:true,word:true},JSON.parse(r));}catch(e){}return {formal:true,decimals:true,history:true,assign:true,confirm:true,word:true};}
 function mcurSaveConfig(c){try{localStorage.setItem(mcurConfigKey(cid()),JSON.stringify(c));}catch(e){}}
 function mcurApplyConfig(){
   var c=mcurGetConfig();
   document.querySelectorAll('#mayaacc-currency-panel [data-mcur-field="formal"]').forEach(function(el){el.style.display=c.formal?'':'none';});
-  document.querySelectorAll('#mayaacc-currency-panel [data-mcur-field="decimals"]').forEach(function(el){el.style.display=c.decimals?'':'none';});
-  document.querySelectorAll('#mayaacc-currency-panel [data-mcur-section="assign"]').forEach(function(el){el.style.display=c.assign?'':'none';});
+  document.querySelectorAll('#mayaacc-currency-panel [data-mcur-field="word"]').forEach(function(el){el.style.display=c.word?'':'none';});
   mcurPaintRates();
 }
 function mcurPaintNote(){
@@ -29036,7 +29061,6 @@ function mcurPaintRates(){
   var V=mcurValues();var box=$('mcurTable');if(!box)return;
   if(!V){box.innerHTML='<p class="mcur-empty">Currency data is not available.</p>';return;}
   var list=V.listCurrencies();
-  var c=mcurGetConfig();
   box.innerHTML=list.map(function(cur){
     var hist=(cur.history||[]).slice(0,5).map(function(h){return '₹'+(h.rate)+' on '+(h.date||'');}).join(' · ');
     return '<div class="mcur-rate-row" data-code="'+mcurEsc(cur.code)+'">'
@@ -29044,10 +29068,10 @@ function mcurPaintRates(){
       +'<span>'+mcurEsc(cur.symbol||'')+'</span>'
       +'<span class="mcur-rate-name">'+mcurEsc(cur.name||cur.code)+'</span>'
       +(cur.base
-        ?'<span>₹ 1.00 — base currency</span><span></span><span></span>'
+        ?'<span class="mcur-base-note">₹ 1.00 — base currency</span>'
         :'<input id="mcur-rate-'+mcurEsc(cur.code)+'" type="number" step="any" min="0" value="'+mcurEsc(cur.rate)+'">'
         +'<input id="mcur-date-'+mcurEsc(cur.code)+'" type="date" value="'+mcurEsc(cur.rateDate||'')+'">'
-        +'<span class="mcur-rate-btns"><button type="button" onclick="mcurSaveRate(\''+mcurEsc(cur.code)+'\')">Save rate</button>'+(c.history?'<button type="button" onclick="mcurToggleHist(\''+mcurEsc(cur.code)+'\')">History</button>':'')+'<button type="button" onclick="mcurDeleteRow(\''+mcurEsc(cur.code)+'\')">Delete</button></span>')
+        +'<span class="mcur-rate-btns"><button type="button" onclick="mcurSaveRate(\''+mcurEsc(cur.code)+'\')">Save rate</button><button type="button" onclick="mcurToggleHist(\''+mcurEsc(cur.code)+'\')">History</button><button type="button" onclick="mcurDeleteRow(\''+mcurEsc(cur.code)+'\')">Delete</button></span>')
       +'<div class="mcur-hist" id="mcur-hist-'+mcurEsc(cur.code)+'" hidden>'+(hist?('Earlier rates: '+mcurEsc(hist)):'No earlier rates yet.')+'</div>'
       +'</div>';
   }).join('');
@@ -29086,17 +29110,28 @@ function mcurAssign(){
   if(!res.ok){toast(res.error||'Could not assign the currency.');return;}
   toast(l+' now uses '+code+'.');mcurPaintAssign();
 }
+function mcurToggleMore(forceOpen){
+  var m=$('mcurMore');if(!m)return;
+  if(forceOpen===true){m.style.display='block';}
+  else{m.style.display=(m.style.display==='none'||m.style.display==='')?'block':'none';}
+  if(m.style.display==='block'){var r=$('mcurRate');if(r)setTimeout(function(){r.focus();},0);}
+}
 function mcurOpen(){
   var ov=$('mayaacc-currency-overlay');if(!ov)return;
   ov.style.display='block';ov.setAttribute('aria-hidden','false');
-  ['mcurName','mcurCode','mcurSymbol','mcurFormal'].forEach(function(id){var el=$(id);if(el)el.value='';});
+  ['mcurSymbol','mcurFormal','mcurCode','mcurWord'].forEach(function(id){var el=$(id);if(el)el.value='';});
   if($('mcurDecimals'))$('mcurDecimals').value='2';
+  if($('mcurWordDec'))$('mcurWordDec').value='2';
   if($('mcurRate'))$('mcurRate').value='';
   if($('mcurRateDate'))$('mcurRateDate').value='';
   if($('mcurMillions'))$('mcurMillions').value='no';
+  if($('mcurSuffix'))$('mcurSuffix').value='no';
+  if($('mcurSpace'))$('mcurSpace').value='no';
+  if($('mcurMore'))$('mcurMore').style.display='none';
   if($('mcurCompanyChip'))$('mcurCompanyChip').textContent=companyName();
   mcurApplyConfig();mcurPaintNote();mcurPaintAssign();
-  setTimeout(function(){var el=$('mcurName');if(el)el.focus();},0);
+  if(window.__mayaSnapshotForm)window.__mayaSnapshotForm('Currency');
+  setTimeout(function(){var el=$('mcurSymbol');if(el)el.focus();},0);
 }
 function mcurClose(returnToMenu){
   var ov=$('mayaacc-currency-overlay');if(!ov)return;
@@ -29105,26 +29140,32 @@ function mcurClose(returnToMenu){
   if(returnToMenu!==false&&window.__mayaReturnToMenu)window.__mayaReturnToMenu();
 }
 function mcurValidate(){
-  var name=($('mcurName').value||'').trim();
-  var code=($('mcurCode').value||'').trim().toUpperCase();
   var sym=($('mcurSymbol').value||'').trim();
+  var code=($('mcurCode').value||'').trim().toUpperCase();
+  var formal=($('mcurFormal').value||'').trim();
   var rate=parseFloat(($('mcurRate').value||'').trim());
-  if(!name){toast('Currency Name is required.');if($('mcurName'))$('mcurName').focus();return null;}
-  if(!/^[A-Z]{3}$/.test(code)){toast('ISO Code must be 3 letters, e.g. USD.');if($('mcurCode'))$('mcurCode').focus();return null;}
   if(!sym){toast('Symbol is required.');if($('mcurSymbol'))$('mcurSymbol').focus();return null;}
-  if(!isFinite(rate)||rate<=0){toast('Rate to ₹ must be a number above 0.');if($('mcurRate'))$('mcurRate').focus();return null;}
+  if(!/^[A-Z]{3}$/.test(code)){toast('ISO Code must be 3 letters, e.g. USD.');if($('mcurCode'))$('mcurCode').focus();return null;}
+  if(!isFinite(rate)||rate<=0){
+    /* Rate lives under More Details (Ctrl+I) — open it so the user can see
+       the field instead of failing on a hidden input. */
+    mcurToggleMore(true);
+    toast('Rate to ₹ must be a number above 0.');if($('mcurRate'))$('mcurRate').focus();return null;}
+  /* Tally's panel has no Currency Name field — the stored name is the
+     Formal name, falling back to the Symbol. */
+  var name=formal||sym;
   var V=mcurValues();
   if(V){
     var list=V.listCurrencies();
     if(list.some(function(c){return c.code===code;})){toast('Currency "'+code+'" already exists — use Save rate to change its rate.');if($('mcurCode'))$('mcurCode').focus();return null;}
-    if(list.some(function(c){return (c.name||'').trim().toLowerCase()===name.toLowerCase();})){toast('Currency "'+name+'" already exists.');if($('mcurName'))$('mcurName').focus();return null;}
+    if(list.some(function(c){return (c.name||'').trim().toLowerCase()===name.toLowerCase();})){toast('Currency "'+name+'" already exists.');if($('mcurFormal'))$('mcurFormal').focus();return null;}
   }
-  return {name:name,code:code,symbol:sym,formal:($('mcurFormal').value||'').trim(),decimals:parseInt(($('mcurDecimals').value||'2'),10)||2,rate:rate,rateDate:($('mcurRateDate').value||''),showMillions:$('mcurMillions').value==='yes'};
+  return {name:name,code:code,symbol:sym,formal:formal,decimals:parseInt(($('mcurDecimals').value||'2'),10)||2,rate:rate,rateDate:($('mcurRateDate').value||''),showMillions:$('mcurMillions').value==='yes',suffix:$('mcurSuffix').value==='yes',addSpace:$('mcurSpace').value==='yes',wordAfterDecimal:($('mcurWord').value||'').trim(),wordDecimals:parseInt(($('mcurWordDec').value||'2'),10)||2};
 }
 function mcurDoSave(mode){
   var V=mcurValues();if(!V){toast('Currency data is not available.');return;}
   var v=mcurValidate();if(!v)return;
-  var res=V.saveCurrency(v.code,v.symbol,v.rate,v.rateDate,{name:v.name,formalName:v.formal,decimals:v.decimals,showMillions:v.showMillions});
+  var res=V.saveCurrency(v.code,v.symbol,v.rate,v.rateDate,{name:v.name,formalName:v.formal,decimals:v.decimals,showMillions:v.showMillions,suffix:v.suffix,addSpace:v.addSpace,wordAfterDecimal:v.wordAfterDecimal,wordDecimals:v.wordDecimals});
   if(!res.ok){toast(res.error||'Could not save the currency.');return;}
   toast('Currency "'+v.name+' ('+v.code+')" created.');
   var cf=$('mcurConfirm');if(cf)cf.style.display='none';
@@ -29132,16 +29173,16 @@ function mcurDoSave(mode){
 }
 function mcurAskSave(andNew){
   if(!($('mayaacc-currency-overlay')&&$('mayaacc-currency-overlay').style.display!=='none'))return;
-  if(!mcurValidate())return;
+  var v=mcurValidate();if(!v)return;
   if(mcurGetConfig().confirm){
     mcurState.pending=!!andNew;
-    var cf=$('mcurConfirm');if(cf){cf.style.display='flex';if($('mcurConfirmText'))$('mcurConfirmText').textContent='Save Currency "'+$('mcurName').value.trim()+' ('+$('mcurCode').value.trim().toUpperCase()+')" in '+companyName()+'?';}
+    var cf=$('mcurConfirm');if(cf){cf.style.display='flex';if($('mcurConfirmText'))$('mcurConfirmText').textContent='Save Currency "'+v.name+' ('+v.code+')" in '+companyName()+'?';}
   }else mcurDoSave(!!andNew);
 }
 function mcurConfirmSave(){mcurDoSave(!!mcurState.pending);mcurState.pending=null;}
 function mcurCloseConfirm(){var cf=$('mcurConfirm');if(cf)cf.style.display='none';mcurState.pending=null;}
 function mcurChangeCompany(){
-  var dirty=(($('mcurName')&&$('mcurName').value.trim())||($('mcurCode')&&$('mcurCode').value.trim()));
+  var dirty=(($('mcurSymbol')&&$('mcurSymbol').value.trim())||($('mcurCode')&&$('mcurCode').value.trim()));
   if(dirty){
     if(window.__mayaAskQuit){window.__mayaAskQuit('Currency (unsaved)',function(){mcurClose(false);if(typeof showCompanySelect==='function')showCompanySelect();});return;}
     if(!confirm('This Currency has unsaved changes. Change company and discard the current entry?'))return;
@@ -29150,17 +29191,17 @@ function mcurChangeCompany(){
 }
 function mcurConfigOpen(){
   var c=mcurGetConfig();
-  var map={mcurcFormal:'formal',mcurcDecimals:'decimals',mcurcHistory:'history',mcurcAssign:'assign',mcurcConfirm:'confirm'};
+  var map={mcurcFormal:'formal',mcurcWord:'word',mcurcConfirm:'confirm'};
   Object.keys(map).forEach(function(id){var el=$(id);if(el)el.checked=!!c[map[id]];});
   var p=$('mayaacc-currency-config');if(p){p.style.display='block';p.setAttribute('aria-hidden','false');}
   if($('mcurcStatus'))$('mcurcStatus').textContent='Changes apply to the active Currency screen.';
 }
 function mcurConfigClose(){var p=$('mayaacc-currency-config');if(p){p.style.display='none';p.setAttribute('aria-hidden','true');}}
 function mcurConfigSave(){
-  var c={formal:!!($('mcurcFormal')&&$('mcurcFormal').checked),decimals:!!($('mcurcDecimals')&&$('mcurcDecimals').checked),history:!!($('mcurcHistory')&&$('mcurcHistory').checked),assign:!!($('mcurcAssign')&&$('mcurcAssign').checked),confirm:!!($('mcurcConfirm')&&$('mcurcConfirm').checked)};
+  var c={formal:!!($('mcurcFormal')&&$('mcurcFormal').checked),word:!!($('mcurcWord')&&$('mcurcWord').checked),confirm:!!($('mcurcConfirm')&&$('mcurcConfirm').checked),decimals:true,history:true,assign:true};
   mcurSaveConfig(c);mcurApplyConfig();mcurConfigClose();toast('Currency configuration saved.');
 }
-function mcurConfigReset(){mcurSaveConfig({formal:true,decimals:true,history:true,assign:true,confirm:true});mcurApplyConfig();mcurConfigOpen();if($('mcurcStatus'))$('mcurcStatus').textContent='Currency configuration reset to defaults.';}
+function mcurConfigReset(){mcurSaveConfig({formal:true,decimals:true,history:true,assign:true,confirm:true,word:true});mcurApplyConfig();mcurConfigOpen();if($('mcurcStatus'))$('mcurcStatus').textContent='Currency configuration reset to defaults.';}
 window.mayaOpenCurrency=mcurOpen;
 window.mayaCloseCurrencyRaw=mcurClose;
 window.mayaCloseCurrency=function(after){
@@ -29173,7 +29214,7 @@ window.mayaConfirmCurrencySave=mcurConfirmSave;window.mayaCloseCurrencyConfirm=m
 window.mayaCurrencyChangeCompany=mcurChangeCompany;
 window.mayaOpenCurrencyConfig=mcurConfigOpen;window.mayaCloseCurrencyConfig=mcurConfigClose;
 window.mayaSaveCurrencyConfig=mcurConfigSave;window.mayaResetCurrencyConfig=mcurConfigReset;
-window.mcurSaveRate=mcurSaveRate;window.mcurDeleteRow=mcurDeleteRow;window.mcurToggleHist=mcurToggleHist;window.mcurAssign=mcurAssign;window.mcurTurnOnMulti=mcurTurnOnMulti;
+window.mcurSaveRate=mcurSaveRate;window.mcurDeleteRow=mcurDeleteRow;window.mcurToggleHist=mcurToggleHist;window.mcurAssign=mcurAssign;window.mcurTurnOnMulti=mcurTurnOnMulti;window.mayaToggleCurrencyMore=mcurToggleMore;
 
 /* ---------------- form keydown: Stock Group / Stock Category ---------------- */
 function __ctShownEl(el){if(!el)return false;try{if(window.getComputedStyle(el).display==='none')return false;}catch(e){}return true;}
@@ -29239,8 +29280,16 @@ document.addEventListener('keydown',function(e){
       else if(k==='Enter'){e.preventDefault();mcurConfirmSave();}
       return;
     }
+    var curPicker=$('mlgOtherMasters');
+    if(curPicker&&curPicker.style.display==='flex'){
+      if(k==='ArrowDown'||k==='ArrowUp'){e.preventDefault();e.stopImmediatePropagation();var _items=[...document.querySelectorAll('#mlgOtherMasters .mlg-other-item')];if(_items.length){var _i=_items.findIndex(function(el){return el.classList.contains('sel');});_i=(_i+(k==='ArrowDown'?1:-1)+_items.length)%_items.length;_items.forEach(function(el,j){el.classList.toggle('sel',j===_i);});_items[_i].scrollIntoView({block:'nearest'});}return;}
+      if(k==='Enter'){e.preventDefault();e.stopImmediatePropagation();var _items2=[...document.querySelectorAll('#mlgOtherMasters .mlg-other-item')];var _j=_items2.findIndex(function(el){return el.classList.contains('sel');});if(_j<0)_j=0;if(window.mayaPickOtherMaster)window.mayaPickOtherMaster(_j);return;}
+      if(k==='Escape'){e.preventDefault();e.stopImmediatePropagation();if(window.mayaCloseOtherMasters)window.mayaCloseOtherMasters();return;}
+      e.preventDefault();e.stopImmediatePropagation();return;
+    }
     if(k==='Escape'){e.preventDefault();if(window.mayaCloseCurrency)window.mayaCloseCurrency();}
     else if(k==='F12'){e.preventDefault();mcurConfigOpen();}
+    else if(k==='F10'){e.preventDefault();e.stopImmediatePropagation();if(window.mayaOpenOtherMasters)window.mayaOpenOtherMasters('Currency');}
     else if((e.ctrlKey||e.metaKey)&&!e.altKey&&(k==='s'||k==='S')){e.preventDefault();mcurAskSave(true);}
   }
 });
@@ -29263,11 +29312,22 @@ document.addEventListener('click',function(e){
 /* Enter-to-next-field for the two new forms */
 document.addEventListener('keydown',function(e){
   if(e.key!=='Enter')return;
-  var t=e.target;if(!t||t.tagName!=='INPUT')return;
-  var map={msgName:'msgAlias',msgAlias:'msgUnder',msgUnder:'msgQtyAdd',msgHsn:'msgHsnDesc',mscName:'mscAlias',mscAlias:'mscUnder',mcurName:'mcurCode',mcurCode:'mcurSymbol',mcurSymbol:'mcurFormal',mcurFormal:'mcurDecimals',mcurRate:'mcurRateDate',mcurRateDate:'mcurMillions'};
+  var t=e.target;if(!t||(t.tagName!=='INPUT'&&t.tagName!=='SELECT'))return;
+  var map={msgName:'msgAlias',msgAlias:'msgUnder',msgUnder:'msgQtyAdd',msgHsn:'msgHsnDesc',mscName:'mscAlias',mscAlias:'mscUnder',mcurSymbol:'mcurFormal',mcurFormal:'mcurCode',mcurCode:'mcurDecimals',mcurDecimals:'mcurMillions',mcurMillions:'mcurSuffix',mcurSuffix:'mcurSpace',mcurSpace:'mcurWord',mcurWord:'mcurWordDec',mcurWordDec:'mcurRate',mcurRate:'mcurRateDate'};
   var next=map[t.id];if(!next)return;
   if(t.id==='msgUnder'&&__ctShownEl($('msgTree')))return;
   if(t.id==='mscUnder'&&__ctShownEl($('mscTree')))return;
+  /* Currency: skip rows hidden by F12 config (Formal / Word) and the More
+     Details fields while More Details is closed. */
+  var _guard=0;
+  while(next&&_guard++<12){
+    var _el=$(next);if(!_el)break;
+    var _row=_el.closest?_el.closest('.mcur-trow'):null;
+    if(_row&&getComputedStyle(_row).display==='none'){next=map[next];continue;}
+    if(_el.closest&&_el.closest('#mcurMore')&&$('mcurMore').style.display==='none'){next=map[next];continue;}
+    break;
+  }
+  if(!next)return;
   e.preventDefault();var el=$(next);if(el)el.focus();
 });
 
@@ -29470,6 +29530,7 @@ document.addEventListener('keydown',function(e){
         if(e.ctrlKey&&!e.altKey&&!e.metaKey&&(k==='i'||k==='I')&&form){
           if(form.name==='Group'&&window.mayaToggleGroupMore){e.preventDefault();e.stopImmediatePropagation();window.mayaToggleGroupMore();return 2;}
           if(form.name==='Ledger'&&window.mayaToggleLedgerMore){e.preventDefault();e.stopImmediatePropagation();window.mayaToggleLedgerMore();return 2;}
+          if(form.name==='Currency'&&window.mayaToggleCurrencyMore){e.preventDefault();e.stopImmediatePropagation();window.mayaToggleCurrencyMore();return 2;}
         }
         if(e.altKey&&!e.ctrlKey&&!e.metaKey&&(k==='b'||k==='B')&&form&&form.name==='Stock Item'){
           if(window.mayaOpenHsnFinder){e.preventDefault();e.stopImmediatePropagation();window.mayaOpenHsnFinder();return 2;}
@@ -29892,8 +29953,10 @@ document.addEventListener('focusin',function(e){
        top of the 200px sidebar. Park it immediately LEFT of the visible right
        sidebar instead, top aligned with the sidebar's F3 row. */
     var side=null,i;
+    var cu=document.getElementById('mayaacc-currency-overlay');
+    if(cu&&getComputedStyle(cu).display!=='none'){var cs=cu.querySelector('.mcur-side');if(cs&&cs.offsetParent!==null)side=cs;}
     var rail=document.getElementById('maya-gateway-rail');
-    if(rail&&rail.offsetParent!==null)side=rail;
+    if(!side&&rail&&rail.offsetParent!==null)side=rail;
     if(!side){var go=document.getElementById('mayaacc-group-overlay');if(go&&getComputedStyle(go).display!=='none'){var gs=go.querySelector('.mlg-side');if(gs&&gs.offsetParent!==null)side=gs;}}
     if(!side){var lo=document.getElementById('mayaacc-ledger-overlay');if(lo&&getComputedStyle(lo).display!=='none'){var ls=document.querySelector('#mayaacc-ledger-panel .mlg-side');if(ls&&ls.offsetParent!==null)side=ls;}}
     if(side){var sr=side.getBoundingClientRect();if(sr.right<window.innerWidth-2||sr.width>260)side=null;}
