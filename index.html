@@ -43,6 +43,19 @@ window.addEventListener('keydown',function(e){
   ];
   var FOREIGN=['keyboard-active','mayaacc-keyboard-top','mayaacc-kbd-active','active','selected'];
   var idx={};
+  /* Hover-vs-keyboard guard (2026-11-25): when the list scrolls under a
+     stationary cursor the browser fires a synthetic mouseover on whatever
+     item slides under it. That mouseover must not steal the keyboard's
+     selection — ArrowUp could never climb past the hovered item. A mouseover
+     at the exact point of the last real mousemove is scroll-synthesised
+     (the pointer did not move); it is ignored only when the most recent
+     scroll was keyboard-driven (keySeq>wheelSeq), so wheel-scrolling still
+     selects the item under the cursor, as before. Note the ordering: the
+     browser fires mouseover BEFORE the mousemove of the same genuine move,
+     so lastMX still holds the pre-move point when a real hover arrives. */
+  var lastMX=null,lastMY=null,seq=0,keySeq=0,wheelSeq=0;
+  document.addEventListener('mousemove',function(e){lastMX=e.clientX;lastMY=e.clientY;},true);
+  document.addEventListener('wheel',function(){wheelSeq=++seq;},true);
   function $(id){return document.getElementById(id);}
   function shown(el){if(!el)return false;var cs=getComputedStyle(el);return cs.display!=='none'&&cs.visibility!=='hidden';}
   /* A master form (or any other top layer) owns the keyboard while it is
@@ -78,8 +91,8 @@ window.addEventListener('keydown',function(e){
     all.forEach(function(o){FOREIGN.forEach(function(k){o.classList.remove(k);});o.classList.remove('mx-on');o.removeAttribute('aria-selected');});
     var cur=vis[i];if(cur){cur.classList.add('mx-on');cur.setAttribute('aria-selected','true');if(scroll!==false&&cur.scrollIntoView)cur.scrollIntoView({block:'nearest'});}
   }
-  function move(c,d){var n=options(c).length;if(!n)return;idx[c.dialog]=((idx[c.dialog]||0)+d+n)%n;paint(c);}
-  function go(c,i){var n=options(c).length;if(!n)return;idx[c.dialog]=Math.max(0,Math.min(n-1,i));paint(c);}
+  function move(c,d){var n=options(c).length;if(!n)return;keySeq=++seq;idx[c.dialog]=((idx[c.dialog]||0)+d+n)%n;paint(c);}
+  function go(c,i){var n=options(c).length;if(!n)return;keySeq=++seq;idx[c.dialog]=Math.max(0,Math.min(n-1,i));paint(c);}
   function closeDlg(c){var f=window[c.close];if(typeof f==='function')f();else{var d=$(c.dialog);if(d)d.style.display='none';}}
 
   window.addEventListener('keydown',function(e){
@@ -118,6 +131,7 @@ window.addEventListener('keydown',function(e){
     CFG.forEach(function(c){if(e.target&&e.target.id===c.search){idx[c.dialog]=0;setTimeout(function(){paint(c);},0);}});
   },true);
   document.addEventListener('mouseover',function(e){
+    if(lastMX!==null&&e.clientX===lastMX&&e.clientY===lastMY&&keySeq>wheelSeq)return; /* scroll-synthesised hover after a keyboard move — ignore */
     CFG.forEach(function(c){
       var o=e.target.closest&&e.target.closest(c.opt);if(!o||!$(c.list)||!$(c.list).contains(o))return;
       var i=options(c).indexOf(o);if(i>=0&&i!==idx[c.dialog]){idx[c.dialog]=i;paint(c,false);}
