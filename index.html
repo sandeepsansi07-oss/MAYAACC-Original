@@ -24111,34 +24111,41 @@ window.MayaStock={
   /* ---------- wrap the engine (same pattern as the existing __waWrapped post wrapper) ---------- */
   function wrapEngine(){
     var bk=B();if(!bk)return;
-    if(bk.post&&!bk.post.__tdsTcsWrapped){
+    /* Object-level flag as well as the function flag: later snippets
+       (values / sales-features / audit-config) wrap bk.post without
+       carrying __tdsTcsWrapped, so the 1500ms re-wrap below used to
+       wrap a second time and finalize() ran twice (TCS on the
+       already-TCS total: 10000 -> 101). The object flag survives
+       those wrappers; a recreated MayaBooks object has no flag, so
+       the re-wrap safety net still works. */
+    if(bk.post&&!bk.post.__tdsTcsWrapped&&!bk.__tdsTcsPostWrapped){
       var origPost=bk.post;
       var wp=function(c,spec){var r=origPost.apply(this,arguments);
         try{if(r&&r.ok&&r.voucher)finalize(c,r.voucher,spec||{},uiOverride((spec||{}).type),true);}catch(e){}
         return r;};
-      wp.__tdsTcsWrapped=1;bk.post=wp;
+      wp.__tdsTcsWrapped=1;bk.post=wp;bk.__tdsTcsPostWrapped=1;
     }
-    if(bk.previewVoucher&&!bk.previewVoucher.__tdsTcsWrapped){
+    if(bk.previewVoucher&&!bk.previewVoucher.__tdsTcsWrapped&&!bk.__tdsTcsPreviewWrapped){
       var origPrev=bk.previewVoucher;
       var wv=function(c,spec){var r=origPrev.apply(this,arguments);
         try{if(r&&r.ok&&r.voucher)finalize(c,r.voucher,spec||{},uiOverride((spec||{}).type),false);}catch(e){}
         return r;};
-      wv.__tdsTcsWrapped=1;bk.previewVoucher=wv;
+      wv.__tdsTcsWrapped=1;bk.previewVoucher=wv;bk.__tdsTcsPreviewWrapped=1;
     }
-    if(bk.updateVoucher&&!bk.updateVoucher.__tdsTcsWrapped){
+    if(bk.updateVoucher&&!bk.updateVoucher.__tdsTcsWrapped&&!bk.__tdsTcsUpdateWrapped){
       var origUpd=bk.updateVoucher;
       var wu=function(c,id,spec){var r=origUpd.apply(this,arguments);
         try{if(r&&r.ok&&r.voucher)finalize(c,r.voucher,spec||{},uiOverride((spec||{}).type),true);}catch(e){}
         return r;};
-      wu.__tdsTcsWrapped=1;bk.updateVoucher=wu;
+      wu.__tdsTcsWrapped=1;bk.updateVoucher=wu;bk.__tdsTcsUpdateWrapped=1;
     }
-    if(bk.cancelVoucher&&!bk.cancelVoucher.__tdsTcsWrapped){
+    if(bk.cancelVoucher&&!bk.cancelVoucher.__tdsTcsWrapped&&!bk.__tdsTcsCancelWrapped){
       var origCan=bk.cancelVoucher;
       var wc=function(c,id){var r=origCan.apply(this,arguments);
         try{if(r&&r.ok){var v=readStoredVoucher(c,id);
           if(v&&(v.tds||v.tcs)){delete v.tds;delete v.tcs;persistVoucher(c,v);}}}catch(e){}
         return r;};
-      wc.__tdsTcsWrapped=1;bk.cancelVoucher=wc;
+      wc.__tdsTcsWrapped=1;bk.cancelVoucher=wc;bk.__tdsTcsCancelWrapped=1;
     }
   }
 
