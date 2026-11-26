@@ -2841,7 +2841,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
     'mayaacc-unit-overlay':'#muName,#muAlias,#muSymbol,#muFormal,#muDecimals,#muType,#muFactor,#muBaseUnit',
     'mayaacc-godown-overlay':'#mgdName,#mgdAlias,#mgdUnder,#mgdAddress,#mgdCity,#mgdState,#mgdCountry,#mgdPin,#mgdContact,#mgdPhone,#mgdEmail,#mgdCapacity,#mgdCapacityUnit,#mgdPrimary,#mgdNegative,#mgdNotes',
     'mayaacc-cost-centre-overlay':'#mccName,#mccAlias,#mccUnder,#mccCategory,#mccNotes,#mccActive,#mccAllocate',
-    'mayaacc-voucher-type-overlay':'#mvtName,#mvtNameAlias,#mvtBase,#mvtAlias,#mvtActive,#mvtNumbering,#mvtUnused,#mvtRetain,#mvtEffective,#mvtZeroValued,#mvtOptional,#mvtNarration,#mvtNarrPerLedger,#mvtCategory,#mvtParty,#mvtInventory,#mvtDateMode,#mvtNotes,#mvtNumberingEnabled,#mvtStartNo,#mvtPrefix,#mvtSuffix,#mvtSeparator,#mvtPadding,#mvtYearPosition,#mvtAnnualReset,#mvtPrintTitle,#mvtPrintAfter,#mvtPos,#mvtTpl,#mvtDefTitle,#mvtDefBank,#mvtJur,#mvtDecl,#mvtTerms,#mvtClass,#mvtAlloc,#mvtWhatsapp,#mvtCustomBill',
+    'mayaacc-voucher-type-overlay':'#mvtName,#mvtBase,#mvtActive,#mvtNumbering,#mvtUnused,#mvtEffective,#mvtZeroValued,#mvtOptional,#mvtNarration,#mvtNarrPerLedger,#mvtCategory,#mvtNumberingEnabled,#mvtStartNo,#mvtPrefix,#mvtSuffix,#mvtSeparator,#mvtPadding,#mvtYearPosition,#mvtAnnualReset,#mvtPrintTitle,#mvtPrintAfter,#mvtBank,#mvtTpl,#mvtWhatsapp',
     'mayaacc-tax-gst-overlay':'#mtgName,#mtgAlias,#mtgNature,#mtgRate,#mtgBase,#mtgRegistration,#mtgRcm,#mtgRound,#mtgActive,#mtgPrint,#mtgNotes,#mtgInputCredit,#mtgShowInvoice,#mtgAutoCalc,#mtgConfirmSave'
   };
   function activeOverlay(){for(const id of Object.keys(fieldGroups))if(shown(id))return id;return null;}
@@ -2866,11 +2866,11 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
       'mayaacc-unit-overlay':['mayaacc-unit-config','muConfirm'],
       'mayaacc-godown-overlay':['mayaacc-godown-config','mgdConfirm','mgdTree'],
       'mayaacc-cost-centre-overlay':['mayaacc-cost-centre-config','mccConfirm','mccTree'],
-      'mayaacc-voucher-type-overlay':['mayaacc-voucher-type-config','mvtConfirm','mlgOtherMasters','mvtTypeList'],
+      'mayaacc-voucher-type-overlay':['mayaacc-voucher-type-config','mvtConfirm','mlgOtherMasters','mvtTypeList','mvtBankList'],
       'mayaacc-tax-gst-overlay':['mayaacc-tax-gst-config','mtgConfirm']
     }[overlay]||[];
     if(childIds.some(shown))return;
-    if(overlay==='mayaacc-voucher-type-overlay'&&document.activeElement&&document.activeElement.id==='mvtBase')return;
+    if(overlay==='mayaacc-voucher-type-overlay'&&document.activeElement&&(document.activeElement.id==='mvtBase'||document.activeElement.id==='mvtBank'))return;
     if(overlay==='mayaacc-ledger-overlay'&&document.activeElement&&document.activeElement.id==='mlgName'&&shown('mlgDupWarn')){e.preventDefault();e.stopImmediatePropagation();return;}
     const fields=visibleFields(overlay),i=fields.indexOf(document.activeElement);
     if(i<0||i>=fields.length-1)return;
@@ -2882,7 +2882,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   document.addEventListener('keydown',function(e){
     if(e.key!=='F12')return;
     const overlay=activeOverlay();if(!overlay)return;
-    if(overlay==='mayaacc-voucher-type-overlay'&&shown('mvtTypeList'))return;
+    if(overlay==='mayaacc-voucher-type-overlay'&&(shown('mvtTypeList')||shown('mvtBankList')))return;
     const map={
       'mayaacc-cost-centre-overlay':'mayaOpenCostCentreConfig',
       'mayaacc-voucher-type-overlay':'mayaOpenVoucherTypeConfig',
@@ -3283,18 +3283,9 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
     if(alterIds.some(id=>{const el=document.getElementById(id);return el&&getComputedStyle(el).display!=='none'&&el.getAttribute('aria-hidden')!=='true';}))return;
     const info=configInfo();
     if(info){
-      /* Voucher Type box text field: while the Default bank / cash ledger
-         input has focus, keys stay native — Enter saves the whole box,
-         Tab stays put, typing/arrows must not move or toggle a row.
-         This handler (mayaacc-f12-final-authority) runs before the patch
-         and the module, so the guard has to live here. Escape / F12 /
-         Ctrl+S / Ctrl+A keep their box meaning and fall through to the
-         branches below. */
-      if(document.activeElement&&document.activeElement.id==='mvtvBank'){
-        if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();if(typeof window.mayaSaveVoucherTypeConfig==='function')window.mayaSaveVoucherTypeConfig();state[info.id]=-1;return;}
-        if(e.key==='Tab'){e.preventDefault();e.stopImmediatePropagation();return;}
-        if(!(e.key==='Escape'||e.key==='F12'||(e.ctrlKey&&(String(e.key||'').toLowerCase()==='s'||String(e.key||'').toLowerCase()==='a')))){e.stopImmediatePropagation();return;}
-      }
+      /* run #33: the Voucher Type box has no text input any more (the
+         Default bank / cash ledger moved onto the screen as a dropdown),
+         so no native-keys guard is needed here. */
       if(e.key==='Escape'){
         e.preventDefault();e.stopImmediatePropagation();
         const fn=window[info.cfg.close];
@@ -3530,7 +3521,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
     Godown:{overlay:'mayaacc-godown-overlay',config:'mayaacc-godown-config',confirm:'mgdConfirm',tree:'mgdTree',
       open:'mayaOpenGodown',close:'mayaCloseGodown',save:'mayaSaveGodown',confirmSave:'mayaConfirmGodownSave',closeConfig:'mayaCloseGodownConfig'},
     'Voucher Type':{overlay:'mayaacc-voucher-type-overlay',config:'mayaacc-voucher-type-config',confirm:'mvtConfirm',tree:null,open:'mayaOpenVoucherType',close:'mayaCloseVoucherType',save:'mayaSaveVoucherType',confirmSave:'mayaConfirmVoucherTypeSave',closeConfig:'mayaCloseVoucherTypeConfig'},
-    'Voucher Type':{overlay:'mayaacc-voucher-type-overlay',config:'mayaacc-voucher-type-config',confirm:'mvtConfirm',tree:null,open:'mayaOpenVoucherType',close:'mayaCloseVoucherType',save:'mayaSaveVoucherType',confirmSave:'mayaConfirmVoucherTypeSave',closeConfig:'mayaCloseVoucherTypeConfig'}
+    'Voucher Type':{overlay:'mayaacc-voucher-type-overlay',config:'mayaacc-voucher-type-config',confirm:'mvtConfirm',tree:null,lists:['mvtTypeList','mvtBankList'],closeList:'mayaCloseVoucherTypeLists',open:'mayaOpenVoucherType',close:'mayaCloseVoucherType',save:'mayaSaveVoucherType',confirmSave:'mayaConfirmVoucherTypeSave',closeConfig:'mayaCloseVoucherTypeConfig'}
   };
 
   function activeName(){
@@ -3740,7 +3731,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
       confirm:'mvtConfirm',
       tree:null,
       finder:null,
-      lists:['mvtTypeList'],
+      lists:['mvtTypeList','mvtBankList'],
       closeList:'mayaCloseVoucherTypeLists',
       close:'mayaCloseVoucherType',
       closeConfig:'mayaCloseVoucherTypeConfig',
@@ -3979,7 +3970,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
     Unit:{overlay:'mayaacc-unit-overlay',config:'mayaacc-unit-config',confirm:'muConfirm',tree:null,finder:null,close:'mayaCloseUnit',closeConfig:'mayaCloseUnitConfig',closeConfirm:'mayaCloseUnitConfirm',saveConfig:'mayaSaveUnitConfig',save:'mayaSaveUnit'},
     Godown:{overlay:'mayaacc-godown-overlay',config:'mayaacc-godown-config',confirm:'mgdConfirm',tree:'mgdTree',finder:null,close:'mayaCloseGodown',closeConfig:'mayaCloseGodownConfig',closeConfirm:'mayaCloseGodownConfirm',saveConfig:'mayaSaveGodownConfig',save:'mayaSaveGodown'},
     'Cost Centre':{overlay:'mayaacc-cost-centre-overlay',config:'mayaacc-cost-centre-config',confirm:'mccConfirm',tree:'mccTree',finder:null,close:'mayaCloseCostCentre',closeConfig:'mayaCloseCostCentreConfig',closeConfirm:'mayaCloseCostCentreConfirm',saveConfig:'mayaSaveCostCentreConfig',save:'mayaSaveCostCentre'},
-    'Voucher Type':{overlay:'mayaacc-voucher-type-overlay',config:'mayaacc-voucher-type-config',confirm:'mvtConfirm',tree:null,finder:null,lists:['mvtTypeList'],closeList:'mayaCloseVoucherTypeLists',close:'mayaCloseVoucherType',closeConfig:'mayaCloseVoucherTypeConfig',closeConfirm:'mayaCloseVoucherTypeConfirm',saveConfig:'mayaSaveVoucherTypeConfig',save:'mayaSaveVoucherType'}
+    'Voucher Type':{overlay:'mayaacc-voucher-type-overlay',config:'mayaacc-voucher-type-config',confirm:'mvtConfirm',tree:null,finder:null,lists:['mvtTypeList','mvtBankList'],closeList:'mayaCloseVoucherTypeLists',close:'mayaCloseVoucherType',closeConfig:'mayaCloseVoucherTypeConfig',closeConfirm:'mayaCloseVoucherTypeConfirm',saveConfig:'mayaSaveVoucherTypeConfig',save:'mayaSaveVoucherType'}
   };
   const visible=id=>{
     const el=$(id); if(!el)return false;
@@ -4049,18 +4040,6 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
     if(layer.type==='config'){
       const k=String(e.key||'').toLowerCase();
       const tag=(e.target&&e.target.tagName||'').toLowerCase();
-      // The Voucher Type box has a text field (Default bank / cash ledger):
-      // while it has focus, keys must behave natively — Enter saves the box,
-      // Tab stays put, arrows/typing must not move or toggle a config row.
-      // The live guard is in mayaacc-f12-final-authority (it runs first and
-      // stops Enter/arrows); this is defence-in-depth for keys that layer
-      // lets through. Escape / F12 / Ctrl+S / Ctrl+A keep their box
-      // meaning and fall through to the handling below.
-      if(document.activeElement&&document.activeElement.id==='mvtvBank'){
-        if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();const fn=window[layer.m.saveConfig];if(typeof fn==='function')fn();cfgIndex=-1;cfgLayerKey='';return;}
-        if(e.key==='Tab'){e.preventDefault();e.stopImmediatePropagation();return;}
-        if(!(e.key==='Escape'||e.key==='F12'||(e.ctrlKey&&(k==='s'||k==='a')))){e.stopImmediatePropagation();return;}
-      }
       const typing=['input','textarea','select'].includes(tag);
       const isSave=(k==='s' && !e.ctrlKey && !e.altKey && !e.metaKey && !typing) || (e.code==='KeyS' && e.ctrlKey && !e.altKey && !e.metaKey);
       if(isSave){
@@ -4660,7 +4639,6 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
 .mvt-toprow input{height:27px;border:1px solid #d8e0ea;border-radius:6px;padding:0 10px;font-size:13.5px;outline:none}
 .mvt-toprow input:focus{border-color:#8d9bb0;box-shadow:0 0 0 3px rgba(94,108,134,.08)}
 #mvtName{flex:0 0 420px;width:420px;min-width:0}
-#mvtNameAlias{width:200px;flex:0 0 200px}
 .mvt-cols{display:flex;gap:0;border:1px solid #d7dee8;border-radius:6px;background:#fff}
 .mvt-col{flex:1;min-width:0;padding:0 16px 10px}
 .mvt-col + .mvt-col{border-left:1px solid #d7dee8}
@@ -4698,6 +4676,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
    "List of Voucher Types" side panel (run #30) — replaced: the side panel
    broke Backspace on Based On. */
 .mvt-picker-field{position:relative;width:170px;flex:0 0 170px}
+.mvt-picker-field.narrow{width:130px;flex:0 0 130px}
 .mvt-picker-field input{width:100%;cursor:pointer;background:#fff}
 .mvt-picker-field .mvt-picker-arr{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:11px;color:#6b7280;pointer-events:none}
 #mvtTypeList{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);max-height:220px;overflow:auto;background:#fff;border:1px solid #d7dfe8;border-radius:8px;box-shadow:0 14px 30px rgba(16,24,40,.14);z-index:40;padding:5px 0}
@@ -4708,6 +4687,12 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
 #mvtTypeList .mvt-tl-it.sel{background:#2f6fd0;color:#fff}
 #mvtTypeList .mvt-tl-it.sel small{color:#dbeafe}
 #mvtTypeList .mvt-tl-it.cur{font-weight:700}
+#mvtBankList{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);max-height:220px;overflow:auto;background:#fff;border:1px solid #d7dfe8;border-radius:8px;box-shadow:0 14px 30px rgba(16,24,40,.14);z-index:40;padding:5px 0}
+#mvtBankList.open{display:block}
+#mvtBankList .mvt-tl-it{padding:8px 12px;font-size:12px;color:#33445c;cursor:pointer}
+#mvtBankList .mvt-tl-it small{display:block;font-size:11px;color:#6b7a90;margin-top:1px}
+#mvtBankList .mvt-tl-it.sel{background:#2f6fd0;color:#fff}
+#mvtBankList .mvt-tl-it.sel small{color:#dbeafe}
 @media(max-width:820px){.mvt-cols{display:block}.mvt-col{margin-bottom:14px}}
 </style>
 <div id="mayaacc-voucher-type-overlay" aria-hidden="true">
@@ -4719,32 +4704,22 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
         <div class="mvt-toprow">
           <label for="mvtName">Name</label>
           <input id="mvtName" autocomplete="off" placeholder="e.g. Material Issue">
-          <label for="mvtNameAlias">(alias)</label>
-          <input id="mvtNameAlias" autocomplete="off" placeholder="Optional">
         </div>
         <div class="mvt-cols">
           <div class="mvt-col">
             <h4>General</h4>
             <div class="mvt-field"><label for="mvtBase">Based On</label><span class="mvt-picker-field"><input id="mvtBase" value="None" readonly autocomplete="off"><span class="mvt-picker-arr">&#9662;</span><div id="mvtTypeList"><div class="mvt-tl-list" id="mvtTypeListBody"></div></div></span></div>
-            <div class="mvt-field" id="rowAbbr"><label for="mvtAlias">Abbreviation</label><input id="mvtAlias" class="mvt-w-txt" maxlength="12" autocomplete="off" placeholder="e.g. MI"></div>
             <div class="mvt-field"><label for="mvtActive">Activate this Voucher Type</label><select id="mvtActive" class="mvt-w-yn"><option value="Active">Yes</option><option value="Inactive">No</option></select></div>
             <div class="mvt-field" id="rowMethod"><label for="mvtNumbering">Method of Voucher Numbering</label><select id="mvtNumbering" class="mvt-w-long"><option value="Automatic">Automatic</option><option value="Manual">Manual</option><option value="Automatic with Override">Automatic with Override</option></select></div>
             <div class="mvt-field"><label for="mvtUnused">Show unused vch nos. in transactions for</label><select id="mvtUnused" class="mvt-w-yn"><option value="No" selected>No</option><option value="Yes">Yes</option></select></div>
-            <div class="mvt-field"><label for="mvtRetain">Retain Original Voucher No. behaviour</label><select id="mvtRetain" class="mvt-w-yn"><option value="Yes">Yes</option><option value="No">No</option></select></div>
             <div class="mvt-field" id="rowEffective"><label for="mvtEffective">Use effective dates for vouchers</label><select id="mvtEffective" class="mvt-w-yn"><option value="No">No</option><option value="Yes">Yes</option></select></div>
             <div class="mvt-field" id="rowZero"><label for="mvtZeroValued">Allow zero-valued transactions</label><select id="mvtZeroValued" class="mvt-w-yn"><option value="No">No</option><option value="Yes">Yes</option></select></div>
             <div class="mvt-field" id="rowOptional"><label for="mvtOptional">Make this voucher type as 'Optional' by default</label><select id="mvtOptional" class="mvt-w-yn"><option value="No">No</option><option value="Yes">Yes</option></select></div>
             <div class="mvt-field" id="rowNarr"><label for="mvtNarration">Allow narration in voucher</label><select id="mvtNarration" class="mvt-w-mid"><option value="Optional">Optional</option><option value="Mandatory">Mandatory</option><option value="Hidden">Hidden</option></select></div>
             <div class="mvt-field" id="rowNarrLedger"><label for="mvtNarrPerLedger">Provide narrations for each ledger in voucher</label><select id="mvtNarrPerLedger" class="mvt-w-yn"><option value="No">No</option><option value="Yes">Yes</option></select></div>
-            <div class="mvt-field" id="rowAddCost" style="display:none"><label for="mvtAddCost">Track Additional Costs for Purchases</label><select id="mvtAddCost" class="mvt-w-yn"><option value="No">No</option><option value="Yes">Yes</option></select></div>
-            <div class="mvt-field" id="rowMfg" style="display:none"><label for="mvtMfg">Use as Manufacturing Journal</label><select id="mvtMfg" class="mvt-w-yn"><option value="No">No</option><option value="Yes">Yes</option></select></div>
             <div class="mvt-more" id="mvtMore">
               <div class="mvt-more-head">More Details</div>
               <div class="mvt-field"><label for="mvtCategory">Voucher Category</label><select id="mvtCategory" class="mvt-w-mid"><option value="Accounting">Accounting</option><option value="Inventory">Inventory</option><option value="Order">Order</option><option value="Other">Other</option></select></div>
-              <div class="mvt-field"><label for="mvtParty">Party / Ledger Selection</label><select id="mvtParty" class="mvt-w-mid"><option value="Allowed">Allowed</option><option value="Mandatory">Mandatory</option><option value="Not Required">Not Required</option></select></div>
-              <div class="mvt-field"><label for="mvtInventory">Inventory Details</label><select id="mvtInventory" class="mvt-w-mid"><option value="Not Required">Not Required</option><option value="Optional">Optional</option><option value="Mandatory">Mandatory</option></select></div>
-              <div class="mvt-field"><label for="mvtDateMode">Date Control</label><select id="mvtDateMode" class="mvt-w-mid"><option value="Current FY">Current Financial Year</option><option value="Any Date">Any Date</option><option value="Working Date">Working Date</option></select></div>
-              <div class="mvt-field"><label for="mvtNotes">Notes</label><textarea id="mvtNotes" class="mvt-w-txt" placeholder="Optional internal notes"></textarea></div>
             </div>
           </div>
           <div class="mvt-col">
@@ -4763,21 +4738,12 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
             <h4 id="mvtPrintHead">Printing</h4>
             <div class="mvt-field" id="rowPrintTitle"><label for="mvtPrintTitle">Print Title</label><input id="mvtPrintTitle" class="mvt-w-txt" placeholder="Defaults to voucher type name"></div>
             <div class="mvt-field" id="rowPrintAfter"><label for="mvtPrintAfter">Print voucher after saving</label><select id="mvtPrintAfter" class="mvt-w-yn"><option value="No">No</option><option value="Yes">Yes</option></select></div>
-            <div class="mvt-field" id="rowPos" style="display:none"><label for="mvtPos">Use for POS invoicing</label><select id="mvtPos" class="mvt-w-yn"><option value="No">No</option><option value="Yes">Yes</option></select></div>
-            <div class="mvt-field" id="rowTpl" style="display:none"><label for="mvtTpl">Default template to print</label><select id="mvtTpl" class="mvt-w-mid"><option value="Not Applicable">Not Applicable</option><option value="Tax Invoice">Tax Invoice</option><option value="POS Templates">POS Templates</option></select></div>
-            <div class="mvt-field" id="rowDefTitle" style="display:none"><label for="mvtDefTitle">Default title to print</label><input id="mvtDefTitle" class="mvt-w-txt" autocomplete="off"></div>
-            <div class="mvt-field" id="rowDefBank" style="display:none"><label for="mvtDefBank">Default bank</label><select id="mvtDefBank" class="mvt-w-mid"><option value="Not Applicable">Not Applicable</option><option value="Cash">Cash</option><option value="HDFC Bank">HDFC Bank</option></select></div>
-            <div class="mvt-field" id="rowJur" style="display:none"><label for="mvtJur">Default jurisdiction</label><input id="mvtJur" class="mvt-w-txt" autocomplete="off"></div>
-            <div class="mvt-field" id="rowDecl" style="display:none"><label for="mvtDecl">Set/alter declaration</label><select id="mvtDecl" class="mvt-w-yn"><option value="No">No</option><option value="Yes">Yes</option></select></div>
-            <div class="mvt-field" id="rowTerms" style="display:none"><label for="mvtTerms">Set/Alter Terms and Conditions</label><select id="mvtTerms" class="mvt-w-yn"><option value="No">No</option><option value="Yes">Yes</option></select></div>
-            <h4 id="mvtClassHead" style="margin-top:14px">Name of Class</h4>
-            <div class="mvt-field" id="rowClass"><label for="mvtClass">Class Name</label><input id="mvtClass" class="mvt-w-txt" autocomplete="off" placeholder="Optional"></div>
+            <div class="mvt-field" id="rowBank"><label for="mvtBank">Default bank / cash ledger</label><span class="mvt-picker-field narrow"><input id="mvtBank" value="Not Applicable" readonly autocomplete="off"><span class="mvt-picker-arr">&#9662;</span><div id="mvtBankList"><div class="mvt-tl-list" id="mvtBankListBody"></div></div></span></div>
+            <div class="mvt-field" id="rowTpl"><label for="mvtTpl">Default template to print</label><select id="mvtTpl" class="mvt-w-mid"><option value="Not Applicable">Not Applicable</option><option value="Classic Corporate">Classic Corporate</option><option value="Modern Sidebar">Modern Sidebar</option><option value="Premium Charcoal &amp; Gold">Premium Charcoal &amp; Gold</option><option value="Traditional Bordered Grid">Traditional Bordered Grid</option><option value="Minimal Swiss">Minimal Swiss</option><option value="Bold Colour Block">Bold Colour Block</option><option value="Elegant Green Serif">Elegant Green Serif</option><option value="Slate Summary Cards">Slate Summary Cards</option></select></div>
           </div>
         </div>
         <div class="mvt-bottomrow">
-          <div class="mvt-field" id="rowAlloc" style="display:none"><label for="mvtAlloc">Enable default accounting allocations</label><select id="mvtAlloc" class="mvt-w-yn"><option value="No">No</option><option value="Yes">Yes</option></select></div>
           <div class="mvt-field" id="rowWhats"><label for="mvtWhatsapp">WhatsApp voucher after saving</label><select id="mvtWhatsapp" class="mvt-w-yn"><option value="No">No</option><option value="Yes">Yes</option></select></div>
-          <div class="mvt-field"><label for="mvtCustomBill">Print Customized Bill</label><select id="mvtCustomBill" class="mvt-w-yn"><option value="No">No</option><option value="Yes">Yes</option></select></div>
         </div>
       </main>
       <aside class="mlg-side">
@@ -4811,25 +4777,16 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
     <div class="cfgcols">
       <div class="cfgcol">
         <label class="mlgc-option"><span>Show more configurations</span><span class="v">: Yes</span><input id="mvtcShowMore" type="checkbox"></label>
-        <label class="mlgc-option mvtc-ext"><span>Provide aliases for Name</span><span class="v">: Yes</span><input id="mvtcAlias" type="checkbox"></label>
-        <label class="mlgc-option mvtc-ext"><span>Provide language aliases for Name</span><span class="v">: No</span><input id="mvtcLangAlias" type="checkbox"></label>
-        <label class="mlgc-option mvtc-ext"><span>Use Abbreviations for Voucher Type</span><span class="v">: Yes</span><input id="mvtcAbbr" type="checkbox"></label>
         <label class="mlgc-option mvtc-ext"><span>Set Method of Voucher Numbering</span><span class="v">: Yes</span><input id="mvtcMethod" type="checkbox"></label>
-        <label class="mlgc-option mvtc-ext"><span>Define multiple numbering series for vouchers</span><span class="v">: No</span><input id="mvtcMultiSeries" type="checkbox"></label>
         <label class="mlgc-option mvtc-ext"><span>Allow use of Effective date option in Voucher Type</span><span class="v">: Yes</span><input id="mvtcEffective" type="checkbox"></label>
         <label class="mlgc-option mvtc-ext"><span>Use zero-valued transactions in Voucher Types</span><span class="v">: Yes</span><input id="mvtcZero" type="checkbox"></label>
         <label class="mlgc-option mvtc-ext"><span>Allow use of Voucher Type as Optional by default</span><span class="v">: Yes</span><input id="mvtcOptional" type="checkbox"></label>
       </div>
       <div class="cfgcol">
         <label class="mlgc-option mvtc-ext"><span>Allow use of Narrations for Vouchers</span><span class="v">: Yes</span><input id="mvtcNarr" type="checkbox"></label>
-        <label class="mlgc-option mvtc-ext"><span>Allow use of Stock Journal as Manufacturing Journal</span><span class="v">: Yes</span><input id="mvtcMfgJournal" type="checkbox"></label>
         <label class="mlgc-option mvtc-ext"><span>Allow use of Narrations for each Ledger in Vouchers</span><span class="v">: Yes</span><input id="mvtcNarrLedger" type="checkbox"></label>
-        <label class="mlgc-option mvtc-ext"><span>Allow tracking of Additional Costs for Purchases in Reports</span><span class="v">: Yes</span><input id="mvtcAddCost" type="checkbox"></label>
-        <label class="mlgc-option mvtc-ext"><span>Allow selection of default Tax Unit</span><span class="v">: Yes</span><input id="mvtcTaxUnit" type="checkbox"></label>
-        <label class="mlgc-option mvtc-ext"><span>Allow setting of default Accounting Allocation</span><span class="v">: Yes</span><input id="mvtcAlloc" type="checkbox"></label>
         <label class="mlgc-option mvtc-ext"><span>Allow sharing voucher through WhatsApp after saving</span><span class="v">: Yes</span><input id="mvtcWhats" type="checkbox"></label>
         <label class="mlgc-option mvtc-ext"><span>Set Printing options</span><span class="v">: Yes</span><input id="mvtcPrint" type="checkbox"></label>
-        <label class="mlgc-option mvtc-ext"><span>Allow use of Voucher Class</span><span class="v">: Yes</span><input id="mvtcClass" type="checkbox"></label>
         <button type="button" class="mlgc-option" onclick="mayaResetVoucherTypeConfig()"><span>Reset Defaults</span></button>
       </div>
     </div>
@@ -4849,7 +4806,6 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
         <label class="mlgc-option"><span>Calculate tax on the subtotal</span><span class="v">: No</span><input id="mvtvTaxOnSubtotal" type="checkbox"></label>
       </div>
     </div>
-    <div class="mvtc-bank"><span>Default bank / cash ledger</span><input id="mvtvBank" autocomplete="off" placeholder="e.g. HDFC Bank"></div>
   </div>
   <span class="mlgc-ind bot" style="display:none">▼</span>
 </div>
@@ -4859,11 +4815,16 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   const shown=id=>{const e=$(id);if(!e)return false;const s=getComputedStyle(e);return s.display!=='none'&&s.visibility!=='hidden'&&e.getAttribute('aria-hidden')!=='true'};
   const keyBase='mayaacc_voucher_types_';
   const cfgBase='mayaacc_voucher_type_cfg_';
-  /* F12 box toggles (Tally order, 18). Saved-only keys (no form row):
-     langAlias, multiSeries, mfgJournal, addCost, taxUnit, alloc. */
-  const defaults={showMore:true,alias:true,langAlias:false,abbr:true,method:true,multiSeries:false,effective:true,zero:true,optional:true,narr:true,mfgJournal:true,narrLedger:true,addCost:true,taxUnit:true,alloc:true,whats:true,print:true,class:true};
-  const CFGKEYS=['showMore','alias','langAlias','abbr','method','multiSeries','effective','zero','optional','narr','mfgJournal','narrLedger','addCost','taxUnit','alloc','whats','print','class'];
-  const CFGIDS={showMore:'mvtcShowMore',alias:'mvtcAlias',langAlias:'mvtcLangAlias',abbr:'mvtcAbbr',method:'mvtcMethod',multiSeries:'mvtcMultiSeries',effective:'mvtcEffective',zero:'mvtcZero',optional:'mvtcOptional',narr:'mvtcNarr',mfgJournal:'mvtcMfgJournal',narrLedger:'mvtcNarrLedger',addCost:'mvtcAddCost',taxUnit:'mvtcTaxUnit',alloc:'mvtcAlloc',whats:'mvtcWhats',print:'mvtcPrint',class:'mvtcClass'};
+  /* F12 box Section 1 toggles (run #33 cleanup, 9): the dead toggles
+     (alias, langAlias, abbr, multiSeries, mfgJournal, addCost, taxUnit,
+     alloc, class) are gone — they gated rows that no longer exist. */
+  const defaults={showMore:true,method:true,effective:true,zero:true,optional:true,narr:true,narrLedger:true,whats:true,print:true};
+  const CFGKEYS=['showMore','method','effective','zero','optional','narr','narrLedger','whats','print'];
+  const CFGIDS={showMore:'mvtcShowMore',method:'mvtcMethod',effective:'mvtcEffective',zero:'mvtcZero',optional:'mvtcOptional',narr:'mvtcNarr',narrLedger:'mvtcNarrLedger',whats:'mvtcWhats',print:'mvtcPrint'};
+  /* The 8 Invoice Designer template names (must match the Designer's TPL
+     list); fill() falls back to 'Not Applicable' for older stored values
+     such as 'Tax Invoice' / 'POS Templates'. */
+  const TPL_NAMES=['Not Applicable','Classic Corporate','Modern Sidebar','Premium Charcoal & Gold','Traditional Bordered Grid','Minimal Swiss','Bold Colour Block','Elegant Green Serif','Slate Summary Cards'];
   /* F12 box Section 2 — Voucher Entry Options (run #31). The 9 VCH_OPTS rows
      from the old separate mayaVoucherConfig dialog (godowns NOT included —
      company setting, stays in F11) + the Default bank / cash ledger input.
@@ -4877,7 +4838,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   function vchEntryType(){const n=$('mvtName');const t=n?n.value.trim():'';return t||'Sales';}
   function loadVch(){vchType=vchEntryType();let cur={};try{cur=(typeof mayaVchCfg==='function'?mayaVchCfg(vchType):{})||{};}catch(e){cur={};}VCHKEYS.forEach(k=>{vchState[k]=!!cur[k];});vchState.bankDefaultLedger=cur.bankDefaultLedger||'';vchLoaded=true;syncVchValues();}
   function saveVch(){if(!vchLoaded)return;const o={};VCHKEYS.forEach(k=>{o[k]=!!vchState[k];});o.bankDefaultLedger=vchState.bankDefaultLedger||'';try{if(typeof mayaSaveVchCfg==='function')mayaSaveVchCfg(vchType,o);}catch(e){}}
-  function syncVchValues(){VCHKEYS.forEach(k=>{const el=$(VCHIDS[k]);if(!el)return;el.checked=!!vchState[k];const row=el.closest('.mlgc-option');const v=row?row.querySelector('.v'):null;if(v)v.textContent=': '+(el.checked?'Yes':'No');});const b=$('mvtvBank');if(b&&b.value!==vchState.bankDefaultLedger)b.value=vchState.bankDefaultLedger;const h=$('mvtcVchHead');if(h)h.textContent='Voucher Entry Options — '+vchType;}
+  function syncVchValues(){VCHKEYS.forEach(k=>{const el=$(VCHIDS[k]);if(!el)return;el.checked=!!vchState[k];const row=el.closest('.mlgc-option');const v=row?row.querySelector('.v'):null;if(v)v.textContent=': '+(el.checked?'Yes':'No');});syncBankField();const h=$('mvtcVchHead');if(h)h.textContent='Voucher Entry Options — '+vchType;}
   let dirty=false,pending='save',cfgIndex=-1;
   function companyId(){return localStorage.getItem('mayaacc_active_company')||'default'}
   function companyName(){return $('workspaceCompanyName')?.textContent||'Current Company'}
@@ -4886,22 +4847,20 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   function getCfg(){try{return {...defaults,...JSON.parse(localStorage.getItem(cfgBase+companyId())||'{}')}}catch{return {...defaults}}}
   function saveCfg(v){localStorage.setItem(cfgBase+companyId(),JSON.stringify(v))}
   function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-  function capture(){return{name:$('mvtName').value.trim(),nameAlias:$('mvtNameAlias').value.trim(),alias:$('mvtAlias').value.trim(),category:$('mvtCategory').value,base:$('mvtBase').value,numberingEnabled:$('mvtNumberingEnabled').value,numbering:$('mvtNumbering').value,startNo:Math.max(1,Number($('mvtStartNo').value)||1),dateMode:$('mvtDateMode').value,prefix:$('mvtPrefix').value.trim(),suffix:$('mvtSuffix').value.trim(),separator:$('mvtSeparator').value,padding:Number($('mvtPadding').value)||2,yearPosition:$('mvtYearPosition').value,annualReset:$('mvtAnnualReset').value,printTitle:$('mvtPrintTitle').value.trim(),narration:$('mvtNarration').value,party:$('mvtParty').value,inventory:$('mvtInventory').value,active:$('mvtActive').value,notes:$('mvtNotes').value.trim(),retain:$('mvtRetain').value,effective:$('mvtEffective').value,zeroValued:$('mvtZeroValued').value,optional:$('mvtOptional').value,narrPerLedger:$('mvtNarrPerLedger').value,printAfter:$('mvtPrintAfter').value,whatsapp:$('mvtWhatsapp').value,customBill:$('mvtCustomBill').value,className:$('mvtClass').value.trim(),unused:$('mvtUnused').value,pos:$('mvtPos').value,template:$('mvtTpl').value,defTitle:$('mvtDefTitle').value.trim(),defBank:$('mvtDefBank').value,jurisdiction:$('mvtJur').value.trim(),declaration:$('mvtDecl').value,terms:$('mvtTerms').value,alloc:$('mvtAlloc').value,addCost:$('mvtAddCost').value,mfg:$('mvtMfg').value}}
-  function fill(o){$('mvtName').value=o?.name||'';$('mvtNameAlias').value=o?.nameAlias||'';$('mvtAlias').value=o?.alias||'';$('mvtCategory').value=o?.category||'Accounting';$('mvtBase').value=o?.base||'None';$('mvtNumberingEnabled').value=o?.numberingEnabled||'Yes';$('mvtNumbering').value=o?.numbering||'Automatic';$('mvtStartNo').value=o?.startNo||1;$('mvtDateMode').value=o?.dateMode||'Current FY';$('mvtPrefix').value=o?.prefix||'';$('mvtSuffix').value=o?.suffix||'';$('mvtSeparator').value=o?.separator??'/';$('mvtPadding').value=o?.padding||2;$('mvtYearPosition').value=o?.yearPosition||'suffix';$('mvtAnnualReset').value=o?.annualReset||'Yes';$('mvtPrintTitle').value=o?.printTitle||'';$('mvtNarration').value=o?.narration||'Optional';$('mvtParty').value=o?.party||'Allowed';$('mvtInventory').value=o?.inventory||'Not Required';$('mvtActive').value=o?.active||'Active';$('mvtNotes').value=o?.notes||'';$('mvtRetain').value=o?.retain||'Yes';$('mvtEffective').value=o?.effective||'No';$('mvtZeroValued').value=o?.zeroValued||'No';$('mvtOptional').value=o?.optional||'No';$('mvtNarrPerLedger').value=o?.narrPerLedger||'No';$('mvtPrintAfter').value=o?.printAfter||'No';$('mvtWhatsapp').value=o?.whatsapp||'No';$('mvtCustomBill').value=o?.customBill||'No';$('mvtClass').value=o?.className||'';$('mvtUnused').value=o?.unused||'No';$('mvtPos').value=o?.pos||'No';$('mvtTpl').value=o?.template||'Not Applicable';$('mvtDefTitle').value=o?.defTitle||'';$('mvtDefBank').value=o?.defBank||'Not Applicable';$('mvtJur').value=o?.jurisdiction||'';$('mvtDecl').value=o?.declaration||'No';$('mvtTerms').value=o?.terms||'No';$('mvtAlloc').value=o?.alloc||'No';$('mvtAddCost').value=o?.addCost||'No';$('mvtMfg').value=o?.mfg||'No';currentBase=o?.base||'None';applyNumberingVisibility();applyBaseVisibility()}
-  function applyConfig(){const c=getCfg();const aliasBox=$('mvtNameAlias');if(aliasBox)aliasBox.style.display=c.alias?'':'none';const aliasLab=document.querySelector('label[for="mvtNameAlias"]');if(aliasLab)aliasLab.style.display=c.alias?'':'none';const row=(id,on)=>{const el=$(id);if(el)el.style.display=on?'':'none'};row('rowAbbr',c.abbr);row('rowMethod',c.method);row('rowEffective',c.effective);row('rowZero',c.zero);row('rowOptional',c.optional);row('rowNarr',c.narr);row('rowNarrLedger',c.narrLedger);row('rowWhats',c.whats);row('rowPrintTitle',c.print);row('rowPrintAfter',c.print);row('rowClass',c.class);const ph=$('mvtPrintHead');if(ph)ph.style.display=c.print?'':'none';const ch=$('mvtClassHead');if(ch)ch.style.display=c.class?'':'none';document.querySelectorAll('#mayaacc-voucher-type-config .mvtc-ext').forEach(el=>{el.style.display=c.showMore?'':'none'});applyNumberingVisibility();applyBaseVisibility()}
+  function capture(){return{name:$('mvtName').value.trim(),category:$('mvtCategory').value,base:$('mvtBase').value,numberingEnabled:$('mvtNumberingEnabled').value,numbering:$('mvtNumbering').value,startNo:Math.max(1,Number($('mvtStartNo').value)||1),prefix:$('mvtPrefix').value.trim(),suffix:$('mvtSuffix').value.trim(),separator:$('mvtSeparator').value,padding:Number($('mvtPadding').value)||2,yearPosition:$('mvtYearPosition').value,annualReset:$('mvtAnnualReset').value,printTitle:$('mvtPrintTitle').value.trim(),narration:$('mvtNarration').value,active:$('mvtActive').value,effective:$('mvtEffective').value,zeroValued:$('mvtZeroValued').value,optional:$('mvtOptional').value,narrPerLedger:$('mvtNarrPerLedger').value,printAfter:$('mvtPrintAfter').value,whatsapp:$('mvtWhatsapp').value,unused:$('mvtUnused').value,template:$('mvtTpl').value}}
+  function fill(o){$('mvtName').value=o?.name||'';$('mvtCategory').value=o?.category||'Accounting';$('mvtBase').value=o?.base||'None';$('mvtNumberingEnabled').value=o?.numberingEnabled||'Yes';$('mvtNumbering').value=o?.numbering||'Automatic';$('mvtStartNo').value=o?.startNo||1;$('mvtPrefix').value=o?.prefix||'';$('mvtSuffix').value=o?.suffix||'';$('mvtSeparator').value=o?.separator??'/';$('mvtPadding').value=o?.padding||2;$('mvtYearPosition').value=o?.yearPosition||'suffix';$('mvtAnnualReset').value=o?.annualReset||'Yes';$('mvtPrintTitle').value=o?.printTitle||'';$('mvtNarration').value=o?.narration||'Optional';$('mvtActive').value=o?.active||'Active';$('mvtEffective').value=o?.effective||'No';$('mvtZeroValued').value=o?.zeroValued||'No';$('mvtOptional').value=o?.optional||'No';$('mvtNarrPerLedger').value=o?.narrPerLedger||'No';$('mvtPrintAfter').value=o?.printAfter||'No';$('mvtWhatsapp').value=o?.whatsapp||'No';$('mvtUnused').value=o?.unused||'No';$('mvtTpl').value=TPL_NAMES.includes(o?.template)?o.template:'Not Applicable';currentBase=o?.base||'None';applyNumberingVisibility();applyBaseVisibility()}
+  function applyConfig(){const c=getCfg();const row=(id,on)=>{const el=$(id);if(el)el.style.display=on?'':'none'};row('rowMethod',c.method);row('rowEffective',c.effective);row('rowZero',c.zero);row('rowOptional',c.optional);row('rowNarr',c.narr);row('rowNarrLedger',c.narrLedger);row('rowWhats',c.whats);row('rowPrintTitle',c.print);row('rowPrintAfter',c.print);row('rowBank',c.print);row('rowTpl',c.print);const ph=$('mvtPrintHead');if(ph)ph.style.display=c.print?'':'none';document.querySelectorAll('#mayaacc-voucher-type-config .mvtc-ext').forEach(el=>{el.style.display=c.showMore?'':'none'});applyNumberingVisibility();applyBaseVisibility()}
   function financialYear(){const c=typeof getCompanies==='function'?getCompanies().find(x=>x.id===companyId()):null;const s=c?.fyStart;let y=s?new Date(s+'T00:00:00').getFullYear():new Date().getFullYear();const now=new Date();if(!s&&now.getMonth()<3)y--;return String(y)+'-'+String((y+1)%100).padStart(2,'0')}
   function formatExample(){const serial=String(Math.max(1,Number($('mvtStartNo').value)||1)).padStart(Number($('mvtPadding').value)||2,'0');let pre=$('mvtPrefix').value||'';const suf=$('mvtSuffix').value||'',sep=$('mvtSeparator').value??'/',fy=financialYear(),pos=$('mvtYearPosition').value;if(sep&&pre.endsWith(sep))pre=pre.slice(0,pre.length-sep.length);const parts=[];if(pos==='prefix')parts.push(fy);if(pre)parts.push(pre);parts.push(serial);if(pos==='suffix')parts.push(fy);return parts.join(sep)+suf}
   function applyNumberingVisibility(){const on=$('mvtNumberingEnabled')?.value==='Yes';document.querySelectorAll('.mvt-numbering-field').forEach(el=>el.style.display=on?'':'none');if($('mvtFormatPreview'))$('mvtFormatPreview').textContent=on?formatExample():'Numbering not required';}
-  /* Per-type dynamic behaviour (run #30). VERIFIED from Sandeep's Tally screenshots
-     (2026-11-24): Sales only. Other sets INFERRED from Tally help
-     (help.tallysolutions.com — Creating Voucher Types). "Provide narrations for each
-     ledger" is NOT available for Delivery Note, Receipt Note, Sales Order, Purchase
-     Order, Physical Stock, Stock Journal. "Track Additional Costs for Purchases"
-     applies to Purchase, Journal, Payment, Physical Stock. "Default template to
-     print" applies to Sales, Sales Order, Delivery Note, Credit Note, Debit Note.
-     "Default title / bank / jurisdiction" — Sales only. "Use as Manufacturing
-     Journal" for Stock Journal (Tally knowledge + run #29 F12 toggle). */
-  const TYPE_BEHAVIOUR={'Sales':{sales:true},'Purchase':{addCost:true},'Credit Note':{printTemplate:true},'Debit Note':{printTemplate:true},'Delivery Note':{printTemplate:true,hideNarrLedger:true},'Receipt Note':{hideNarrLedger:true},'Sales Order':{printTemplate:true,hideNarrLedger:true},'Purchase Order':{hideNarrLedger:true},'Physical Stock':{hideNarrLedger:true,addCost:true},'Stock Journal':{hideNarrLedger:true,mfgJournal:true},'Journal':{addCost:true},'Payment':{addCost:true}};
+  /* Per-type dynamic behaviour (run #33 cleanup). The only surviving
+     per-type dynamic rule is hiding "Provide narrations for each ledger"
+     for Delivery Note, Receipt Note, Sales Order, Purchase Order, Physical
+     Stock and Stock Journal (Tally-verified, run #30). All other dynamic
+     rows (Additional Costs, Manufacturing Journal, POS, print template /
+     title / bank / jurisdiction, declaration, terms, default allocations)
+     were REMOVED, so their flags are gone too. */
+  const TYPE_BEHAVIOUR={'Delivery Note':{hideNarrLedger:true},'Receipt Note':{hideNarrLedger:true},'Sales Order':{hideNarrLedger:true},'Purchase Order':{hideNarrLedger:true},'Physical Stock':{hideNarrLedger:true},'Stock Journal':{hideNarrLedger:true}};
   const STD_FALLBACK=[{name:'Contra',category:'Accounting',abbr:'Ctr'},{name:'Credit Note',category:'Accounting',abbr:'CrN'},{name:'Debit Note',category:'Accounting',abbr:'DbN'},{name:'Delivery Note',category:'Inventory',abbr:'DlN'},{name:'Journal',category:'Accounting',abbr:'Jrn'},{name:'Payment',category:'Accounting',abbr:'Pmt'},{name:'Physical Stock',category:'Inventory',abbr:'PhS'},{name:'Purchase',category:'Accounting',abbr:'Pur'},{name:'Purchase Order',category:'Order',abbr:'POr'},{name:'Receipt',category:'Accounting',abbr:'Rct'},{name:'Receipt Note',category:'Inventory',abbr:'RcN'},{name:'Sales',category:'Accounting',abbr:'Sale'},{name:'Sales Order',category:'Order',abbr:'SOr'},{name:'Stock Journal',category:'Inventory',abbr:'StJ'}];
   let currentBase='None',tlItems=[],tlSel=0,tlOpen=false;
   function stdTypes(){try{const B=window.MayaBooks||MayaBooks;if(B&&typeof B.ensureStandardVoucherTypes==='function'){const list=B.ensureStandardVoucherTypes(B.cid());const std=list.filter(x=>x&&x.system).map(x=>({name:x.name,category:x.category||'Accounting',abbr:x.name==='Sales'?'Sale':(x.alias||'')}));if(std.length)return std;}}catch(e){}return STD_FALLBACK.slice();}
@@ -4909,15 +4868,15 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   function resolveBaseName(name){const c=customTypes().find(x=>String(x.name)===String(name));return c?(String(c.base||'').trim()||'None'):name;}
   function baseBehaviour(name){return TYPE_BEHAVIOUR[resolveBaseName(name)]||{};}
   function setRowVis(id,show){const el=$(id);if(el)el.style.display=show?'':'none';}
-  function applyBaseVisibility(){const b=baseBehaviour(currentBase);const c=getCfg();const isSales=resolveBaseName(currentBase)==='Sales';setRowVis('rowNarrLedger',!!c.narrLedger&&!b.hideNarrLedger);setRowVis('rowAddCost',!!b.addCost);setRowVis('rowMfg',!!b.mfgJournal);setRowVis('rowPrintTitle',!!c.print&&!isSales);setRowVis('rowPos',isSales);setRowVis('rowTpl',isSales||!!b.printTemplate);setRowVis('rowDefTitle',isSales);setRowVis('rowDefBank',isSales);setRowVis('rowJur',isSales);setRowVis('rowDecl',isSales);setRowVis('rowTerms',isSales);setRowVis('rowAlloc',isSales);}
-  function applyBaseType(name,opts){opts=opts||{};const prev=currentBase;currentBase=name;const fb=$('mvtBase');if(fb)fb.value=name;const custom=customTypes().find(x=>String(x.name)===String(name));const std=stdTypes().find(t=>t.name===name);if(name==='None'){$('mvtAlias').value='';}else if(custom){$('mvtAlias').value=custom.alias||'';const bt=stdTypes().find(t=>t.name===String(custom.base||'').trim());if(bt)$('mvtCategory').value=bt.category;}else if(std){$('mvtAlias').value=std.abbr;$('mvtCategory').value=std.category;}applyBaseVisibility();if(!opts.silent&&name!==prev)dirty=true;}
+  function applyBaseVisibility(){const b=baseBehaviour(currentBase);const c=getCfg();const isSales=resolveBaseName(currentBase)==='Sales';setRowVis('rowNarrLedger',!!c.narrLedger&&!b.hideNarrLedger);setRowVis('rowPrintTitle',!!c.print&&!isSales);}
+  function applyBaseType(name,opts){opts=opts||{};const prev=currentBase;currentBase=name;const fb=$('mvtBase');if(fb)fb.value=name;const custom=customTypes().find(x=>String(x.name)===String(name));const std=stdTypes().find(t=>t.name===name);if(custom){const bt=stdTypes().find(t=>t.name===String(custom.base||'').trim());if(bt)$('mvtCategory').value=bt.category;}else if(std){$('mvtCategory').value=std.category;}applyBaseVisibility();if(!opts.silent&&name!==prev)dirty=true;}
   function buildTypeList(){const std=stdTypes().sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));const customs=customTypes().sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));tlItems=[{name:'None',sub:'No base type — basic options',custom:false}];std.forEach(t=>tlItems.push({name:t.name,sub:t.category+' · entry screen available',custom:false}));customs.forEach(c=>tlItems.push({name:c.name,sub:'Custom · based on '+(String(c.base||'').trim()||'None'),custom:true}));const list=$('mvtTypeListBody');if(!list)return;let html='',customStarted=false;tlItems.forEach((it,i)=>{if(it.custom&&!customStarted){html+='<div class="mvt-tl-sub">Custom Types</div>';customStarted=true;}html+='<div class="mvt-tl-it'+(it.name===currentBase?' cur':'')+'" data-i="'+i+'">'+esc(it.name)+'<small>'+esc(it.sub)+(it.name===currentBase?' · current':'')+'</small></div>';});list.innerHTML=html;tlSel=Math.max(0,tlItems.findIndex(it=>it.name===currentBase));paintTlSel();}
   function paintTlSel(){const rows=[...document.querySelectorAll('#mvtTypeListBody .mvt-tl-it')];rows.forEach((r,i)=>r.classList.toggle('sel',i===tlSel));const on=rows[tlSel];if(on&&on.scrollIntoView)on.scrollIntoView({block:'nearest'});}
   function openTypeList(){buildTypeList();const p=$('mvtTypeList');if(!p)return;p.classList.add('open');tlOpen=true;}
   function closeTypeList(){const p=$('mvtTypeList');if(p)p.classList.remove('open');tlOpen=false;}
-  function pickType(i){const it=tlItems[i];if(!it)return;closeTypeList();applyBaseType(it.name);setTimeout(()=>{const a=$('mvtAlias');if(a){a.focus();a.select();}},0);}
+  function pickType(i){const it=tlItems[i];if(!it)return;closeTypeList();applyBaseType(it.name);setTimeout(()=>{const a=$('mvtActive');if(a)a.focus();},0);}
   function clear(){fill({});dirty=false}
-  function validate(){const o=capture(),n=o.name.toLowerCase();if(!o.name){alert('Please enter Voucher Type Name.');$('mvtName').focus();return false}if(read().some(x=>String(x.name||'').trim().toLowerCase()===n)){alert('A Voucher Type with this name already exists in this company.');$('mvtName').focus();return false}if(!/^[\w .&/-]{1,30}$/i.test(o.name)){alert('Use 1–30 characters for Voucher Type Name.');$('mvtName').focus();return false}if(o.alias&&!/^[A-Za-z0-9 ._-]{1,12}$/.test(o.alias)){alert('Abbreviation can contain letters, numbers, spaces, dot, underscore and hyphen only.');$('mvtAlias').focus();return false}return true}
+  function validate(){const o=capture(),n=o.name.toLowerCase();if(!o.name){alert('Please enter Voucher Type Name.');$('mvtName').focus();return false}if(read().some(x=>String(x.name||'').trim().toLowerCase()===n)){alert('A Voucher Type with this name already exists in this company.');$('mvtName').focus();return false}if(!/^[\w .&/-]{1,30}$/i.test(o.name)){alert('Use 1–30 characters for Voucher Type Name.');$('mvtName').focus();return false}return true}
   function ask(mode='save'){if(!validate())return;pending=mode;const n=$('mvtName').value.trim();$('mvtConfirmText').textContent='Save “'+n+'” (based on '+$('mvtBase').value+') as a Voucher Type in the current company?';$('mvtConfirm').style.display='flex'}
   function commit(){if(!validate())return;const o=capture(),a=read();a.push({...o,id:'VTP-'+Date.now(),createdAt:new Date().toISOString()});write(a);$('mvtConfirm').style.display='none';dirty=false;if(pending==='new'){clear();$('mvtName').focus()}else close()}
   function getFormConfig(){const c=getCfg();CFGKEYS.forEach(k=>{const el=$(CFGIDS[k]);if(el)c[k]=el.checked});return c;}
@@ -4931,17 +4890,18 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   function saveConfig(){saveConfigForm();const st=$('mvtcStatus');if(st)st.textContent='Configuration saved for '+companyName()+'.';configClose()}
   function resetConfig(){saveCfg({...defaults});const c=getCfg();CFGKEYS.forEach(k=>{const el=$(CFGIDS[k]);if(el)el.checked=!!c[k]});syncConfigValues();applyConfig();syncCfgIndicators();alert('Voucher Type configuration reset to defaults.')}
   function changeCompany(){if(dirty&&!confirm('This Voucher Type has unsaved changes. Change company and discard the current entry?'))return;close(false);if(typeof showCompanySelect==='function')showCompanySelect()}
-  function printVoucherType(){const o=capture(),row=(l,v)=> (v||'')?'<div class="r"><span>'+esc(l)+'</span><strong>'+esc(v||'—')+'</strong></div>':'';const html='<!doctype html><html><head><meta charset="utf-8"><title>MAYAACC Voucher Type</title><style>body{font-family:Arial,sans-serif;margin:40px;color:#172033}h1{font-size:22px;margin:0 0 4px}p{font-size:12px;color:#687286;margin:0 0 24px}.box{max-width:780px;border:1px solid #dfe4ec;border-radius:10px;padding:18px}.r{display:flex;justify-content:space-between;gap:30px;padding:9px 0;border-bottom:1px solid #edf0f4;font-size:12px}.r:last-child{border-bottom:0}</style></head><body><h1>'+esc(o.name||'Voucher Type')+'</h1><p>MAYAACC • '+esc(companyName())+'</p><div class="box">'+row('Name',o.name)+row('(alias)',o.nameAlias)+row('Abbreviation',o.alias)+row('Category',o.category)+row('Based On',o.base)+row('Numbering',o.numberingEnabled==='Yes'?o.numbering:'Not Required')+row('Starting Number',o.startNo)+row('Number Format',formatExample())+row('Annual Reset',o.annualReset)+row('Date Control',o.dateMode)+row('Prefix',o.prefix)+row('Suffix',o.suffix)+row('Narration',o.narration)+row('Party / Ledger',o.party)+row('Inventory',o.inventory)+row('Status',o.active)+row('Print after saving',o.printAfter)+row('WhatsApp after saving',o.whatsapp)+row('Name of Class',o.className)+row('Notes',o.notes)+'</div></body></html>';const w=window.open('','_blank','width=860,height=700');if(!w){alert('Please allow popups to use Print Preview.');return}w.document.write(html);w.document.close()}
+  function printVoucherType(){const o=capture(),row=(l,v)=> (v||'')?'<div class="r"><span>'+esc(l)+'</span><strong>'+esc(v||'—')+'</strong></div>':'';const html='<!doctype html><html><head><meta charset="utf-8"><title>MAYAACC Voucher Type</title><style>body{font-family:Arial,sans-serif;margin:40px;color:#172033}h1{font-size:22px;margin:0 0 4px}p{font-size:12px;color:#687286;margin:0 0 24px}.box{max-width:780px;border:1px solid #dfe4ec;border-radius:10px;padding:18px}.r{display:flex;justify-content:space-between;gap:30px;padding:9px 0;border-bottom:1px solid #edf0f4;font-size:12px}.r:last-child{border-bottom:0}</style></head><body><h1>'+esc(o.name||'Voucher Type')+'</h1><p>MAYAACC • '+esc(companyName())+'</p><div class="box">'+row('Name',o.name)+row('Category',o.category)+row('Based On',o.base)+row('Numbering',o.numberingEnabled==='Yes'?o.numbering:'Not Required')+row('Starting Number',o.startNo)+row('Number Format',formatExample())+row('Annual Reset',o.annualReset)+row('Prefix',o.prefix)+row('Suffix',o.suffix)+row('Narration',o.narration)+row('Status',o.active)+row('Print after saving',o.printAfter)+row('WhatsApp after saving',o.whatsapp)+row('Default template to print',o.template)+'</div></body></html>';const w=window.open('','_blank','width=860,height=700');if(!w){alert('Please allow popups to use Print Preview.');return}w.document.write(html);w.document.close()}
   function toggleMore(){var m=$('mvtMore');if(m)m.classList.toggle('on')}
-  function open(){if(window.__mayaRecordReturn)window.__mayaRecordReturn('Voucher Type');if(typeof closeCreateMaster==='function')closeCreateMaster();configClose();closeTypeList();$('mayaacc-voucher-type-overlay').style.display='block';$('mayaacc-voucher-type-overlay').setAttribute('aria-hidden','false');$('mvtConfirm').style.display='none';const chip=$('mvtCompanyChip');if(chip){let nm='';try{const a=JSON.parse(localStorage.getItem('mayaacc_companies')||'[]');const c=a.find(x=>String(x.id)===String(companyId()));nm=(c&&(c.companyName||c.name))||'';}catch(e){}chip.textContent=nm||'Current Company';}if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-voucher-type-overlay .mvt-main');clear();applyConfig();setTimeout(()=>$('mvtName').focus(),20)}
+  function open(){if(window.__mayaRecordReturn)window.__mayaRecordReturn('Voucher Type');if(typeof closeCreateMaster==='function')closeCreateMaster();configClose();closeTypeList();$('mayaacc-voucher-type-overlay').style.display='block';$('mayaacc-voucher-type-overlay').setAttribute('aria-hidden','false');$('mvtConfirm').style.display='none';const chip=$('mvtCompanyChip');if(chip){let nm='';try{const a=JSON.parse(localStorage.getItem('mayaacc_companies')||'[]');const c=a.find(x=>String(x.id)===String(companyId()));nm=(c&&(c.companyName||c.name))||'';}catch(e){}chip.textContent=nm||'Current Company';}if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-voucher-type-overlay .mvt-main');clear();loadVch();syncBankField();applyConfig();setTimeout(()=>$('mvtName').focus(),20)}
   function close(returnToMenu){configClose();closeTypeList();$('mvtConfirm').style.display='none';$('mayaacc-voucher-type-overlay').style.display='none';$('mayaacc-voucher-type-overlay').setAttribute('aria-hidden','true');dirty=false;if(returnToMenu!==false&&window.__mayaReturnToMenu)window.__mayaReturnToMenu()}
-  function prevMvtField(curId){const order=['mvtName','mvtNameAlias','mvtBase','mvtAlias','mvtActive','mvtNumbering','mvtUnused','mvtRetain','mvtEffective','mvtZeroValued','mvtOptional','mvtNarration','mvtNarrPerLedger','mvtAddCost','mvtMfg','mvtCategory','mvtParty','mvtInventory','mvtDateMode','mvtNotes','mvtNumberingEnabled','mvtStartNo','mvtPrefix','mvtSuffix','mvtSeparator','mvtPadding','mvtYearPosition','mvtAnnualReset','mvtPrintTitle','mvtPrintAfter','mvtPos','mvtTpl','mvtDefTitle','mvtDefBank','mvtJur','mvtDecl','mvtTerms','mvtClass','mvtAlloc','mvtWhatsapp','mvtCustomBill'];const i=order.indexOf(curId);if(i<0)return null;for(let j=i-1;j>=0;j--){const el=$(order[j]);if(!el||el.disabled)continue;const cs=getComputedStyle(el);if(cs.display==='none'||cs.visibility==='hidden')continue;const w=el.closest('.mvt-field');if(w){const ws=getComputedStyle(w);if(ws.display==='none'||ws.visibility==='hidden')continue;}if(el.offsetWidth<=0||el.offsetHeight<=0)continue;return el;}return null;}
+  function prevMvtField(curId){const order=['mvtName','mvtBase','mvtActive','mvtNumbering','mvtUnused','mvtEffective','mvtZeroValued','mvtOptional','mvtNarration','mvtNarrPerLedger','mvtCategory','mvtNumberingEnabled','mvtStartNo','mvtPrefix','mvtSuffix','mvtSeparator','mvtPadding','mvtYearPosition','mvtAnnualReset','mvtPrintTitle','mvtPrintAfter','mvtBank','mvtTpl','mvtWhatsapp'];const i=order.indexOf(curId);if(i<0)return null;for(let j=i-1;j>=0;j--){const el=$(order[j]);if(!el||el.disabled)continue;const cs=getComputedStyle(el);if(cs.display==='none'||cs.visibility==='hidden')continue;const w=el.closest('.mvt-field');if(w){const ws=getComputedStyle(w);if(ws.display==='none'||ws.visibility==='hidden')continue;}if(el.offsetWidth<=0||el.offsetHeight<=0)continue;return el;}return null;}
   function key(e){if(!shown('mayaacc-voucher-type-overlay'))return;const k=String(e.key||'').toLowerCase();
-    if(shown('mayaacc-voucher-type-config')){if(document.activeElement&&document.activeElement.id==='mvtvBank'){if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();saveConfig();return}if(e.key==='Tab'){e.preventDefault();e.stopImmediatePropagation();return}if(e.key==='Escape'||e.key==='F12'){e.preventDefault();e.stopImmediatePropagation();configClose();return}if(e.ctrlKey&&!e.altKey&&!e.metaKey&&k==='a'){e.preventDefault();e.stopImmediatePropagation();saveConfig();return}if(e.ctrlKey&&!e.altKey&&!e.metaKey&&k==='s'){e.preventDefault();e.stopImmediatePropagation();saveConfigForm();return}return}
-    if(e.key==='Tab'){e.preventDefault();e.stopImmediatePropagation();const _bk=$('mvtvBank');if(_bk)_bk.focus();return}
+    if(shown('mayaacc-voucher-type-config')){
     if(e.key==='Escape'||e.key==='F12'){e.preventDefault();e.stopImmediatePropagation();configClose();return}if(e.ctrlKey&&!e.altKey&&!e.metaKey&&k==='a'){e.preventDefault();e.stopImmediatePropagation();saveConfig();return}if(e.ctrlKey&&!e.altKey&&!e.metaKey&&k==='s'){e.preventDefault();e.stopImmediatePropagation();saveConfigForm();return}if(e.key==='ArrowDown'||e.key==='ArrowUp'){const rs=configRows();if(!rs.length)return;e.preventDefault();e.stopImmediatePropagation();cfgIndex=(cfgIndex<0?(e.key==='ArrowDown'?0:rs.length-1):(cfgIndex+(e.key==='ArrowDown'?1:-1)+rs.length)%rs.length);paintConfig();return}if(e.key==='Enter'||e.key===' '){const rs=configRows();if(!rs.length)return;e.preventDefault();e.stopImmediatePropagation();if(cfgIndex<0)cfgIndex=0;const el=rs[cfgIndex],cb=el.querySelector('input[type="checkbox"]');if(cb){cb.checked=!cb.checked;cb.dispatchEvent(new Event('change',{bubbles:true}))}else el.click();paintConfig();return}return}
     if(tlOpen){if(e.key==='Tab'){closeTypeList();return;}if(e.key==='F10'){e.preventDefault();e.stopImmediatePropagation();closeTypeList();if(window.mayaOpenOtherMasters)window.mayaOpenOtherMasters('Voucher Type');return;}e.preventDefault();e.stopImmediatePropagation();if(e.key==='ArrowDown'||e.key==='ArrowUp'){tlSel=(tlSel+(e.key==='ArrowDown'?1:-1)+tlItems.length)%tlItems.length;paintTlSel();return;}if(e.key==='Enter'||e.key===' '){pickType(tlSel);return;}if(e.key==='Escape'){closeTypeList();const b=$('mvtBase');if(b)b.focus();return;}return;}
+    if(bkOpen){if(e.key==='Tab'){bkClose();return;}if(e.key==='F10'){e.preventDefault();e.stopImmediatePropagation();bkClose();if(window.mayaOpenOtherMasters)window.mayaOpenOtherMasters('Voucher Type');return;}e.preventDefault();e.stopImmediatePropagation();if(e.key==='ArrowDown'||e.key==='ArrowUp'){bkSel=(bkSel+(e.key==='ArrowDown'?1:-1)+bkItems.length)%bkItems.length;paintBk();return;}if(e.key==='Enter'||e.key===' '){bkPick(bkSel);return;}if(e.key==='Escape'){bkClose();const b=$('mvtBank');if(b)b.focus();return;}return;}
     if(document.activeElement===$('mvtBase')&&!tlOpen){if(e.key==='Backspace'){e.preventDefault();e.stopImmediatePropagation();const pv=prevMvtField('mvtBase');if(pv)pv.focus();return;}if(e.key==='Delete'){e.preventDefault();e.stopImmediatePropagation();applyBaseType('None');return;}if(e.key==='ArrowDown'||e.key==='ArrowUp'||e.key===' '){e.preventDefault();e.stopImmediatePropagation();openTypeList();return;}}
+    if(document.activeElement===$('mvtBank')&&!bkOpen){if(e.key==='Backspace'){e.preventDefault();e.stopImmediatePropagation();const pv=prevMvtField('mvtBank');if(pv)pv.focus();return;}if(e.key==='Delete'){e.preventDefault();e.stopImmediatePropagation();bkReset();return;}if(e.key==='Enter'||e.key==='ArrowDown'||e.key==='ArrowUp'||e.key===' '){e.preventDefault();e.stopImmediatePropagation();bkOpenList();return;}}
     const om=$('mlgOtherMasters');
     if(om&&om.style.display==='flex'){if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();if(window.mayaCloseOtherMasters)window.mayaCloseOtherMasters();return;}if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();e.stopImmediatePropagation();const items=[...om.querySelectorAll('.mlg-other-item')];if(!items.length)return;const cur=items.findIndex(el=>el.classList.contains('sel'));const n=(cur+(e.key==='ArrowDown'?1:-1)+items.length)%items.length;items.forEach((el,j)=>el.classList.toggle('sel',j===n));items[n].scrollIntoView({block:'nearest'});return;}if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();const items=[...om.querySelectorAll('.mlg-other-item')];const cur=items.findIndex(el=>el.classList.contains('sel'));if(window.mayaPickOtherMaster)window.mayaPickOtherMaster(cur<0?0:cur);return;}e.preventDefault();e.stopImmediatePropagation();return;}
     const conf=$('mvtConfirm');if(conf&&getComputedStyle(conf).display!=='none'){if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();conf.style.display='none';return}if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();commit();return}return}
@@ -4950,30 +4910,93 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
     if(e.ctrlKey&&!e.altKey&&!e.metaKey&&k==='i'){e.preventDefault();e.stopImmediatePropagation();toggleMore();return}
     if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();window.mayaCloseVoucherType();return}
     if(e.ctrlKey&&!e.altKey&&!e.metaKey&&k==='s'){e.preventDefault();e.stopImmediatePropagation();ask('new');return}
-    if(e.key==='Enter'){if(document.activeElement===$('mvtBase')){e.preventDefault();e.stopImmediatePropagation();openTypeList();return;}const order=['mvtName','mvtNameAlias','mvtBase','mvtAlias','mvtActive','mvtNumbering','mvtUnused','mvtRetain','mvtEffective','mvtZeroValued','mvtOptional','mvtNarration','mvtNarrPerLedger','mvtAddCost','mvtMfg','mvtCategory','mvtParty','mvtInventory','mvtDateMode','mvtNotes','mvtNumberingEnabled','mvtStartNo','mvtPrefix','mvtSuffix','mvtSeparator','mvtPadding','mvtYearPosition','mvtAnnualReset','mvtPrintTitle','mvtPrintAfter','mvtPos','mvtTpl','mvtDefTitle','mvtDefBank','mvtJur','mvtDecl','mvtTerms','mvtClass','mvtAlloc','mvtWhatsapp','mvtCustomBill'];const i=order.indexOf(document.activeElement?.id);if(i>=0){for(let j=i+1;j<order.length;j++){const el=$(order[j]);if(!el||el.disabled)continue;const cs=getComputedStyle(el);if(cs.display==='none'||cs.visibility==='hidden')continue;const w=el.closest('.mvt-field');if(w){const ws=getComputedStyle(w);if(ws.display==='none'||ws.visibility==='hidden')continue;}if(el.offsetWidth<=0||el.offsetHeight<=0)continue;e.preventDefault();e.stopImmediatePropagation();el.focus();return;}}}}
-  document.addEventListener('input',e=>{if(e.target?.id==='mvtvBank'){vchState.bankDefaultLedger=e.target.value;return;}if(e.target?.id?.startsWith('mvt')&&!e.target.id.startsWith('mvtv')){dirty=true}});
-  document.addEventListener('change',e=>{if(e.target?.id?.startsWith('mvtv')){if(e.target.type==='checkbox'){const k=VCHID2KEY[e.target.id];if(k){vchState[k]=e.target.checked;saveVch();syncVchValues();}}else if(e.target.id==='mvtvBank'){vchState.bankDefaultLedger=e.target.value;saveVch();}return;}if(e.target?.id?.startsWith('mvtc')){saveConfigForm();return;}if(e.target?.id?.startsWith('mvt')){dirty=true;if(['mvtNumberingEnabled','mvtPrefix','mvtSuffix','mvtSeparator','mvtPadding','mvtYearPosition','mvtAnnualReset','mvtStartNo'].includes(e.target.id))applyNumberingVisibility()}});
+    if(e.key==='Enter'){if(document.activeElement===$('mvtBase')){e.preventDefault();e.stopImmediatePropagation();openTypeList();return;}const order=['mvtName','mvtBase','mvtActive','mvtNumbering','mvtUnused','mvtEffective','mvtZeroValued','mvtOptional','mvtNarration','mvtNarrPerLedger','mvtCategory','mvtNumberingEnabled','mvtStartNo','mvtPrefix','mvtSuffix','mvtSeparator','mvtPadding','mvtYearPosition','mvtAnnualReset','mvtPrintTitle','mvtPrintAfter','mvtBank','mvtTpl','mvtWhatsapp'];const i=order.indexOf(document.activeElement?.id);if(i>=0){for(let j=i+1;j<order.length;j++){const el=$(order[j]);if(!el||el.disabled)continue;const cs=getComputedStyle(el);if(cs.display==='none'||cs.visibility==='hidden')continue;const w=el.closest('.mvt-field');if(w){const ws=getComputedStyle(w);if(ws.display==='none'||ws.visibility==='hidden')continue;}if(el.offsetWidth<=0||el.offsetHeight<=0)continue;e.preventDefault();e.stopImmediatePropagation();el.focus();return;}}}}
+  document.addEventListener('input',e=>{if(e.target?.id?.startsWith('mvt')&&!e.target.id.startsWith('mvtv')){dirty=true}});
+  document.addEventListener('change',e=>{if(e.target?.id?.startsWith('mvtv')){if(e.target.type==='checkbox'){const k=VCHID2KEY[e.target.id];if(k){vchState[k]=e.target.checked;saveVch();syncVchValues();}}return;}if(e.target?.id?.startsWith('mvtc')){saveConfigForm();return;}if(e.target?.id?.startsWith('mvt')){dirty=true;if(['mvtNumberingEnabled','mvtPrefix','mvtSuffix','mvtSeparator','mvtPadding','mvtYearPosition','mvtAnnualReset','mvtStartNo'].includes(e.target.id))applyNumberingVisibility()}});
   document.addEventListener('mousedown',e=>{if(e.target===$('mayaacc-voucher-type-overlay'))close()});
   document.addEventListener('mousedown',e=>{if(tlOpen&&!(e.target.closest&&e.target.closest('.mvt-picker-field')))closeTypeList();});
-  $('mvtBase').addEventListener('mousedown',e=>{if(e.button!==0)return;e.preventDefault();$('mvtBase').focus();if(tlOpen)closeTypeList();else openTypeList();});
-  document.addEventListener('click',e=>{const it=e.target.closest('#mvtTypeListBody .mvt-tl-it');if(it){pickType(+it.getAttribute('data-i'));return;}});
+  $('mvtBase').addEventListener('mousedown',e=>{if(e.button!==0)return;e.preventDefault();bkClose();$('mvtBase').focus();if(tlOpen)closeTypeList();else openTypeList();});
+  $('mvtBank').addEventListener('mousedown',e=>{if(e.button!==0)return;e.preventDefault();closeTypeList();$('mvtBank').focus();if(bkOpen)bkClose();else bkOpenList();});
+  document.addEventListener('mousedown',e=>{if(bkOpen&&!(e.target.closest&&e.target.closest('.mvt-picker-field')))bkClose();});
+  document.addEventListener('click',e=>{const it=e.target.closest('#mvtTypeListBody .mvt-tl-it');if(it){pickType(+it.getAttribute('data-i'));return;}const bk=e.target.closest('#mvtBankListBody .mvt-tl-it');if(bk){bkPick(+bk.getAttribute('data-i'));return;}});
+  /* ---------- Default bank / cash ledger DROPDOWN (run #33, Sandeep
+     2026-11-26) — moved OUT of the F12 box onto the screen's PRINTING
+     section. Same inline-dropdown pattern as Based On: opens BELOW the
+     field, arrows move, Enter/Space pick, Esc closes + refocuses,
+     click-outside closes, Delete resets to Not Applicable. No typing:
+     the list shows the created bank/cash ledgers — Cash (Cash-in-Hand)
+     + every ledger under Bank Accounts in the current company. The value
+     stays in the same per-type store (mayaacc_vchcfg_<cid>_<type>
+     .bankDefaultLedger) the F12 box used to own. */
+  let bkItems=[],bkSel=0,bkOpen=false;
+  function bankOptions(){
+    const opts=[{name:'Not Applicable',sub:'No default bank / cash ledger'}];
+    try{
+      let all=[];
+      const B=window.MayaBooks||null;
+      if(B&&typeof B.ledgers==='function')all=B.ledgers(companyId())||[];
+      else all=JSON.parse(localStorage.getItem('mayaacc_ledgers_'+companyId())||'[]');
+      (all||[]).forEach(l=>{if(l&&l.name==='Cash'&&String(l.under||'')==='Cash-in-Hand')opts.push({name:l.name,sub:'Cash-in-Hand'});});
+      (all||[]).forEach(l=>{if(l&&String(l.under||'')==='Bank Accounts')opts.push({name:l.name,sub:'Bank Accounts'});});
+    }catch(e){}
+    return opts;
+  }
+  function bkListEl(){return $('mvtBankList');}
+  function bkClose(){const l=bkListEl();if(l)l.classList.remove('open');bkOpen=false;}
+  function bkOpenList(){
+    const list=bkListEl();if(!list)return;
+    bkClose();
+    syncBankField();
+    bkItems=bankOptions();
+    const body=$('mvtBankListBody');if(!body)return;
+    body.innerHTML=bkItems.map((it,i)=>'<div class="mvt-tl-it" data-i="'+i+'">'+esc(it.name)+'<small>'+esc(it.sub)+'</small></div>').join('');
+    bkOpen=true;bkSel=0;
+    for(let k=0;k<bkItems.length;k++){if(bkItems[k].name===$('mvtBank').value){bkSel=k;break;}}
+    list.classList.add('open');paintBk();
+  }
+  function paintBk(){
+    const rows=[...document.querySelectorAll('#mvtBankListBody .mvt-tl-it')];
+    rows.forEach((r,i)=>r.classList.toggle('sel',i===bkSel));
+    const on=rows[bkSel];if(on&&on.scrollIntoView)on.scrollIntoView({block:'nearest'});
+  }
+  function bkPick(i){
+    const it=bkItems[i];if(!it)return;
+    bkClose();
+    if(vchEntryType()!==vchType)loadVch();
+    $('mvtBank').value=it.name;
+    vchState.bankDefaultLedger=it.name==='Not Applicable'?'':it.name;
+    saveVch();
+    $('mvtBank').focus();
+  }
+  function bkReset(){
+    if(vchEntryType()!==vchType)loadVch();
+    $('mvtBank').value='Not Applicable';vchState.bankDefaultLedger='';saveVch();
+  }
+  function syncBankField(){
+    if(!vchLoaded||vchEntryType()!==vchType)loadVch();
+    const el=$('mvtBank');if(!el)return;
+    const opts=bankOptions().map(o=>o.name);
+    let v=vchState.bankDefaultLedger||'';
+    if(v&&opts.indexOf(v)<0){v='';vchState.bankDefaultLedger='';saveVch();}
+    el.value=v||'Not Applicable';
+  }
   /* Section 2 belongs to the type named in the Name field: reload it if the
      name changes while the box is open. GUARD: reload ONLY when the type
      actually changed — an unguarded reload on every Name blur would reset a
      Section 2 row the user just toggled (and, with a DOM rebuild, swallow
      the click that follows the blur). */
-  $('mvtName').addEventListener('change',()=>{if(shown('mayaacc-voucher-type-config')&&vchEntryType()!==vchType){loadVch();syncCfgIndicators();}});
+  $('mvtName').addEventListener('change',()=>{if(vchEntryType()!==vchType){loadVch();syncBankField();if(shown('mayaacc-voucher-type-config'))syncCfgIndicators();}});
   document.addEventListener('click',e=>{const row=e.target.closest('#mayaacc-voucher-type-config .mlgc-option');if(row&&shown('mayaacc-voucher-type-config')){const rs=configRows(),i=rs.indexOf(row);if(i>=0){cfgIndex=i;paintConfig()}}});
   document.addEventListener('keydown',key,true);
   (function(){var _cb=document.querySelector('#mayaacc-voucher-type-config .mlgc-body');if(_cb)_cb.addEventListener('scroll',syncCfgIndicators);})();
-  window.mayaCloseVoucherTypeLists=closeTypeList;window.mayaOpenVoucherType=open;window.mayaCloseVoucherType=function(after){var _done=function(){close(true);if(typeof after==='function')after();};if(window.__mayaFormDirty&&window.__mayaFormDirty('Voucher Type')){if(window.__mayaAskQuit)window.__mayaAskQuit('Voucher Type',_done);else _done();}else _done();};window.mayaCloseVoucherTypeRaw=close;window.mayaSaveVoucherType=ask;window.mayaConfirmVoucherTypeSave=commit;window.mayaCloseVoucherTypeConfirm=()=>{$('mvtConfirm').style.display='none'};window.mayaOpenVoucherTypeConfig=configOpen;window.mayaCloseVoucherTypeConfig=configClose;window.mayaSaveVoucherTypeConfig=saveConfig;window.mayaResetVoucherTypeConfig=resetConfig;window.mayaVoucherTypeChangeCompany=changeCompany;window.mayaPrintVoucherType=printVoucherType;window.mayaToggleVoucherTypeMore=toggleMore;
+  window.mayaCloseVoucherTypeLists=function(){closeTypeList();bkClose();};window.mayaOpenVoucherType=open;window.mayaCloseVoucherType=function(after){var _done=function(){close(true);if(typeof after==='function')after();};if(window.__mayaFormDirty&&window.__mayaFormDirty('Voucher Type')){if(window.__mayaAskQuit)window.__mayaAskQuit('Voucher Type',_done);else _done();}else _done();};window.mayaCloseVoucherTypeRaw=close;window.mayaSaveVoucherType=ask;window.mayaConfirmVoucherTypeSave=commit;window.mayaCloseVoucherTypeConfirm=()=>{$('mvtConfirm').style.display='none'};window.mayaOpenVoucherTypeConfig=configOpen;window.mayaCloseVoucherTypeConfig=configClose;window.mayaSaveVoucherTypeConfig=saveConfig;window.mayaResetVoucherTypeConfig=resetConfig;window.mayaVoucherTypeChangeCompany=changeCompany;window.mayaPrintVoucherType=printVoucherType;window.mayaToggleVoucherTypeMore=toggleMore;
   const old=window.createMasterAction;window.createMasterAction=function(name){if(name==='Voucher Type'){open();return}return typeof old==='function'?old.apply(this,arguments):undefined};
 })();
 </script>
 <script id="mayaacc-voucher-type-return-guard">
 (function(){
   const shown=id=>{const e=document.getElementById(id);if(!e)return false;const s=getComputedStyle(e);return s.display!=='none'&&s.visibility!=='hidden'&&e.getAttribute('aria-hidden')!=='true'};
-  window.addEventListener('keydown',function(e){if(!shown('mayaacc-voucher-type-overlay'))return;if(shown('mayaacc-voucher-type-config')||shown('mvtConfirm'))return;var _f3=document.getElementById('maya-f3-menu');if(_f3&&_f3.style.display==='block')return;var _om=document.getElementById('mlgOtherMasters');if(_om&&_om.style.display==='flex')return;if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();window.mayaCloseVoucherType();}},true);
+  window.addEventListener('keydown',function(e){if(!shown('mayaacc-voucher-type-overlay'))return;if(shown('mayaacc-voucher-type-config')||shown('mvtConfirm'))return;var _f3=document.getElementById('maya-f3-menu');if(_f3&&_f3.style.display==='block')return;var _om=document.getElementById('mlgOtherMasters');if(_om&&_om.style.display==='flex')return;/* run #33: an open inline dropdown (Based On / Default bank) owns Escape — let the event through to the module's key() so Esc closes the list and refocuses the field instead of quitting the form. The guard runs on window capture, before the module's document-capture key(). */if(shown('mvtTypeList')||shown('mvtBankList'))return;if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();window.mayaCloseVoucherType();}},true);
 })();
 </script>
 
@@ -5533,9 +5556,6 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
    ledger input. Same row style as Section 1; NOT .mvtc-ext, so Show-more
    never hides it. */
 #mayaacc-voucher-type-config .mvtc-sec-head{font-size:11px;font-weight:700;letter-spacing:1px;color:#78869a;text-transform:uppercase;padding:12px 8px 4px;border-top:1px solid #e6ebf2;margin-top:6px}
-#mayaacc-voucher-type-config .mvtc-bank{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 8px;font-size:13px;border-bottom:1px solid #f0f2f6}
-#mayaacc-voucher-type-config .mvtc-bank input{width:200px;height:27px;border:1px solid #9aa3ad;border-radius:2px;padding:0 8px;font-size:13px}
-#mayaacc-voucher-type-config .mvtc-bank input:focus{border-color:#2f6fd0;outline:none;box-shadow:0 0 0 3px rgba(47,111,208,.15)}
 #mayaacc-voucher-type-config .mlgc-ind{position:absolute;right:10px;font-size:11px;color:#7a8798;font-weight:700;z-index:3;pointer-events:none}
 #mayaacc-voucher-type-config .mlgc-ind.top{top:60px}
 #mayaacc-voucher-type-config .mlgc-ind.bot{bottom:64px}
@@ -5876,6 +5896,11 @@ body.maya-alter-stock-open #mayaacc-stock-overlay{z-index:110000!important}
   function effective(v,asOf){
     if(!v||v.cancelled||v.optional)return false;
     if(v.postdated&&v.date>(asOf||today()))return false;
+    /* run #33: a voucher with an Effective Date (Voucher Type setting
+       "Use effective dates") takes effect only on/after that date — as of
+       an earlier date it does not count in balances and reports. Vouchers
+       without an effective date are unaffected. */
+    if(v.effectiveDate&&asOf&&v.effectiveDate>asOf)return false;
     return true;
   }
   function openingNet(l){const o=num(l&&l.openingBalance);return (l&&l.balance==='cr')?-o:o;}
@@ -6023,6 +6048,10 @@ body.maya-alter-stock-open #mayaacc-stock-overlay{z-index:110000!important}
         }
       }
     }
+    /* run #33: "Allow narration in voucher" = Mandatory (Voucher Type
+       setting) — a narration is required to save. 'Hidden' only hides the
+       row in entry; the stored value stays empty. */
+    if(String((vtSettings(c,t)||{}).narration||'Optional')==='Mandatory'&&!String(spec.narration||'').trim())return bad('Narration is mandatory for "'+t+'". Enter a narration before saving.','narration');
     if(isNewT(t)){
       if(t!=='Physical Stock'){
         if(!String(spec.party||'').trim())return bad('Party A/c Name is required.','party');
@@ -6039,6 +6068,14 @@ body.maya-alter-stock-open #mayaacc-stock-overlay{z-index:110000!important}
         else if(!(num(r.qty)>0))return bad('Quantity must be greater than zero for "'+r.name+'".','item:'+i);
         if(!(num(r.rate)>=0))return bad('Rate cannot be negative for "'+r.name+'".','item:'+i);
         if(num(r.disc)<0||num(r.disc)>100)return bad('Discount % must be between 0 and 100.','item:'+i);
+      }
+      /* run #33: zero-valued transactions (Voucher Type setting) — an
+         order whose items total zero is blocked unless the type allows
+         zero-valued transactions. Delivery/Receipt Notes and Physical
+         Stock carry no money total, so the check does not apply to them. */
+      if((t==='Sales Order'||t==='Purchase Order')&&String((vtSettings(c,t)||{}).zeroValued||'')==='No'){
+        const tot=(spec.items||[]).reduce((a,i)=>a+itemAmt(i),0);
+        if(!(tot>0))return bad('Zero-valued vouchers are not allowed for "'+t+'". Enable "Allow zero-valued transactions" in the Voucher Type to allow this.','item:0');
       }
       const no=String(spec.number||'').trim();
       if(no&&vouchers(c).some(v=>v.type===t&&String(v.number)===no&&v.id!==opts.ignoreId))return bad(t+' voucher number '+no+' already exists.','number');
@@ -6082,7 +6119,10 @@ body.maya-alter-stock-open #mayaacc-stock-overlay{z-index:110000!important}
         if(num(l.dr)>0&&num(l.cr)>0)return bad('A line cannot have both Debit and Credit.','line:'+i);
       }
       const s=sumLines(spec);
-      if(s.dr<=0)return bad('Voucher total cannot be zero.');
+      /* run #33: zero-valued transactions (Voucher Type setting) — a
+         zero-total Journal saves only when the type allows zero-valued
+         transactions; otherwise it is blocked with a clear message. */
+      if(s.dr<=0&&String((vtSettings(c,t)||{}).zeroValued||'')!=='Yes')return bad('Zero-valued vouchers are not allowed for "'+t+'". Enable "Allow zero-valued transactions" in the Voucher Type to allow this.');
       if(Math.abs(s.dr-s.cr)>0.004)return bad('Debit total ('+fmt(s.dr)+') and Credit total ('+fmt(s.cr)+') must be equal.');
     }else{
       const ls=spec.lines||[];
@@ -6102,7 +6142,11 @@ body.maya-alter-stock-open #mayaacc-stock-overlay{z-index:110000!important}
     const dErr=validateDetails(c,spec);if(dErr)return dErr;
     const g=gstCompute(c,spec),ent=buildEntries(spec,g);
     const dr=r2(ent.reduce((a,x)=>a+x.dr,0)),cr=r2(ent.reduce((a,x)=>a+x.cr,0));
-    if(!ent.length||dr<=0||Math.abs(dr-cr)>0.004)return bad('Entries are not balanced (Dr '+fmt(dr)+' / Cr '+fmt(cr)+').');
+    /* run #33: a zero-valued Journal whose type allows zero-valued
+       transactions posts with no entries (Dr = Cr = 0); every other
+       zero/empty case is still blocked. */
+    const zeroOk=t==='Journal'&&String((vtSettings(c,t)||{}).zeroValued||'')==='Yes'&&dr===0&&cr===0;
+    if((!ent.length||dr<=0)&&!zeroOk||Math.abs(dr-cr)>0.004)return bad('Entries are not balanced (Dr '+fmt(dr)+' / Cr '+fmt(cr)+').');
     const no=String(spec.number||'').trim();
     if(no&&vouchers(c).some(v=>v.type===t&&String(v.number)===no&&v.id!==opts.ignoreId))return bad(t+' voucher number '+no+' already exists.','number');
     const bErr=validateBills(c,spec,opts);if(bErr)return bErr;
@@ -6407,7 +6451,7 @@ body.maya-alter-stock-open #mayaacc-stock-overlay{z-index:110000!important}
     const g=gstCompute(c,spec),s=sumLines(spec,g);if(s.roundOff)ensureRoundOff(c);
     const warnings=g.warnings.concat(detailWarnings(spec));
     const v={
-      id:'VCH-'+Date.now()+'-'+Math.floor(Math.random()*1e4),type:spec.type,number,serial,date:spec.date,
+      id:'VCH-'+Date.now()+'-'+Math.floor(Math.random()*1e4),type:spec.type,number,serial,date:spec.date,effectiveDate:spec.effectiveDate||'',
       party:spec.party||'',ledger:spec.ledger||'',mode:spec.mode||'',
       entries:buildEntries(spec,g),items:(spec.items||[]).map((i,ix)=>({...i,godown:canonGd(c,i.godown)||undefined,amount:itemAmt(i),gst:g.rows[ix]?g.rows[ix].rate:undefined,cess:g.rows[ix]?g.rows[ix].cess:undefined})),
       gst:g.applicable?{place:g.place,companyState:g.companyState,partyState:g.partyState,taxable:g.taxable,tax:g.taxTotal,lines:g.lines,rcm:!!g.rcm}:null,
@@ -6434,7 +6478,7 @@ body.maya-alter-stock-open #mayaacc-stock-overlay{z-index:110000!important}
     const number=manual||formatNumber(c,spec.type,serial,spec.date);
     const g=gstCompute(c,spec),s=sumLines(spec,g);
     const v={
-      id:'DRAFT-'+Date.now(),type:spec.type,number,serial,date:spec.date,
+      id:'DRAFT-'+Date.now(),type:spec.type,number,serial,date:spec.date,effectiveDate:spec.effectiveDate||'',
       party:spec.party||'',ledger:spec.ledger||'',mode:spec.mode||'',
       entries:buildEntries(spec,g),items:(spec.items||[]).map((i,ix)=>({...i,godown:canonGd(c,i.godown)||undefined,amount:itemAmt(i),gst:g.rows[ix]?g.rows[ix].rate:undefined,cess:g.rows[ix]?g.rows[ix].cess:undefined})),
       gst:g.applicable?{place:g.place,companyState:g.companyState,partyState:g.partyState,taxable:g.taxable,tax:g.taxTotal,lines:g.lines,rcm:!!g.rcm}:null,
@@ -6551,7 +6595,7 @@ body.maya-alter-stock-open #mayaacc-stock-overlay{z-index:110000!important}
 
   /* ---------- voucher alteration ---------- */
   function voucherToSpec(v){
-    const sp={type:v.type,mode:v.mode||'acct',date:v.date,number:v.number,party:v.party||'',ledger:v.ledger||'',ledgerDesc:(v.lineDesc&&v.lineDesc[String(v.ledger||'').toLowerCase()])||'',narration:v.narration||'',costCentre:v.costCentre||'',optional:!!v.optional,postdated:!!v.postdated,items:[],lines:[],
+    const sp={type:v.type,mode:v.mode||'acct',date:v.date,effectiveDate:v.effectiveDate||'',number:v.number,party:v.party||'',ledger:v.ledger||'',ledgerDesc:(v.lineDesc&&v.lineDesc[String(v.ledger||'').toLowerCase()])||'',narration:v.narration||'',costCentre:v.costCentre||'',optional:!!v.optional,postdated:!!v.postdated,items:[],lines:[],
       dispatch:v.dispatch||null,order:v.order||null,exportDetails:v.exportDetails||null,buyer:v.buyer||null,consignee:v.consignee||null,posState:v.posState||'',rateInclusive:!!v.rateInclusive,rcm:!!(v.gst&&v.gst.rcm),reference:v.reference||null,outward:!!v.outward};
     const e=v.entries||[],t=v.type,amt=x=>r2(num(x.dr)||num(x.cr));
     if(t==='Journal')e.forEach(x=>sp.lines.push({name:x.ledger,dr:num(x.dr)>0?String(num(x.dr)):'',cr:num(x.cr)>0?String(num(x.cr)):'',desc:x.desc||''}));
@@ -6577,7 +6621,7 @@ body.maya-alter-stock-open #mayaacc-stock-overlay{z-index:110000!important}
     const err=validate(c,spec,{ignoreId:id});if(err)return {ok:false,error:err};
     if(spec.type==='Physical Stock'){const seen={};spec.items=(spec.items||[]).map(i=>{const k=norm(i.name),book=stockQtyOn(c,i.name,spec.date,id),phys=num(i.qty);const adj=seen[k]!=null?phys:r2(phys-book);seen[k]=1;return Object.assign({},i,{adj});});}
     const g=gstCompute(c,spec),s=sumLines(spec,g);if(s.roundOff)ensureRoundOff(c);
-    const nv=Object.assign({},old,{date:spec.date,number:String(spec.number||'').trim()||old.number,party:spec.party||'',ledger:spec.ledger||'',mode:spec.mode||'',
+    const nv=Object.assign({},old,{date:spec.date,effectiveDate:spec.effectiveDate||'',number:String(spec.number||'').trim()||old.number,party:spec.party||'',ledger:spec.ledger||'',mode:spec.mode||'',
       entries:buildEntries(spec,g),items:(spec.items||[]).map((x,ix)=>Object.assign({},x,{godown:canonGd(c,x.godown)||undefined,amount:itemAmt(x),gst:g.rows[ix]?g.rows[ix].rate:undefined,cess:g.rows[ix]?g.rows[ix].cess:undefined})),
       gst:g.applicable?{place:g.place,companyState:g.companyState,partyState:g.partyState,taxable:g.taxable,tax:g.taxTotal,lines:g.lines,rcm:!!g.rcm}:null,
       narration:spec.narration||'',costCentre:spec.costCentre||'',total:s.total!=null?s.total:s.dr,
@@ -7269,6 +7313,7 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
       <div id="mve-title">SALES</div>
       <div class="mve-header-block"><span class="mve-header-label">No.</span><input id="mveNumber" class="mve-header-input" value="1" aria-label="Voucher Number" style="width:90px;min-width:90px;max-width:60vw"></div>
       <div class="mve-header-block"><span class="mve-header-label">Date</span><input id="mveDate" class="mve-header-input" type="date" aria-label="Voucher Date"></div>
+      <div class="mve-header-block" id="mveEffDateBlock" hidden><span class="mve-header-label">Effective Date</span><input id="mveEffDate" class="mve-header-input" type="date" aria-label="Effective Date"></div>
       <div class="mve-header-block" id="mveRefBlock" hidden><span class="mve-header-label">Ref No.</span><input id="mveRefNo" class="mve-header-input" aria-label="Reference Number" autocomplete="off" style="width:110px"><span class="mve-header-label">Ref Date</span><input id="mveRefDate" class="mve-header-input" type="date" aria-label="Reference Date"></div>
       <div class="mve-header-block" id="mveOrderRow" hidden><span class="mve-header-label">Order No.</span><input id="mveOrderNo" class="mve-header-input" aria-label="Order Number" autocomplete="off" style="width:110px"><span class="mve-header-label">Due Date</span><input id="mveOrderDue" class="mve-header-input" type="date" aria-label="Order Due Date"></div>
       <div class="mve-header-block" id="mveOrderRefRow" hidden><span class="mve-header-label">Against Order</span><input id="mveOrderRef" class="mve-header-input" aria-label="Against order number" autocomplete="off" style="width:110px" placeholder="Order No."></div>
@@ -7623,7 +7668,11 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
     try{
       const cid=Books.cid();let coInv='Automatic';
       try{const a=JSON.parse(localStorage.getItem('mayaacc_companies')||'[]');const co=a.find(x=>String(x.id)===String(cid));if(co&&co.invoiceNumbering)coInv=co.invoiceNumbering;}catch(e){}
-      const per=(Books.vtSettings(cid,st.type)||{}).numbering||'Automatic';
+      const _s=Books.vtSettings(cid,st.type)||{};
+      /* run #33: "Numbering Required: No" stops auto-numbering — the
+         number is left empty and editable, like Manual. */
+      if(String(_s.numberingEnabled||'Yes')==='No')return 'manual';
+      const per=_s.numbering||'Automatic';
       if(per==='Manual')return 'manual';
       if(per==='Automatic with Override')return 'override';
       if(coInv==='Manual')return 'manual';
@@ -7631,6 +7680,7 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
     }catch(e){return 'auto';}
   }
   window.__mayaEntryNumberingMode=numberingMode;
+  function numberingRequired(){try{return String((Books.vtSettings(Books.cid(),st.type)||{}).numberingEnabled||'Yes')!=='No';}catch(e){return true;}}
   function voucherNo(){if(numberingMode()==='manual')return '';return Books.nextNumber(Books.cid(),st.type,$('mveDate').value);}
   function layout(){
     const t=st.type,inv=isInvT(t),jr=t==='Journal',nw=isNewT(t);
@@ -7674,6 +7724,15 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
     if(nw)$('mveLblParty').textContent=isPhys?'Party A/c Name':(t==='Receipt Note'||t==='Purchase Order')?'Supplier A/c Name':'Customer A/c Name';
     $('mveSingleTitle').textContent=SINGLE_TITLES[t]||'PARTICULARS';
     $('mveModeLabel').textContent=(st.editId?'ALTERATION · ':'')+'Mode: '+(item?(nw?({'Delivery Note':'Stock Out','Receipt Note':'Stock In','Physical Stock':'Physical Count','Sales Order':'Order Entry','Purchase Order':'Order Entry'}[t]||'Item Entry'):'Item Invoice'):inv?'Accounting Invoice':jr?'As Voucher (Double Entry)':'As Voucher (Single Entry)')+(st.optional?' · Optional':'')+(st.postdated?' · Post-Dated':'');
+    /* run #33: per-type entry flags (Voucher Type settings). Narration
+       'Hidden' hides the narration row; the Effective Date field shows
+       only when the type uses effective dates (defaulting to the voucher
+       date while empty). */
+    var _narr='Optional';try{_narr=String((Books.vtSettings(Books.cid(),t)||{}).narration||'Optional');}catch(e){}
+    var _nrEl=$('mveNarration');if(_nrEl){var _nrRow=_nrEl.closest('.mve-narration');if(_nrRow)_nrRow.style.display=_narr==='Hidden'?'none':'';}
+    var _eff=false;try{_eff=String((Books.vtSettings(Books.cid(),t)||{}).effective||'No')==='Yes';}catch(e){}
+    var _eb=$('mveEffDateBlock');if(_eb)_eb.hidden=!_eff;
+    if(_eff){var _ed=$('mveEffDate'),_dv=$('mveDate');if(_ed&&_dv&&!_ed.value)_ed.value=_dv.value;}
     overlay.querySelectorAll('.mve-side-action[data-t]').forEach(b=>b.classList.toggle('active',b.dataset.t===t));
     overlay.querySelector('[data-k=L]').classList.toggle('flag-on',st.optional);
     overlay.querySelector('[data-k=T]').classList.toggle('flag-on',st.postdated);
@@ -7769,7 +7828,13 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
       }
     });
     var ledTh=$('mveLedTh');if(ledTh)ledTh.style.display=cfgNow().commonLedger===false?'':'none';
-    var dlOn=!!cfgNow().descLedger;
+    /* run #33: "Provide narrations for each ledger" (Voucher Type
+       setting) — No hides the per-ledger narration/description inputs,
+       even when the entry option "Show description for ledger accounts"
+       is on. Only an explicit No hides them; types without the setting
+       keep today's behaviour. */
+    var _narrOff=false;try{_narrOff=String((Books.vtSettings(Books.cid(),t)||{}).narrPerLedger||'')==='No';}catch(e){}
+    var dlOn=!!cfgNow().descLedger&&!_narrOff;
     singleBody.querySelectorAll('tr').forEach(function(tr){
       var amtCell=tr.querySelector('input[data-col="amt1"]');
       var dCell=tr.querySelector('input[data-col="desc"]');
@@ -7787,6 +7852,10 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
   /* the voucher-number box grows with its content so prefixed numbers are always fully visible */
   function fitNo(){const n=$('mveNumber');if(!n)return;const len=String(n.value||'').length;n.style.width=Math.max(90,Math.round(len*8.2+26))+'px';}
   function switchVoucherType(type,keepFocus){
+    /* run #33: an Inactive voucher type cannot be opened for entry
+       ("Activate this Voucher Type: No"). It stays alterable, so it can
+       be re-activated from Masters → Alter → Voucher Type. */
+    try{const _s=Books.vtSettings(Books.cid(),type)||{};if(String(_s.active||'Active')==='Inactive'){banner('"'+type+'" is Inactive. Activate it in Masters → Alter → Voucher Type to enter vouchers of this type.','info');return;}}catch(e){}
     /* Stock Journal has its own screen (same route as the F10 picker and
        Alt+F7): it is not one of the 13 TYPES, so route it explicitly
        instead of silently ignoring it. */
@@ -7794,6 +7863,7 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
     if(!TYPES.includes(type))return;
     if(st.editId&&type!==st.type){banner('The voucher type cannot be changed while altering a voucher.','info');return;}
     st.type=type;
+    if(!st.editId)applyOptionalDefault();
     if(isNewT(type))st.mode='item';
     else if(!isInvT(type))st.mode='acct';
     else st.mode=st.invMode||'item';            /* coming back to Sales/Purchase restores the invoice mode you chose, default Item Invoice */
@@ -7835,13 +7905,18 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
   }
 
   /* ---------- open / close / quit ---------- */
+  /* run #33: "Make this voucher type as 'Optional' by default" (Voucher
+     Type setting) — a fresh voucher of the type starts with Optional ON.
+     Alteration keeps the voucher's own flag (loadVoucher sets it). */
+  function applyOptionalDefault(){try{st.optional=String((Books.vtSettings(Books.cid(),st.type)||{}).optional||'No')==='Yes';}catch(e){st.optional=false;}}
   function resetForm(){
     overlay.querySelectorAll('.mve-grid input,.mve-party-cell input,#mveNarration').forEach(i=>{if(i.dataset.col==='drcr')i.value='Dr';else i.value='';});
     journalBody.querySelectorAll('tr').forEach(syncJournalRow);
     while(itemBody.rows.length>5)itemBody.deleteRow(-1);
     while(singleBody.rows.length>5)singleBody.deleteRow(-1);
     while(journalBody.rows.length>6)journalBody.deleteRow(-1);
-    st.dirty=false;st.optional=false;st.postdated=false;st.details={};
+    st.dirty=false;st.postdated=false;st.details={};
+    if($('mveEffDate'))$('mveEffDate').value='';
     if($('mveRefNo')){$('mveRefNo').value='';$('mveRefDate').value='';}
     if($('mveOrderNo')){$('mveOrderNo').value='';$('mveOrderDue').value='';}
     if($('mveOrderRef')){$('mveOrderRef').value='';}
@@ -7855,7 +7930,7 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
     st.type=v.type;st.mode=isNewT(v.type)?'item':(isInvT(v.type)?(sp.mode==='item'?'item':'acct'):'acct');st.invMode=st.mode;
     st.optional=!!v.optional;st.postdated=!!v.postdated;st.editId=v.id;st.editNumber=v.number;
     $('mveDate').value=v.date;
-    $('mveParty').value=sp.party||'';$('mveSalesLedger').value=sp.ledger||'';var _ld=$('mveLedgerDesc');if(_ld)_ld.value=sp.ledgerDesc||'';$('mveNarration').value=sp.narration||'';
+    $('mveParty').value=sp.party||'';$('mveSalesLedger').value=sp.ledger||'';var _ld=$('mveLedgerDesc');if(_ld)_ld.value=sp.ledgerDesc||'';$('mveNarration').value=sp.narration||'';var _ef=$('mveEffDate');if(_ef)_ef.value=sp.effectiveDate||v.date||'';
     /* cost-centre row is created by layout() (runs after loadVoucher), so restore the value on the next tick */
     setTimeout(function(){var cc=$('mveCostCentre');if(cc)cc.value=sp.costCentre||'';},0);
     if(sp.reference&&typeof sp.reference==='object'){$('mveRefNo').value=sp.reference.no||'';$('mveRefDate').value=sp.reference.date||'';}else if(sp.reference){$('mveRefNo').value=String(sp.reference);}
@@ -7878,7 +7953,7 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
     const alter=opts&&opts.id?Books.vouchers(Books.cid()).find(v=>v.id===opts.id):null;
     if(opts&&opts.id&&!alter){if(window.mayaToast)mayaToast('That voucher no longer exists.');return;}
     if(alter&&alter.cancelled){if(window.mayaToast)mayaToast('This voucher is cancelled and cannot be altered.');return;}
-    if(alter){loadVoucher(alter);}else{setDate(true);st.type='Sales';st.mode='item';st.invMode='item';}
+    if(alter){loadVoucher(alter);}else{setDate(true);st.type='Sales';st.mode='item';st.invMode='item';applyOptionalDefault();}
     layout();
     overlay.classList.add('is-open');overlay.setAttribute('aria-hidden','false');
     document.documentElement.classList.add('mayaacc-voucher-open');document.body.classList.add('mayaacc-voucher-open');
@@ -7959,7 +8034,7 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
   /* ---------- accept: collect -> validate -> post (Books engine) ---------- */
   function gatherSpec(){
     const t=st.type,inv=isInvT(t),jr=t==='Journal',nw=isNewT(t),item=(inv||nw)&&st.mode==='item';
-    const spec={type:t,mode:item?'item':'acct',date:$('mveDate').value,number:$('mveNumber').value.trim(),
+    const spec={type:t,mode:item?'item':'acct',date:$('mveDate').value,effectiveDate:(function(){var _e=document.getElementById('mveEffDate');return _e?_e.value:'';})(),number:$('mveNumber').value.trim(),
       party:jr?'':$('mveParty').value.trim(),ledger:inv?$('mveSalesLedger').value.trim():'',ledgerDesc:(function(){var e=document.getElementById('mveLedgerDesc');return e?e.value.trim():'';})(),
       narration:$('mveNarration').value.trim(),costCentre:(function(){var s=$('mveCostCentre');return s?s.value:'';})(),optional:st.optional,postdated:st.postdated,items:[],lines:[]};
     const C0=cfgNow();spec.roundOff=C0.roundOff!==false;
@@ -7998,6 +8073,7 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
     else if(field==='party')el=$('mveParty');
     else if(field==='ledger')el=$('mveSalesLedger');
     else if(field==='number')el=$('mveNumber');
+    else if(field==='narration')el=$('mveNarration');
     else if(field.indexOf('item:')===0){const tr=rows.item[+field.slice(5)]||itemBody.rows[0];el=tr&&tr.querySelector('[data-col=item]');}
     else if(field.indexOf('line:')===0){const tr=rows.line[+field.slice(5)];el=tr&&tr.querySelector('[data-col=part]');}
     focusEl(el);
@@ -8005,7 +8081,7 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
   function accept(force){
     closePicker();
     const {spec,rows}=gatherSpec();
-    if(numberingMode()==='manual'&&!spec.number){banner('Enter the voucher number (Manual numbering is on).','err');focusField('number',rows);return false;}
+    if(numberingMode()==='manual'&&numberingRequired()&&!spec.number){banner('Enter the voucher number (Manual numbering is on).','err');focusField('number',rows);return false;}
     const cid=Books.cid(),C=cfgNow();
     if(force!==true){
       if(C.warnVchLen&&spec.number.length>16){showConfirm('Voucher No. "'+spec.number+'" has '+spec.number.length+' characters; GST rules allow at most 16. Save anyway?',()=>accept(true));return false;}
@@ -8015,7 +8091,11 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
       const up=Books.updateVoucher(cid,st.editId,spec);
       if(!up.ok){banner(up.error.msg,'err');focusField(up.error.field,rows);return false;}
       if(window.mayaToast)mayaToast(spec.type+' voucher No. '+up.voucher.number+' updated ✓'+((up.warnings&&up.warnings.length)?'  ⚠ '+up.warnings[0]:''));
-      close();return true;
+      close();
+      const _su=Books.vtSettings(cid,spec.type)||{};
+      if(String(_su.printAfter||'No')==='Yes'){try{if(window.mayaPrintDialog)window.mayaPrintDialog(up.voucher.id);}catch(e){}}
+      if(String(_su.whatsapp||'No')==='Yes'){try{if(typeof window.waSendVoucher==='function')window.waSendVoucher(up.voucher.id);}catch(e){}}
+      return true;
     }
     if(window.MayaSalesFeatures){const cg=window.MayaSalesFeatures.checkCredit(cid,spec.party,window.MayaSalesFeatures.billTotal(cid,spec));if(cg&&cg.blocked){banner(cg.msg,'err');focusField('party',rows);return false;}if(cg&&cg.warn)banner(cg.msg,'info');}
     const res=Books.post(cid,spec);
@@ -8023,9 +8103,13 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
     const v=res.voucher;
     const w=(res.warnings||[]);
     banner(spec.type+' voucher No. '+v.number+' saved ✓   Total ₹ '+fmt(v.total)+(v.gst?'   (GST ₹ '+fmt(v.gst.tax)+', '+(v.gst.place==='inter'?'IGST':'CGST+SGST')+')':'')+(w.length?'   ⚠ '+w[0]:''),w.length?'info':'ok');
-    resetForm();layout();updateBalances();
+    resetForm();applyOptionalDefault();layout();updateBalances();
     if(window.mayaRefreshDashboard)window.mayaRefreshDashboard();
-    const after=()=>setTimeout(()=>focusEl(startFocus(null)),20);
+    /* run #33: per-type post-save actions (Voucher Type settings) — print
+       the saved voucher and/or send it on WhatsApp. They run after the
+       e-Way Bill / e-Invoice prompts, via the same `after` step. */
+    const _s=Books.vtSettings(cid,spec.type)||{};
+    const after=()=>{if(String(_s.printAfter||'No')==='Yes'){try{if(window.mayaPrintDialog)window.mayaPrintDialog(v.id);}catch(e){}}if(String(_s.whatsapp||'No')==='Yes'){try{if(typeof window.waSendVoucher==='function')window.waSendVoucher(v.id);}catch(e){}}setTimeout(()=>focusEl(startFocus(null)),20);};
     const F0=Books.features(cid),needE=C.sendEwb&&F0.ewbCfg.promptAfterSave&&window.mayaEwbNeeded&&window.mayaEwbNeeded(v),needI=F0.einvCfg.promptAfterSave&&window.mayaEinvNeeded&&window.mayaEinvNeeded(v);
     const step2=()=>needI?window.mayaEinvEdit(v,after):after();
     if(needE)ewbDialog(v,step2);else step2();
@@ -8493,7 +8577,7 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
   window.mayaCloseVoucherEntryConfig=function(){if(dlg.open&&dlg.kind==='config')dlgHide(true);};
   function openOther(){
     if(st.editId){banner('The voucher type cannot be changed while altering a voucher.','info');return;}
-    const list=Books.ensureStandardVoucherTypes(Books.cid()).filter(x=>x&&(x.permanent||!x.system)).map(x=>Object.assign({},x,{custom:!x.system}));
+    const list=Books.ensureStandardVoucherTypes(Books.cid()).filter(x=>x&&(x.permanent||!x.system)&&String(x.active||'Active')!=='Inactive').map(x=>Object.assign({},x,{custom:!x.system}));
     const baseImpl=x=>{const b=String(x.base||'').trim();if(!b||b==='None')return false;const bt=list.find(y=>y&&y.name===b);return !!(bt&&bt.implemented);};
     const isImpl=x=>x.custom?baseImpl(x):!!x.implemented;
     let idx=Math.max(0,list.findIndex(x=>x.name===st.type));
@@ -8701,6 +8785,9 @@ body.mve-inline-master [id^="mayaacc-ledger-"],body.mve-inline-master [id^="maya
   function showUnused(){
     const cid=Books.cid(),type=st.type,date=$('mveDate').value;
     const s=Books.vtSettings(cid,type),start=Math.max(1,parseInt(s.startNo,10)||1);
+    /* run #33: "Show unused vch nos." (Voucher Type setting) — when No,
+       the unused-numbers list does not open at all. */
+    if(String(s.unused||'No')!=='Yes'){banner('Unused voucher numbers are not enabled for "'+type+'". Enable "Show unused vch nos." in the Voucher Type to see them.','info');return;}
     const next=Books.nextSerial(cid,type,date);
     const used=new Set(Books.vouchers(cid).filter(v=>v.type===type).map(v=>String(v.number)));
     const unused=[];
@@ -9498,12 +9585,12 @@ html.mayaacc-reports-open,body.mayaacc-reports-open{overflow:hidden!important;he
       {k:'name',l:'Name',req:1},{k:'alias',l:'Alias / Short Name'},{k:'under',l:'Under Cost Centre',list:'Cost Centre',primary:1},
       {k:'category',l:'Category',t:'select',src:'mccCategory'},{k:'active',l:'Active',t:'select',src:'mccActive'},{k:'allocate',l:'Allocation',t:'select',src:'mccAllocate'},{k:'notes',l:'Notes',t:'textarea',wide:1}]},
     'Voucher Type':{label:'Voucher Type',sub:r=>[r.permanent?'Standard':'',r.category,r.permanent&&r.implemented===false?'entry screen planned':'',r.base&&r.base!=='None'?'based on '+r.base:''].filter(Boolean).join(' · '),fields:[
-      {k:'name',l:'Voucher Type Name',req:1,max:30},{k:'alias',l:'Abbreviation'},{k:'category',l:'Voucher Category',t:'select',src:'mvtCategory'},{k:'base',l:'Based On',t:'select',src:'mvtBase'},
+      {k:'name',l:'Voucher Type Name',req:1,max:30},{k:'category',l:'Voucher Category',t:'select',src:'mvtCategory'},{k:'base',l:'Based On',t:'select',src:'mvtBase'},
       {k:'numberingEnabled',l:'Numbering Required',t:'select',src:'mvtNumberingEnabled'},{k:'numbering',l:'Numbering Method',t:'select',src:'mvtNumbering'},{k:'startNo',l:'Starting Serial No.',t:'number'},
       {k:'prefix',l:'Prefix'},{k:'separator',l:'Separator'},{k:'padding',l:'Serial Digits',t:'select',src:'mvtPadding'},{k:'yearPosition',l:'Financial Year',t:'select',src:'mvtYearPosition'},
-      {k:'annualReset',l:'Reset Serial Every Financial Year',t:'select',src:'mvtAnnualReset'},{k:'dateMode',l:'Date Control',t:'select',src:'mvtDateMode'},{k:'printTitle',l:'Print Title'},
-      {k:'narration',l:'Narration',t:'select',src:'mvtNarration'},{k:'party',l:'Party / Ledger Selection',t:'select',src:'mvtParty'},{k:'inventory',l:'Inventory Details',t:'select',src:'mvtInventory'},
-      {k:'active',l:'Status',t:'select',src:'mvtActive'},{k:'notes',l:'Notes',t:'textarea',wide:1}]},
+      {k:'annualReset',l:'Reset Serial Every Financial Year',t:'select',src:'mvtAnnualReset'},{k:'printTitle',l:'Print Title'},
+      {k:'narration',l:'Narration',t:'select',src:'mvtNarration'},
+      {k:'active',l:'Status',t:'select',src:'mvtActive'}]},
     'Tax / GST Ledger':{label:'Tax / GST Ledger',sub:r=>[r.nature,r.rate!==undefined&&r.rate!==''?r.rate+'%':''].filter(Boolean).join(' · '),fields:[
       {k:'name',l:'Ledger Name',req:1},{k:'alias',l:'Alias'},{k:'nature',l:'Tax Nature',t:'select',src:'mtgNature',req:1},{k:'rate',l:'GST / Tax Rate (%)',t:'number'},
       {k:'basis',l:'Calculation Basis',t:'select',src:'mtgBase'},{k:'registration',l:'Registration Applicability',t:'select',src:'mtgRegistration'},{k:'reverseCharge',l:'Reverse Charge',t:'select',src:'mtgRcm'},
@@ -17739,6 +17826,19 @@ function defaultBadgeCss(){
 }
 /* Sale & Credit Note share the Invoice Designer's template choice. */
 function tplFor(type){
+  /* run #33: "Default template to print" (Voucher Type setting) wins when
+     set — one of the 8 Invoice Designer templates, by name. "Not
+     Applicable" (or an unknown value) falls through to the print dialog's
+     own config / the per-type map / the global default, as before. */
+  try{
+    var s=B().vtSettings(cid(),type), tv=s&&s.template;
+    if(tv&&tv!=='Not Applicable'){
+      var list=(I&&I.TPL)||[], hit=null;
+      for(var i=0;i<list.length;i++){ if(String(list[i].name)===String(tv)){ hit=list[i]; break; } }
+      if(hit&&hit.id>=1&&hit.id<=8) return hit.id;
+      var pn=parseInt(tv,10); if(pn>=1&&pn<=8) return pn;
+    }
+  }catch(e){}
   if(isSalesSide(type)){ try{ var g=I.loadCfg(); var t=parseInt(g.tpl,10); return (t>=1&&t<=8)?t:getTplDefault(); }catch(e){ return getTplDefault(); } }
   var m=loadTplMap(), n=parseInt(m[type],10); return (n>=1&&n<=8)?n:getTplDefault();
 }
@@ -20921,7 +21021,7 @@ function openEntryFor(type,date){
     var d=$('mveDate');if(d)d.value=date;
     var n=$('mveNumber');
     if(n){
-      var manual=false;try{manual=/manual/i.test(String((B().vtSettings(cid(),type)||{}).numbering||''));}catch(e){}
+      var manual=false;try{var _vs=B().vtSettings(cid(),type)||{};manual=/manual/i.test(String(_vs.numbering||''))||String(_vs.numberingEnabled||'Yes')==='No';}catch(e){}
       if(!manual){try{n.value=B().nextNumber(cid(),type,date);}catch(e){}}
     }
   }
