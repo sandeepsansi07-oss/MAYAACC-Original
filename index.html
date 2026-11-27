@@ -1786,7 +1786,7 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
     <div id="mlgGstin" class="mg-confirm"><div class="mg-confirm-card"><h3>Fetch Details Using GSTIN / UIN</h3><p>Enter the 15-character GSTIN. PAN and State are derived from it on this device — no internet needed.</p><input id="mlgGstinInput" maxlength="15" autocomplete="off" placeholder="e.g. 06AOGPR9753P1Z5"><p id="mlgGstinErr"></p><div class="mg-confirm-actions"><button type="button" onclick="mayaCloseLedgerGstin()">Cancel</button><button type="button" class="primary" onclick="mayaFetchLedgerGstin()">Fetch Details</button></div></div></div>
   </div>
 </div>
-    <div id="mlgOtherMasters" class="mlg-other" style="display:none" aria-hidden="true"><div class="mlg-other-card"><h3>Other Masters</h3><div class="mlg-other-item" data-master="Group">Group</div><div class="mlg-other-item" data-master="Ledger">Ledger</div><div class="mlg-other-item" data-master="Stock Item">Stock Item</div><div class="mlg-other-item" data-master="Stock Group">Stock Group</div><div class="mlg-other-item" data-master="Stock Category">Stock Category</div><div class="mlg-other-item" data-master="Unit">Unit</div><div class="mlg-other-item" data-master="Godown">Godown</div><div class="mlg-other-item" data-master="Cost Centre">Cost Centre</div><div class="mlg-other-item" data-master="Currency">Currency</div><div class="mlg-other-item" data-master="Voucher Type">Voucher Type</div></div></div>
+    <div id="mlgOtherMasters" class="mlg-other" style="display:none" aria-hidden="true"><div class="mlg-other-card"><h3>Other Masters</h3><div class="mlg-other-item" data-master="Group">Group</div><div class="mlg-other-item" data-master="Ledger">Ledger</div><div class="mlg-other-item" data-master="Stock Item">Stock Item</div><div class="mlg-other-item" data-master="Stock Group">Stock Group</div><div class="mlg-other-item" data-master="Stock Category">Stock Category</div><div class="mlg-other-item" data-master="Unit">Unit</div><div class="mlg-other-item" data-master="Godown">Godown</div><div class="mlg-other-item" data-master="Cost Centre">Cost Centre</div><div class="mlg-other-item" data-master="Currency">Currency</div><div class="mlg-other-item" data-master="Voucher Type">Voucher Type</div><div class="mlg-other-item" data-master="Price List">Price List</div><div class="mlg-other-item" data-master="Tax / GST Ledger">Tax / GST Ledger</div></div></div>
 
 <style id="mayaacc-nb-f10">
 /* F10 Other Masters picker (new batch #2, 2026-11-21). */
@@ -1901,10 +1901,11 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
     if(name==='Group'){return function(cb){var d=window.mayaGroupDirty;if(d&&d()){if(window.mayaCloseGroup)window.mayaCloseGroup(cb);}else{if(window.mayaCloseGroupRawNoReturn)window.mayaCloseGroupRawNoReturn();cb();}};}
     if(name==='Currency'){return function(cb){if(window.__mayaFormDirty&&window.__mayaFormDirty('Currency')){if(window.mayaCloseCurrency)window.mayaCloseCurrency(cb);}else{if(window.mayaCloseCurrencyRaw)window.mayaCloseCurrencyRaw(false);cb();}};}
     if(name==='Voucher Type'){return function(cb){if(window.__mayaFormDirty&&window.__mayaFormDirty('Voucher Type')){if(window.mayaCloseVoucherType)window.mayaCloseVoucherType(cb);}else{if(window.mayaCloseVoucherTypeRaw)window.mayaCloseVoucherTypeRaw(false);cb();}};}
+    if(name==='Cost Centre'){return function(cb){if(window.__mayaFormDirty&&window.__mayaFormDirty('Cost Centre')){if(window.mayaCloseCostCentre)window.mayaCloseCostCentre(cb);}else{if(window.mayaCloseCostCentreRaw)window.mayaCloseCostCentreRaw(false);cb();}};}
     if(name==='Gateway'){return function(cb){cb();};}
     return null;
   }
-  var OTHER_MASTERS=['Group','Ledger','Stock Item','Stock Group','Stock Category','Unit','Godown','Cost Centre','Currency','Voucher Type'];
+  var OTHER_MASTERS=['Group','Ledger','Stock Item','Stock Group','Stock Category','Unit','Godown','Cost Centre','Currency','Voucher Type','Price List','Tax / GST Ledger'];
   function openOtherMasters(srcName){var d=$('mlgOtherMasters');if(!d)return;customSelClose();var _t=$('mlgTree');if(_t)_t.style.display='none';treeFocus=-1;otherSourceName=srcName||null;otherSourceClose=srcName?otherSourceCloser(srcName):null;d.style.display='flex';d.setAttribute('aria-hidden','false');var _si=srcName?OTHER_MASTERS.indexOf(srcName):-1;otherIdx=_si>=0?_si:0;paintOtherMasters();}
   function closeOtherMasters(){var d=$('mlgOtherMasters');if(!d)return;d.style.display='none';d.setAttribute('aria-hidden','true');}
   function paintOtherMasters(){var items=[...document.querySelectorAll('#mlgOtherMasters .mlg-other-item')];items.forEach(function(el,i){el.classList.toggle('sel',i===otherIdx);});if(items[otherIdx])items[otherIdx].scrollIntoView({block:'nearest'});}
@@ -1913,7 +1914,7 @@ document.addEventListener('keydown',e=>{const m=document.getElementById('alterMa
     closeOtherMasters();
     if(name===otherSourceName){otherSourceName=null;otherSourceClose=null;return;}
     if(window.__mayaUpdateReturnItem)window.__mayaUpdateReturnItem(name);
-    var openTarget=function(){var fn={Group:window.mayaOpenGroup,'Stock Item':window.mayaOpenStockItem,'Stock Group':window.mayaOpenStockGroup,'Stock Category':window.mayaOpenStockCategory,Unit:window.mayaOpenUnit,Godown:window.mayaOpenGodown,'Cost Centre':window.mayaOpenCostCentre,Currency:window.mayaOpenCurrency,'Voucher Type':window.mayaOpenVoucherType}[name];if(typeof fn==='function')fn();else if(typeof window.createMasterAction==='function')window.createMasterAction(name);};
+    var openTarget=function(){var fn={Group:window.mayaOpenGroup,'Stock Item':window.mayaOpenStockItem,'Stock Group':window.mayaOpenStockGroup,'Stock Category':window.mayaOpenStockCategory,Unit:window.mayaOpenUnit,Godown:window.mayaOpenGodown,'Cost Centre':window.mayaOpenCostCentre,Currency:window.mayaOpenCurrency,'Voucher Type':window.mayaOpenVoucherType,'Price List':window.mayaOpenPriceLists,'Tax / GST Ledger':window.mayaOpenTaxGstLedger}[name];if(typeof fn==='function')fn();else if(typeof window.createMasterAction==='function')window.createMasterAction(name);};
     var _sc=otherSourceClose;otherSourceName=null;otherSourceClose=null;
     if(_sc){_sc(openTarget);return;}
     if(name==='Ledger')return;
@@ -2424,6 +2425,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
 #mayaacc-stock-config[aria-hidden="false"],
 #mayaacc-unit-config[aria-hidden="false"],
 #mayaacc-godown-config[aria-hidden="false"],
+#mayaacc-cost-centre-config[aria-hidden="false"],
 #mayaacc-voucher-type-config[aria-hidden="false"],
 #mayaacc-currency-config[aria-hidden="false"]{
   display:flex !important;
@@ -2435,6 +2437,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
 #mayaacc-stock-config[aria-hidden="false"] .msic-body,
 #mayaacc-unit-config[aria-hidden="false"] .mugc-body,
 #mayaacc-godown-config[aria-hidden="false"] .mugc-body,
+#mayaacc-cost-centre-config[aria-hidden="false"] .mlgc-body,
 #mayaacc-voucher-type-config[aria-hidden="false"] .mlgc-body,
 #mayaacc-currency-config[aria-hidden="false"] .mlgc-body{
   flex:1 1 auto !important;
@@ -2466,8 +2469,8 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
 }
 </style>
 <style id="mayaacc-f12-scroll-fix">
-#mayaacc-group-config,#mayaacc-ledger-config,#mayaacc-stock-config,#mayaacc-unit-config,#mayaacc-godown-config,#mayaacc-voucher-type-config,#mayaacc-currency-config{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scroll-behavior:auto;}
-#mayaacc-group-config .mlgc-body,#mayaacc-ledger-config .mlgc-body,#mayaacc-stock-config .msic-body,#mayaacc-unit-config .mugc-body,#mayaacc-godown-config .mugc-body,#mayaacc-voucher-type-config .mlgc-body,#mayaacc-currency-config .mlgc-body{min-height:0;}
+#mayaacc-group-config,#mayaacc-ledger-config,#mayaacc-stock-config,#mayaacc-unit-config,#mayaacc-godown-config,#mayaacc-cost-centre-config,#mayaacc-voucher-type-config,#mayaacc-currency-config{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scroll-behavior:auto;}
+#mayaacc-group-config .mlgc-body,#mayaacc-ledger-config .mlgc-body,#mayaacc-stock-config .msic-body,#mayaacc-unit-config .mugc-body,#mayaacc-godown-config .mugc-body,#mayaacc-cost-centre-config .mlgc-body,#mayaacc-voucher-type-config .mlgc-body,#mayaacc-currency-config .mlgc-body{min-height:0;}
 </style>
 <script id="mayaacc-layered-back-script">
 (function(){
@@ -2490,7 +2493,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
     'mayaacc-stock-config':'.msic-option, .msic-footer button',
     'mayaacc-unit-config':'.mugc-option, .mugc-footer button',
     'mayaacc-godown-config':'.mugd-config-option, .mugd-config-footer button',
-    'mayaacc-cost-centre-config':'.mccc-option, .mccc-footer button',
+    'mayaacc-cost-centre-config':'.mlgc-option, .mlgc-footer button',
     'mayaacc-voucher-type-config':'.mlgc-option, .mlgc-footer button'
   };
   const configBody={
@@ -2504,7 +2507,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   };
   // Ledger/Stock/Godown/Unit config body class safety fallback.
   configBody['mayaacc-ledger-config']='.mlgc-body';
-  configBody['mayaacc-cost-centre-config']='.mccc-body';
+  configBody['mayaacc-cost-centre-config']='.mlgc-body';
 
   const cfgIndex=Object.create(null);
   const treeIndex=Object.create(null);
@@ -2785,7 +2788,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
 
   // Any mouse click on an F12 option becomes the active keyboard row.
   document.addEventListener('click',function(e){
-    const opt=e.target.closest('.mgc-option,.mlgc-option,.msic-option,.mugc-option,.mugd-config-option,.mccc-option,.mgc-footer button,.mlgc-footer button,.msic-footer button,.mugc-footer button,.mugd-config-footer button,.mccc-footer button');
+    const opt=e.target.closest('.mgc-option,.mlgc-option,.msic-option,.mugc-option,.mugd-config-option,.mgc-footer button,.mlgc-footer button,.msic-footer button,.mugc-footer button,.mugd-config-footer button');
     if(!opt)return;
     const cfg=opt.closest('#mayaacc-group-config,#mayaacc-ledger-config,#mayaacc-stock-config,#mayaacc-unit-config,#mayaacc-godown-config,#mayaacc-cost-centre-config');
     if(!cfg)return;
@@ -2840,7 +2843,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
     'mayaacc-stock-overlay':'#msiName,#msiAlias,#msiCode,#msiBarcode,#msiBrand,#msiManufacturer,#msiCategory,#msiTypeSelect,#msiGroup,#msiPrimaryUnit,#msiSecondaryUnit,#msiConversion,#msiPackSize,#msiHSN,#msiHSNDescription,#msiUQC,#msiTax,#msiTaxCustom,#msiCess,#msiTaxability,#msiSupplyType,#msiPurchaseRate,#msiSalesRate,#msiMRP,#msiDiscount,#msiValuation,#msiOpeningQty,#msiOpeningRate,#msiOpeningValue,#msiReorder,#msiMin,#msiMax,#msiLeadDays,#msiBatchNo,#msiSerialNo,#msiExpiry,#msiGodown,#msiWeight,#msiDimensions,#msiNotes',
     'mayaacc-unit-overlay':'#muName,#muAlias,#muSymbol,#muFormal,#muDecimals,#muType,#muFactor,#muBaseUnit',
     'mayaacc-godown-overlay':'#mgdName,#mgdAlias,#mgdUnder,#mgdAddress,#mgdCity,#mgdState,#mgdCountry,#mgdPin,#mgdContact,#mgdPhone,#mgdEmail,#mgdCapacity,#mgdCapacityUnit,#mgdPrimary,#mgdNegative,#mgdNotes',
-    'mayaacc-cost-centre-overlay':'#mccName,#mccAlias,#mccUnder,#mccCategory,#mccNotes,#mccActive,#mccAllocate',
+    'mayaacc-cost-centre-overlay':'#mccName,#mccAlias,#mccUnder,#mccCategory,#mccActive,#mccAllocate,#mccNotes',
     'mayaacc-voucher-type-overlay':'#mvtName,#mvtBase,#mvtActive,#mvtNumbering,#mvtUnused,#mvtEffective,#mvtZeroValued,#mvtOptional,#mvtNarration,#mvtNarrPerLedger,#mvtCategory,#mvtNumberingEnabled,#mvtStartNo,#mvtPrefix,#mvtSuffix,#mvtSeparator,#mvtPadding,#mvtYearPosition,#mvtAnnualReset,#mvtPrintTitle,#mvtPrintAfter,#mvtBank,#mvtTpl,#mvtWhatsapp',
     'mayaacc-tax-gst-overlay':'#mtgName,#mtgAlias,#mtgNature,#mtgRate,#mtgBase,#mtgRegistration,#mtgRcm,#mtgRound,#mtgActive,#mtgPrint,#mtgNotes,#mtgInputCredit,#mtgShowInvoice,#mtgAutoCalc,#mtgConfirmSave'
   };
@@ -2865,7 +2868,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
       'mayaacc-stock-overlay':['mayaacc-stock-config','msiConfirm','msiTree','mayaacc-hsn-finder'],
       'mayaacc-unit-overlay':['mayaacc-unit-config','muConfirm'],
       'mayaacc-godown-overlay':['mayaacc-godown-config','mgdConfirm','mgdTree'],
-      'mayaacc-cost-centre-overlay':['mayaacc-cost-centre-config','mccConfirm','mccTree'],
+      'mayaacc-cost-centre-overlay':['mayaacc-cost-centre-config','mccConfirm','mccTree','mlgOtherMasters','maya-f3-menu'],
       'mayaacc-voucher-type-overlay':['mayaacc-voucher-type-config','mvtConfirm','mlgOtherMasters','mvtTypeList','mvtBankList'],
       'mayaacc-tax-gst-overlay':['mayaacc-tax-gst-config','mtgConfirm']
     }[overlay]||[];
@@ -3087,7 +3090,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
     'mayaacc-stock-config':{row:'.msic-option,.msic-footer button',body:'.msic-body'},
     'mayaacc-unit-config':{row:'.mugc-option,.mugc-footer button',body:'.mugc-body'},
     'mayaacc-godown-config':{row:'.mugd-config-option,.mugd-config-footer button',body:'.mugc-body'},
-    'mayaacc-cost-centre-config':{row:'.mccc-option,.mccc-footer button',body:'.mccc-body'}
+    'mayaacc-cost-centre-config':{row:'.mlgc-option,.mlgc-footer button',body:'.mlgc-body'}
   };
   const $=id=>document.getElementById(id);
   const visible=e=>{if(!e)return false;const s=getComputedStyle(e);return s.display!=='none'&&s.visibility!=='hidden'&&e.offsetParent!==null;};
@@ -3150,7 +3153,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   });
   mo.observe(document.body,{subtree:true,attributes:true,attributeFilter:['style','aria-hidden','class']});
   document.addEventListener('click',function(e){
-    const row=e.target.closest('.mgc-option,.mlgc-option,.msic-option,.mugc-option,.mugd-config-option,.mccc-option');
+    const row=e.target.closest('.mgc-option,.mlgc-option,.msic-option,.mugc-option,.mugd-config-option');
     if(!row)return;
     const cfg=row.closest('#mayaacc-group-config,#mayaacc-ledger-config,#mayaacc-stock-config,#mayaacc-unit-config,#mayaacc-godown-config,#mayaacc-cost-centre-config');
     if(!cfg)return;
@@ -3166,6 +3169,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
 #mayaacc-stock-config[aria-hidden="false"],
 #mayaacc-unit-config[aria-hidden="false"],
 #mayaacc-godown-config[aria-hidden="false"],
+#mayaacc-cost-centre-config[aria-hidden="false"],
 #mayaacc-voucher-type-config[aria-hidden="false"],
 #mayaacc-currency-config[aria-hidden="false"]{
   display:flex !important;
@@ -3177,6 +3181,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
 #mayaacc-stock-config[aria-hidden="false"] .msic-body,
 #mayaacc-unit-config[aria-hidden="false"] .mugc-body,
 #mayaacc-godown-config[aria-hidden="false"] .mugc-body,
+#mayaacc-cost-centre-config[aria-hidden="false"] .mlgc-body,
 #mayaacc-voucher-type-config[aria-hidden="false"] .mlgc-body,
 #mayaacc-currency-config[aria-hidden="false"] .mlgc-body{
   flex:1 1 auto !important;
@@ -3200,7 +3205,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
     'mayaacc-stock-config':{overlay:'mayaacc-stock-overlay',row:'.msic-option',body:'.msic-body',open:'mayaOpenStockConfig',close:'mayaCloseStockConfig'},
     'mayaacc-unit-config':{overlay:'mayaacc-unit-overlay',row:'.mugc-option',body:'.mugc-body',open:'mayaOpenUnitConfig',close:'mayaCloseUnitConfig'},
     'mayaacc-godown-config':{overlay:'mayaacc-godown-overlay',row:'.mugd-config-option',body:'.mugc-body',open:'mayaOpenGodownConfig',close:'mayaCloseGodownConfig'},
-    'mayaacc-cost-centre-config':{overlay:'mayaacc-cost-centre-overlay',row:'.mccc-option',body:'.mccc-body',open:'mayaOpenCostCentreConfig',close:'mayaCloseCostCentreConfig'},
+    'mayaacc-cost-centre-config':{overlay:'mayaacc-cost-centre-overlay',row:'.mlgc-option',body:'.mlgc-body',open:'mayaOpenCostCentreConfig',close:'mayaCloseCostCentreConfig'},
     'mayaacc-voucher-type-config':{overlay:'mayaacc-voucher-type-overlay',row:'.mlgc-option',body:'.mlgc-body',open:'mayaOpenVoucherTypeConfig',close:'mayaCloseVoucherTypeConfig'},
     'mayaacc-voucher-entry-config':{overlay:'mayaacc-voucher-entry-overlay',row:'.mvec-option',body:'.mve-config-body',open:'mayaOpenVoucherEntryConfig',close:'mayaCloseVoucherEntryConfig'},
     'mayaacc-tax-gst-config':{overlay:'mayaacc-tax-gst-overlay',row:'.mtg-config-option',body:'.mtg-config-body',open:'mayaOpenTaxGstConfig',close:'mayaCloseTaxGstConfig'},
@@ -3350,7 +3355,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   },true);
 
   document.addEventListener('click',function(e){
-    const row=e.target.closest('.mgc-option,.mlgc-option,.msic-option,.mugc-option,.mugd-config-option,.mccc-option,.msgc-option');
+    const row=e.target.closest('.mgc-option,.mlgc-option,.msic-option,.mugc-option,.mugd-config-option,.msgc-option');
     if(!row)return;
     const host=row.closest('#mayaacc-group-config,#mayaacc-ledger-config,#mayaacc-stock-config,#mayaacc-unit-config,#mayaacc-godown-config,#mayaacc-cost-centre-config,#mayaacc-stock-group-config,#mayaacc-currency-config,#mayaacc-voucher-type-config');
     if(!host)return;
@@ -4007,7 +4012,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
       'Stock Item':'.msic-option, .msic-footer button',
       Unit:'.mugc-option, .mugc-footer button',
       Godown:'.mugd-config-option, .mugd-config-footer button',
-      'Cost Centre':'.mccc-option, .mccc-footer button',
+      'Cost Centre':'.mlgc-option, .mlgc-footer button',
       'Voucher Type':'.mlgc-option'
     };
     return [...root.querySelectorAll(selectors[layer.name]||'label,button')].filter(el=>{
@@ -4512,60 +4517,113 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
 <!-- MAYAACC COST CENTRE MODULE -->
 <style id="mayaacc-cost-centre-style">
 #mayaacc-cost-centre-overlay{display:none;position:fixed;inset:0;z-index:10050;background:rgba(10,15,26,.30);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
-#mayaacc-cost-centre-panel{position:absolute;left:0;top:0;height:100%;width:100%;min-width:0;background:rgba(255,255,255,.99);border-right:1px solid #dfe4ec;box-shadow:18px 0 45px rgba(16,24,40,.16);display:flex;flex-direction:column;overflow:hidden}
-.mcc-content{display:flex;min-height:100%;overflow:hidden}.mcc-main{padding:26px 28px 20px;overflow:auto;flex:1}.mcc-side{width:148px;background:#f7f9fc;border-left:1px solid #e3e8ef;padding:22px 12px;flex:0 0 148px}.mcc-side h3{font-size:11px;letter-spacing:.08em;color:#7b8797;margin:3px 6px 12px}.mcc-side button{width:100%;padding:10px 9px;margin:0 0 8px;border:1px solid #dce3eb;border-radius:8px;background:#fff;color:#34465d;text-align:left;cursor:pointer;font-size:12px}.mcc-side button:hover{background:#eef3fb}
-.mcc-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}.mcc-title h2{margin:0;font-size:22px;color:#18273c}.mcc-close{border:0;background:transparent;font-size:22px;color:#7b8797;cursor:pointer}
-.mcc-section{margin-bottom:18px}.mcc-section h4{margin:0 0 10px;font-size:10px;letter-spacing:.08em;color:#78869a;text-transform:uppercase}.mcc-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.mcc-field{margin-bottom:0}.mcc-field.full{grid-column:1/-1}.mcc-field label{display:block;font-size:12px;font-weight:800;color:#45546a;margin-bottom:7px}.mcc-field input,.mcc-field select,.mcc-field textarea{width:100%;box-sizing:border-box;padding:10px 11px;border:1px solid #d8e0ea;border-radius:8px;background:#fff;font-size:13px;outline:none}.mcc-field input:focus,.mcc-field select:focus,.mcc-field textarea:focus{border-color:#8d9bb0;box-shadow:0 0 0 3px rgba(94,108,134,.08)}.mcc-field textarea{min-height:74px;resize:vertical}
-.mcc-under-wrap{position:relative}.mcc-tree{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);max-height:260px;overflow:auto;background:#fff;border:1px solid #d7dfe8;border-radius:8px;box-shadow:0 14px 30px rgba(16,24,40,.14);z-index:40;padding:5px 0}.mcc-tree button{display:block;width:100%;border:0;background:#fff;text-align:left;padding:8px 12px;font-size:12px;color:#33445c;cursor:pointer}.mcc-tree button:hover,.mcc-tree button.mcc-focus{background:#edf1fb;color:#395ba8}
-.mcc-note{font-size:10px;color:#8a96a6;margin-top:5px}.mcc-summary{padding:12px 14px;border:1px solid #e1e6ee;border-radius:9px;background:#fafbfe;font-size:12px;line-height:1.7}.mcc-summary-row{display:flex;justify-content:space-between;gap:12px}.mcc-footer{position:sticky;bottom:0;background:#fff;border-top:1px solid #e3e8ef;padding:10px 0 0;margin-top:20px;display:flex;justify-content:space-between;align-items:center}.mcc-savehint{font-size:12px;font-weight:800;color:#2b3b52;cursor:pointer;padding-bottom:5px;border-bottom:3px double #25364d}.mcc-savehint u{text-underline-offset:2px}.mcc-actions{display:flex;gap:8px}.mcc-actions button{border:1px solid #d7dee8;background:#fff;border-radius:8px;padding:9px 12px;font-size:11px;font-weight:700;cursor:pointer}.mcc-actions .primary{background:#1d2d42;color:#fff;border-color:#1d2d42}
-#mayaacc-cost-centre-config{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);right:auto;height:auto;max-height:calc(100vh - 60px);width:min(640px,94vw);background:#fff;border:1px solid #dbe4ec;border-radius:14px;box-shadow:0 24px 70px rgba(15,25,50,.35);z-index:10090;overflow:hidden;flex-direction:column}.mccc-head{position:sticky;top:0;background:#fff;border-bottom:1px solid #e4e8ef;padding:18px 20px 14px;z-index:2}.mccc-head h3{margin:0;color:#1d2d42;font-size:16px}.mccc-head p{margin:5px 0 0;color:#7a8798;font-size:11px;line-height:1.45}.mccc-close{position:absolute;right:14px;top:12px;border:0;background:transparent;color:#768396;font-size:22px;cursor:pointer}.mccc-body{padding:15px 18px 90px;overflow:auto;flex:1;min-height:0}.mccc-section{margin-bottom:18px}.mccc-section h4{margin:0 0 9px;font-size:10px;letter-spacing:.08em;color:#78869a;text-transform:uppercase}.mccc-option{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 11px;border:1px solid #e2e7ee;border-radius:9px;background:#fbfcfe;margin:7px 0;cursor:pointer}.mccc-option:hover,.mccc-option.mccc-focus{background:#edf1fb;border-color:#8ba5df;box-shadow:0 0 0 2px rgba(87,126,214,.10);outline:2px solid #7b9ae0;outline-offset:-2px}.mccc-option strong{font-size:12px;color:#34445c;font-weight:700}.mccc-option small{display:block;color:#8894a6;font-size:10px;line-height:1.35;margin-top:3px}.mccc-check{position:relative;width:40px;height:22px;flex:0 0 auto}.mccc-check input{display:none}.mccc-check span{position:absolute;inset:0;border-radius:20px;background:#d7dde6;cursor:pointer;transition:.18s}.mccc-check span:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.12);transition:.18s}.mccc-check input:checked+span{background:#577ed6}.mccc-check input:checked+span:before{transform:translateX(18px)}.mccc-footer{position:sticky;bottom:0;background:#fff;border-top:1px solid #e3e8ef;padding:11px 18px;display:flex;justify-content:space-between;gap:8px}.mccc-footer button{border:1px solid #d7dee8;background:#fff;border-radius:8px;padding:9px 12px;font-size:11px;font-weight:700;cursor:pointer}.mccc-footer .primary{background:#1d2d42;color:#fff;border-color:#1d2d42}.mccc-status{font-size:10px;color:#77849a;margin:0 0 10px}
-.mcc-confirm{display:none;position:absolute;inset:0;z-index:50;background:rgba(10,15,26,.24);align-items:center;justify-content:center}.mcc-confirm-card{width:min(360px,86%);background:#fff;border:1px solid #dce2ea;border-radius:12px;padding:22px;box-shadow:0 18px 45px rgba(16,24,40,.18)}.mcc-confirm-card h3{margin:0 0 9px;font-size:16px}.mcc-confirm-card p{margin:0 0 18px;font-size:12px;color:#6f7d90;line-height:1.5}.mcc-confirm-actions{display:flex;justify-content:flex-end;gap:8px}.mcc-confirm-actions button{border:1px solid #d7dee8;background:#fff;border-radius:8px;padding:9px 13px;font-size:12px;cursor:pointer}.mcc-confirm-actions .primary{background:#1d2d42;color:#fff;border-color:#1d2d42}
-@media(max-width:760px){#mayaacc-cost-centre-panel{width:100%;min-width:0}#mayaacc-cost-centre-config{width:94vw}.mcc-side{width:135px;flex-basis:135px}}@media(max-width:620px){.mcc-content{display:block}.mcc-main{padding:20px 16px}.mcc-side{display:flex;gap:8px;width:auto;flex:none;border-left:0;border-top:1px solid #e3e8ef;padding:10px 12px}.mcc-side h3{display:none}.mcc-side button{flex:1;margin:0}.mcc-grid{grid-template-columns:1fr}.mcc-field.full{grid-column:auto}}
+#mayaacc-cost-centre-panel{position:absolute;left:0;top:0;width:600px;max-width:calc(100vw - 220px);max-height:100%;background:#fff;border-right:1px solid #dfe4ec;box-shadow:18px 0 45px rgba(16,24,40,.16);display:flex;flex-direction:column;overflow:hidden}
+.mcc-content{display:flex;min-height:0;flex:1 1 auto}
+.mcc-main{padding:0 24px 16px;overflow-y:auto;overflow-x:hidden;flex:1;min-width:0}
+.mcc-title{display:flex;align-items:flex-start;justify-content:space-between;height:40px;border-bottom:1px solid #e5e7eb;margin-bottom:14px}
+.mcc-title h2{margin:0;font-size:15px;font-weight:600;color:#374151}
+.mcc-title .mug-chip{margin-top:4px}
+.mcc-close{border:0;background:transparent;font-size:22px;color:#7b8797;cursor:pointer}
+/* Tally-style field rows (like Currency .mcur-trow): label left, box right. */
+.mcc-trow{display:flex;align-items:center;min-height:44px}
+.mcc-trow>label{width:290px;flex-shrink:0;font-size:14px;color:#111827}
+.mcc-trow>label .colon{color:#6b7280;margin-left:2px}
+.mcc-trow>label .req{color:#c0392b}
+.mcc-trow input,.mcc-trow select{width:260px;height:30px;border:1px solid #9aa3ad;border-radius:2px;padding:0 8px;font-size:14px;color:#111827;background:#fff;outline:none}
+.mcc-trow textarea{width:260px;height:74px;border:1px solid #9aa3ad;border-radius:2px;padding:6px 8px;font-size:14px;color:#111827;background:#fff;outline:none;resize:vertical}
+.mcc-trow input:focus,.mcc-trow select:focus,.mcc-trow textarea:focus{border-color:#2f6fd0;box-shadow:0 0 0 3px rgba(47,111,208,.15)}
+.mcc-trow input::placeholder,.mcc-trow textarea::placeholder{color:#9ca3af}
+.mcc-more{display:none;border-top:1px dashed #d7dce3;margin-top:6px;padding-top:4px}
+.mcc-more-head{font-size:11px;letter-spacing:1px;color:#78869a;text-transform:uppercase;padding:8px 0 2px}
+.mcc-under-wrap{position:relative;width:260px}
+.mcc-under-wrap input{width:100%}
+.mcc-tree{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);max-height:260px;overflow:auto;background:#fff;border:1px solid #d7dfe8;border-radius:8px;box-shadow:0 14px 30px rgba(16,24,40,.14);z-index:40;padding:5px 0}
+.mcc-tree button{display:block;width:100%;border:0;background:#fff;text-align:left;padding:8px 12px;font-size:12px;color:#33445c;cursor:pointer}
+.mcc-tree button:hover,.mcc-tree button.mcc-focus{background:#edf1fb;color:#395ba8}
+/* Sidebar detached to the FAR RIGHT edge (like Group v2): absolute against
+   the overlay — the 600px panel stays on the left, dimmed Gateway sits
+   between panel and sidebar, F12 pinned at the sidebar bottom. */
+#mayaacc-cost-centre-overlay>.mcc-side{position:absolute;right:0;top:0;bottom:0;width:160px;background:#fff;border-left:1px solid #e3e8ef;padding:0;display:flex;flex-direction:column;z-index:5}
+#mayaacc-cost-centre-overlay>.mcc-side .mlg-f12{margin-top:auto;border-top:1px solid #e3e8ef}
+@media(max-width:900px){#mayaacc-cost-centre-overlay>.mcc-side{display:none}}
+/* F12 Configuration BOX — Tally style (Ledger/Group pattern): 1020px, 2 columns, plain Yes/No rows. */
+#mayaacc-cost-centre-config{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);right:auto;height:auto;max-height:calc(100vh - 60px);width:min(1020px,94vw);background:#fff;border:1px solid #dbe4ec;border-radius:10px;box-shadow:0 24px 70px rgba(15,25,50,.35);z-index:10090;overflow:hidden;flex-direction:column}
+#mayaacc-cost-centre-config .mlgc-head{padding:14px 20px 10px}
+#mayaacc-cost-centre-config .mlgc-head h3{font-size:15px}
+#mayaacc-cost-centre-config .mlgc-body{padding:12px 24px 14px;max-height:calc(100vh - 260px)}
+#mayaacc-cost-centre-config .cfgcols{display:flex;gap:36px;padding-right:22px}
+#mayaacc-cost-centre-config .cfgcol{flex:1;min-width:0}
+#mayaacc-cost-centre-config .mlgc-option{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 8px;font-size:13px;border:0;border-bottom:1px solid #f0f2f6;border-radius:6px;background:transparent;margin:0;cursor:pointer}
+#mayaacc-cost-centre-config .mlgc-option .v{font-weight:700;color:#172033;flex:none}
+#mayaacc-cost-centre-config .mlgc-option input{display:none}
+#mayaacc-cost-centre-config .mlgc-option:hover{background:#f4f7fd}
+#mayaacc-cost-centre-config .mlgc-option.mlgc-focus{background:#e8effc;outline:none;box-shadow:none}
+#mayaacc-cost-centre-config .mlgc-ind{position:absolute;right:10px;font-size:11px;color:#7a8798;font-weight:700;z-index:3;pointer-events:none}
+#mayaacc-cost-centre-config .mlgc-ind.top{top:60px}
+#mayaacc-cost-centre-config .mlgc-ind.bot{bottom:64px}
+.mcc-confirm{display:none;position:absolute;inset:0;z-index:50;background:rgba(10,15,26,.24);align-items:center;justify-content:center}
+.mcc-confirm-card{width:min(360px,86%);background:#fff;border:1px solid #dce2ea;border-radius:12px;padding:22px;box-shadow:0 18px 45px rgba(16,24,40,.18)}
+.mcc-confirm-card h3{margin:0 0 9px;font-size:16px}
+.mcc-confirm-card p{margin:0 0 18px;font-size:12px;color:#6f7d90;line-height:1.5}
+.mcc-confirm-actions{display:flex;justify-content:flex-end;gap:8px}
+.mcc-confirm-actions button{border:1px solid #d7dee8;background:#fff;border-radius:8px;padding:9px 13px;font-size:12px;cursor:pointer}
+.mcc-confirm-actions .primary{background:#1d2d42;color:#fff;border-color:#1d2d42}
 </style>
 <div id="mayaacc-cost-centre-overlay" aria-hidden="true">
   <section id="mayaacc-cost-centre-panel" role="dialog" aria-modal="true" aria-labelledby="mccTitle">
     <div class="mcc-content">
       <main class="mcc-main">
-        <div class="mcc-title"><h2 id="mccTitle">Cost Centre</h2><button class="mcc-close" type="button" onclick="mayaCloseCostCentre()">×</button></div>
-        <div class="mcc-section"><h4>Basic Details</h4><div class="mcc-grid">
-          <div class="mcc-field"><label for="mccName">Name *</label><input id="mccName" autocomplete="off" placeholder="e.g. Sales Department"></div>
-          <div class="mcc-field"><label for="mccAlias">Alias / Short Name</label><input id="mccAlias" autocomplete="off" placeholder="Optional alias"></div>
-          <div class="mcc-field"><label for="mccUnder">Under Cost Centre</label><div class="mcc-under-wrap"><input id="mccUnder" autocomplete="off" placeholder="Primary / select parent"><div class="mcc-tree" id="mccTree"></div></div><div class="mcc-note">Leave blank to keep this Cost Centre under Primary.</div></div>
-          <div class="mcc-field"><label for="mccCategory">Category</label><select id="mccCategory"><option>Primary</option><option>Administration</option><option>Sales</option><option>Production</option><option>Finance</option><option>Other</option></select></div>
-          <div class="mcc-field full"><label for="mccNotes">Notes</label><textarea id="mccNotes" placeholder="Optional notes"></textarea></div>
-        </div></div>
-        <div class="mcc-section"><h4>Status</h4><div class="mcc-grid">
-          <div class="mcc-field"><label for="mccActive">Active</label><select id="mccActive"><option value="yes">Yes</option><option value="no">No</option></select></div>
-          <div class="mcc-field"><label for="mccAllocate">Allocation</label><select id="mccAllocate"><option value="yes">Revenue &amp; Non-Revenue</option><option value="no">Revenue Only</option></select></div>
-        </div></div>
-        <div class="mcc-summary"><div class="mcc-summary-row"><span>Company</span><strong id="mccSummaryCompany">Current Company</strong></div><div class="mcc-summary-row"><span>Parent</span><strong id="mccSummaryParent">Primary</strong></div><div class="mcc-summary-row"><span>Status</span><strong id="mccSummaryStatus">Active</strong></div></div>
-              </main>
-      <aside class="mcc-side"><h3>Actions</h3><button type="button" onclick="mayaCostCentreChangeCompany()">Change Company</button></aside>
+        <div class="mcc-title"><div><h2 id="mccTitle">Cost Centre Creation</h2><div class="mug-chip" id="mccCompanyChip">Current Company</div></div><button class="mcc-close" type="button" onclick="mayaCloseCostCentre()">×</button></div>
+        <div class="mcc-trow" id="mccNameRow"><label for="mccName">Name <span class="req">*</span> <span class="colon">:</span></label><input id="mccName" autocomplete="off" placeholder="e.g. Sales Department"></div>
+        <div class="mcc-trow" id="mccAliasRow"><label for="mccAlias">Alias / Short Name <span class="colon">:</span></label><input id="mccAlias" autocomplete="off" placeholder="Optional alias"></div>
+        <div class="mcc-trow" id="mccUnderRow"><label for="mccUnder">Under Cost Centre <span class="colon">:</span></label><div class="mcc-under-wrap"><input id="mccUnder" autocomplete="off" placeholder="Primary / select parent"><div class="mcc-tree" id="mccTree"></div></div></div>
+        <div class="mcc-trow" id="mccCategoryRow"><label for="mccCategory">Category <span class="colon">:</span></label><select id="mccCategory"><option>Primary</option><option>Administration</option><option>Sales</option><option>Production</option><option>Finance</option><option>Other</option></select></div>
+        <div class="mcc-trow" id="mccActiveRow"><label for="mccActive">Active <span class="colon">:</span></label><select id="mccActive"><option value="yes">Yes</option><option value="no">No</option></select></div>
+        <div class="mcc-trow" id="mccAllocateRow"><label for="mccAllocate">Allocation <span class="colon">:</span></label><select id="mccAllocate"><option value="yes">Revenue &amp; Non-Revenue</option><option value="no">Revenue Only</option></select></div>
+        <div class="mcc-more" id="mccMore">
+          <div class="mcc-more-head">More Details — Ctrl+I</div>
+          <div class="mcc-trow" id="mccNotesRow"><label for="mccNotes">Notes <span class="colon">:</span></label><textarea id="mccNotes" placeholder="Optional notes"></textarea></div>
+        </div>
+      </main>
     </div>
     <div class="mcc-footer">
-      <div class="mcc-actions"><button type="button" onclick="mayaPrintCostCentre()">Print</button><button class="primary" type="button" onclick="mayaSaveCostCentre(true)">Save & New</button></div>
-      <div class="maya-create-foot"><span class="mcf-seg" onclick="mayaCloseCostCentre()"><u class="maya-u-dbl">Q</u> Quit</span><span class="mcf-seg" onclick="mayaSaveCostCentre(false)"><u>A</u> Accept</span><span class="mcf-seg off" onclick="window.__mayaCreateDeleteToast&&window.__mayaCreateDeleteToast('Cost Centre')"><u>D</u> Delete</span><span class="mcf-seg" onclick="mayaOpenCostCentreConfig()"><b>F12</b> Configure</span></div>
+      <div class="maya-create-foot"><span class="mcf-seg" onclick="mayaCloseCostCentre()"><u class="maya-u-dbl">Q</u> Quit</span><span class="mcf-seg" onclick="mayaSaveCostCentre(false)"><u>A</u> Accept</span><span class="mcf-seg off" onclick="window.__mayaCreateDeleteToast&&window.__mayaCreateDeleteToast('Cost Centre')"><u>D</u> Delete</span></div>
     </div>
     <div class="mcc-confirm" id="mccConfirm"><div class="mcc-confirm-card"><h3>Save Cost Centre?</h3><p id="mccConfirmText">Save this Cost Centre in the current company?</p><div class="mcc-confirm-actions"><button type="button" onclick="mayaCloseCostCentreConfirm()">Cancel</button><button class="primary" type="button" onclick="mayaConfirmCostCentreSave()">Save</button></div></div></div>
   </section>
+  <aside class="mcc-side">
+    <div class="mlg-side-row off"><b>F2</b><span>Period</span></div>
+    <div class="mlg-side-row" onclick="window.mayaF3Dropdown?window.mayaF3Dropdown():window.mayaCompanyMenu()"><b>F3</b><span>Company</span></div>
+    <div class="mlg-side-row off mlg-blue"><b>F4</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F5</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F6</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F7</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F8</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F9</b></div>
+    <div class="mlg-side-row" onclick="window.mayaOpenOtherMasters&&window.mayaOpenOtherMasters('Cost Centre')"><b>F10</b><span>Other Masters</span></div>
+    <div class="mlg-side-row" id="mccMoreRow" onclick="window.mayaToggleCostCentreMore&&window.mayaToggleCostCentreMore()"><b><u class="maya-u-dbl">I</u></b><span>More Details</span></div>
+    <div class="mlg-side-row mlg-f12" tabindex="-1" onclick="mayaOpenCostCentreConfig()"><b>F12</b><span>Configure</span></div>
+  </aside>
 </div>
 <div id="mayaacc-cost-centre-config" aria-hidden="true">
-  <div class="mccc-head"><button class="mccc-close" type="button" onclick="mayaCloseCostCentreConfig()">×</button><h3>Cost Centre Configuration</h3><p>F12 settings apply only to the Cost Centre screen for the current company.</p></div>
-  <div class="mccc-body">
-    <p id="mcccStatus" class="mccc-status">Changes apply to this Cost Centre screen.</p>
-    <div class="mccc-section"><h4>Display</h4>
-      <label class="mccc-option"><span><strong>Show Alias</strong><small>Show Alias / Short Name field.</small></span><span class="mccc-check"><input id="mcccAlias" type="checkbox" checked><span></span></span></label>
-      <label class="mccc-option"><span><strong>Show Category</strong><small>Show the Cost Centre category selector.</small></span><span class="mccc-check"><input id="mcccCategory" type="checkbox" checked><span></span></span></label>
-      <label class="mccc-option"><span><strong>Show Notes</strong><small>Show optional Notes field.</small></span><span class="mccc-check"><input id="mcccNotes" type="checkbox" checked><span></span></span></label>
-      <label class="mccc-option"><span><strong>Show Parent Field</strong><small>Show the Under Cost Centre selector.</small></span><span class="mccc-check"><input id="mcccParent" type="checkbox" checked><span></span></span></label>
-    </div>
-    <div class="mccc-section"><h4>Behavior</h4>
-      <label class="mccc-option"><span><strong>Confirm Before Save</strong><small>Ask before saving the Cost Centre.</small></span><span class="mccc-check"><input id="mcccConfirm" type="checkbox" checked><span></span></span></label>
-      <label class="mccc-option"><span><strong>Show Active Field</strong><small>Keep the Active selector visible.</small></span><span class="mccc-check"><input id="mcccActiveField" type="checkbox" checked><span></span></span></label>
-      <label class="mccc-option"><span><strong>Print Empty Fields</strong><small>Include blank values in print preview.</small></span><span class="mccc-check"><input id="mcccPrintEmpty" type="checkbox"><span></span></span></label>
+  <div class="mlgc-head"><button class="mlgc-close" type="button" onclick="mayaCloseCostCentreConfig()">×</button><h3>Cost Centre Configuration</h3></div>
+  <span class="mlgc-ind top" style="display:none">▲</span>
+  <div class="mlgc-body">
+    <div class="cfgcols">
+      <div class="cfgcol">
+        <label class="mlgc-option"><span>Show Alias</span><span class="v">: Yes</span><input id="mcccAlias" type="checkbox" checked></label>
+        <label class="mlgc-option"><span>Show Category</span><span class="v">: Yes</span><input id="mcccCategory" type="checkbox" checked></label>
+        <label class="mlgc-option"><span>Show Notes</span><span class="v">: Yes</span><input id="mcccNotes" type="checkbox" checked></label>
+      </div>
+      <div class="cfgcol">
+        <label class="mlgc-option"><span>Show Parent Field</span><span class="v">: Yes</span><input id="mcccParent" type="checkbox" checked></label>
+        <label class="mlgc-option"><span>Confirm Before Save</span><span class="v">: Yes</span><input id="mcccConfirm" type="checkbox" checked></label>
+        <label class="mlgc-option"><span>Show Active Field</span><span class="v">: Yes</span><input id="mcccActiveField" type="checkbox" checked></label>
+      </div>
     </div>
   </div>
-  <div class="mccc-footer"><button type="button" onclick="mayaResetCostCentreConfig()">Reset</button><button class="primary" type="button" onclick="mayaSaveCostCentreConfig()">Save Configuration</button></div>
+  <span class="mlgc-ind bot" style="display:none">▼</span>
+  <div class="mlgc-footer"><button type="button" onclick="mayaResetCostCentreConfig()">Reset Defaults</button><button type="button" class="primary" onclick="mayaSaveCostCentreConfig(true)">Save Configuration</button></div>
 </div>
 <script id="mayaacc-cost-centre-script">
 (function(){
@@ -4574,42 +4632,76 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   const companyName=()=>{try{const a=JSON.parse(localStorage.getItem('mayaacc_companies')||'[]');const c=a.find(x=>x.id===companyId());return c?.companyName||'Current Company'}catch(e){return 'Current Company'}};
   const dataKey=()=> 'mayaacc_cost_centres_'+companyId();
   const cfgKey=()=> 'mayaacc_cost_centre_config_'+companyId();
-  const defaults={alias:true,category:true,notes:true,parent:true,confirm:true,activeField:true,printEmpty:false};
-  let cfgIndex=-1,treeFocus=-1,pending='save',dirty=false;
+  const defaults={alias:true,category:true,notes:true,parent:true,confirm:true,activeField:true};
+  let cfgIndex=-1,treeFocus=-1,pending='close',dirty=false;
   const read=()=>{try{return JSON.parse(localStorage.getItem(dataKey())||'[]')}catch(e){return[]}};
   const write=a=>localStorage.setItem(dataKey(),JSON.stringify(a));
   const getCfg=()=>{try{return {...defaults,...JSON.parse(localStorage.getItem(cfgKey())||'{}')}}catch(e){return {...defaults}}};
-  const saveCfg=c=>localStorage.setItem(cfgKey(),JSON.stringify(c));
+  const saveCfgStore=c=>localStorage.setItem(cfgKey(),JSON.stringify(c));
   const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const shown=id=>{const e=$(id);if(!e)return false;const cs=getComputedStyle(e);return cs.display!=='none'&&cs.visibility!=='hidden'&&e.getAttribute('aria-hidden')!=='true'};
   const parentList=()=>['Primary',...read().filter(x=>x.name).map(x=>x.name)];
   function renderTree(){const q=($('mccUnder')?.value||'').trim().toLowerCase();const list=parentList().filter(x=>x.toLowerCase().includes(q));$('mccTree').innerHTML=list.map(x=>'<button type="button" data-name="'+esc(x)+'">'+esc(x)+'</button>').join('');treeFocus=list.length?0:-1;$('mccTree').style.display=list.length?'block':'none';document.querySelectorAll('#mccTree button').forEach((b,i)=>{b.addEventListener('mousedown',e=>e.preventDefault());b.addEventListener('click',()=>selectTree(i));});paintTree()}
   function paintTree(){const bs=$('mccTree').querySelectorAll('button');bs.forEach((b,i)=>b.classList.toggle('mcc-focus',i===treeFocus));if(treeFocus>=0&&bs[treeFocus])bs[treeFocus].scrollIntoView({block:'nearest'})}
-  function selectTree(i){const b=$('mccTree').querySelectorAll('button')[i];if(!b)return;$('mccUnder').value=b.dataset.name||'';$('mccTree').style.display='none';treeFocus=-1;updateSummary();dirty=true}
-  function updateSummary(){$('mccSummaryCompany').textContent=companyName();$('mccSummaryParent').textContent=$('mccUnder').value.trim()||'Primary';$('mccSummaryStatus').textContent=$('mccActive').value==='yes'?'Active':'Inactive'}
-  function clear(){['mccName','mccAlias','mccUnder','mccNotes'].forEach(id=>{if($(id))$(id).value=''});$('mccCategory').value='Primary';$('mccActive').value='yes';$('mccAllocate').value='yes';dirty=false;updateSummary();applyConfig()}
-  function applyConfig(){const c=getCfg();const alias=$('mccAlias')?.closest('.mcc-field'),cat=$('mccCategory')?.closest('.mcc-field'),notes=$('mccNotes')?.closest('.mcc-field'),parent=$('mccUnder')?.closest('.mcc-field'),active=$('mccActive')?.closest('.mcc-field');if(alias)alias.style.display=c.alias?'':'none';if(cat)cat.style.display=c.category?'':'none';if(notes)notes.style.display=c.notes?'':'none';if(parent)parent.style.display=c.parent?'':'none';if(active)active.style.display=c.activeField?'':'none'}
+  function selectTree(i){const b=$('mccTree').querySelectorAll('button')[i];if(!b)return;$('mccUnder').value=b.dataset.name||'';$('mccTree').style.display='none';treeFocus=-1;dirty=true}
+  function clear(){['mccName','mccAlias','mccUnder','mccNotes'].forEach(id=>{if($(id))$(id).value=''});$('mccCategory').value='Primary';$('mccActive').value='yes';$('mccAllocate').value='yes';$('mccMore').style.display='none';dirty=false;applyConfig()}
+  function applyConfig(){const c=getCfg();
+    const set=(rowId,on)=>{const r=$(rowId);if(r)r.style.display=on?'':'none';};
+    set('mccAliasRow',c.alias);set('mccCategoryRow',c.category);set('mccUnderRow',c.parent);set('mccActiveRow',c.activeField);set('mccNotesRow',c.notes);
+    const moreRow=$('mccMoreRow');
+    if(!c.notes){$('mccMore').style.display='none';moreRow.classList.add('off');moreRow.querySelector('b').innerHTML='I';}
+    else{moreRow.classList.remove('off');moreRow.querySelector('b').innerHTML='<u class="maya-u-dbl">I</u>';}
+  }
+  function toggleMore(){if(!getCfg().notes)return;const m=$('mccMore');m.style.display=m.style.display==='block'?'none':'block';if(m.style.display==='block')setTimeout(()=>$('mccNotes').focus(),0)}
   function capture(){return{name:$('mccName').value.trim(),alias:$('mccAlias').value.trim(),under:$('mccUnder').value.trim()||'Primary',category:$('mccCategory').value,notes:$('mccNotes').value.trim(),active:$('mccActive').value,allocate:$('mccAllocate').value}}
   function validate(){const o=capture();if(!o.name){alert('Please enter Cost Centre Name.');$('mccName').focus();return false}if(o.under.toLowerCase()===o.name.toLowerCase()){alert('A Cost Centre cannot be its own parent.');$('mccUnder').focus();return false}if(read().some(x=>String(x.name||'').trim().toLowerCase()===o.name.toLowerCase())){alert('A Cost Centre with this name already exists in this company.');$('mccName').focus();return false}return true}
   function ask(mode){if(!validate())return;pending=mode;const n=$('mccName').value.trim();if(getCfg().confirm){$('mccConfirmText').textContent='Save “'+n+'” in the current company?';$('mccConfirm').style.display='flex'}else commit()}
   function commit(){if(!validate())return;const o=capture(),a=read();a.push({...o,id:'CCT-'+Date.now(),createdAt:new Date().toISOString()});write(a);$('mccConfirm').style.display='none';dirty=false;if(pending==='new'){clear();$('mccName').focus()}else close()}
-  function configOpen(){const c=getCfg();[['mcccAlias','alias'],['mcccCategory','category'],['mcccNotes','notes'],['mcccParent','parent'],['mcccConfirm','confirm'],['mcccActiveField','activeField'],['mcccPrintEmpty','printEmpty']].forEach(([id,k])=>$(id).checked=!!c[k]);$('mayaacc-cost-centre-config').style.display='flex';$('mayaacc-cost-centre-config').setAttribute('aria-hidden','false');if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-cost-centre-config');cfgIndex=0;paintConfig()}
-  function configClose(){$('mayaacc-cost-centre-config').style.display='none';$('mayaacc-cost-centre-config').setAttribute('aria-hidden','true');$('mayaacc-cost-centre-config').querySelectorAll('.mccc-focus').forEach(x=>x.classList.remove('mccc-focus'));cfgIndex=-1}
-  function configRows(){return [...$('mayaacc-cost-centre-config').querySelectorAll('.mccc-option,.mccc-footer button')].filter(x=>{const s=getComputedStyle(x);return s.display!=='none'&&s.visibility!=='hidden'&&x.offsetHeight>0})}
-  function paintConfig(){const rs=configRows();if(!rs.length)return;cfgIndex=Math.max(0,Math.min(cfgIndex,rs.length-1));rs.forEach(x=>x.classList.remove('mccc-focus'));const el=rs[cfgIndex];el.classList.add('mccc-focus');el.scrollIntoView({block:'nearest'})}
-  function saveConfig(){const c={alias:$('mcccAlias').checked,category:$('mcccCategory').checked,notes:$('mcccNotes').checked,parent:$('mcccParent').checked,confirm:$('mcccConfirm').checked,activeField:$('mcccActiveField').checked,printEmpty:$('mcccPrintEmpty').checked};saveCfg(c);applyConfig();$('mcccStatus').textContent='Configuration saved for '+companyName()+'.';configClose()}
-  function resetConfig(){saveCfg({...defaults});configOpen()}
-  function changeCompany(){if(dirty&&!confirm('This Cost Centre has unsaved changes. Change company and discard the current entry?'))return;close(false);if(typeof showCompanySelect==='function')showCompanySelect()}
-  function printCostCentre(){const c=getCfg(),o=capture(),row=(l,v,show)=>show&&(v||c.printEmpty)?'<div class="r"><span>'+esc(l)+'</span><strong>'+esc(v||'—')+'</strong></div>':'';const html='<!doctype html><html><head><meta charset="utf-8"><title>MAYAACC Cost Centre</title><style>body{font-family:Arial,sans-serif;margin:40px;color:#172033}h1{font-size:22px;margin:0 0 4px}p{font-size:12px;color:#687286;margin:0 0 24px}.box{max-width:780px;border:1px solid #dfe4ec;border-radius:10px;padding:18px}.r{display:flex;justify-content:space-between;gap:30px;padding:9px 0;border-bottom:1px solid #edf0f4;font-size:12px}.r:last-child{border-bottom:0}</style></head><body><h1>'+esc(o.name||'Cost Centre')+'</h1><p>MAYAACC • '+esc(companyName())+'</p><div class="box">'+row('Alias / Short Name',o.alias,c.alias)+row('Under',o.under,true)+row('Category',o.category,c.category)+row('Status',o.active==='yes'?'Active':'Inactive',c.activeField)+row('Allocation',o.allocate==='yes'?'Revenue & Non-Revenue':'Revenue Only',true)+row('Notes',o.notes,c.notes)+'</div><script>window.onload=function(){window.print()}<\/script></body></html>';const w=window.open('','_blank','width=860,height=700');if(!w){alert('Please allow popups to use Print Preview.');return}w.document.write(html);w.document.close()}
-  function open(){if(window.__mayaRecordReturn)window.__mayaRecordReturn('Cost Centre');if(typeof closeCreateMaster==='function')closeCreateMaster();configClose();$('mayaacc-cost-centre-overlay').style.display='block';$('mayaacc-cost-centre-overlay').setAttribute('aria-hidden','false');$('mccConfirm').style.display='none';if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-cost-centre-overlay .mcc-main');clear();setTimeout(()=>$('mccName').focus(),20)}
+  function configRows(){return [...$('mayaacc-cost-centre-config').querySelectorAll('.mlgc-option,.mlgc-footer button')].filter(x=>{const s=getComputedStyle(x);return s.display!=='none'&&s.visibility!=='hidden'&&x.offsetHeight>0})}
+  function paintConfig(){const rs=configRows();if(!rs.length)return;cfgIndex=Math.max(0,Math.min(cfgIndex,rs.length-1));rs.forEach(x=>x.classList.remove('mlgc-focus'));const el=rs[cfgIndex];el.classList.add('mlgc-focus');el.scrollIntoView({block:'nearest'})}
+  function syncCfgValues(){[['mcccAlias','alias'],['mcccCategory','category'],['mcccNotes','notes'],['mcccParent','parent'],['mcccConfirm','confirm'],['mcccActiveField','activeField']].forEach(([id,k])=>{const el=$(id);if(!el)return;const row=el.closest('.mlgc-option');const v=row?row.querySelector('.v'):null;if(v)v.textContent=': '+(el.checked?'Yes':'No');});}
+  function syncCfgIndicators(){const p=$('mayaacc-cost-centre-config');if(!p)return;const b=p.querySelector('.mlgc-body');if(!b)return;const t=p.querySelector('.mlgc-ind.top'),d=p.querySelector('.mlgc-ind.bot');if(t)t.style.display=b.scrollTop>0?'block':'none';if(d)d.style.display=(b.scrollTop+b.clientHeight<b.scrollHeight-4)?'block':'none';}
+  function setConfigForm(){const c=getCfg();[['mcccAlias','alias'],['mcccCategory','category'],['mcccNotes','notes'],['mcccParent','parent'],['mcccConfirm','confirm'],['mcccActiveField','activeField']].forEach(([id,k])=>{if($(id))$(id).checked=!!c[k];});syncCfgValues();syncCfgIndicators();cfgIndex=0;paintConfig();}
+  function configOpen(){setConfigForm();const box=$('mayaacc-cost-centre-config');box.style.display='flex';box.setAttribute('aria-hidden','false');if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-cost-centre-config');setTimeout(()=>paintConfig(),0);syncCfgIndicators();}
+  function configClose(){const box=$('mayaacc-cost-centre-config');box.style.display='none';box.setAttribute('aria-hidden','true');box.querySelectorAll('.mlgc-focus').forEach(x=>x.classList.remove('mlgc-focus'));cfgIndex=-1}
+  function saveCfg(closeAfter){const c={alias:$('mcccAlias').checked,category:$('mcccCategory').checked,notes:$('mcccNotes').checked,parent:$('mcccParent').checked,confirm:$('mcccConfirm').checked,activeField:$('mcccActiveField').checked};saveCfgStore(c);applyConfig();alert('Cost Centre configuration saved.');if(closeAfter)configClose();}
+  function resetCfg(){saveCfgStore({...defaults});setConfigForm();applyConfig();}
+  function open(){if(window.__mayaRecordReturn)window.__mayaRecordReturn('Cost Centre');if(typeof closeCreateMaster==='function')closeCreateMaster();configClose();$('mayaacc-cost-centre-overlay').style.display='block';$('mayaacc-cost-centre-overlay').setAttribute('aria-hidden','false');$('mccConfirm').style.display='none';$('mccCompanyChip').textContent=companyName();if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-cost-centre-overlay .mcc-main');clear();setTimeout(()=>$('mccName').focus(),20)}
   function close(returnToMenu){configClose();$('mccTree').style.display='none';$('mccConfirm').style.display='none';$('mayaacc-cost-centre-overlay').style.display='none';$('mayaacc-cost-centre-overlay').setAttribute('aria-hidden','true');dirty=false;if(returnToMenu!==false&&window.__mayaReturnToMenu)window.__mayaReturnToMenu();}
-  function key(e){if(!shown('mayaacc-cost-centre-overlay'))return;const k=String(e.key||'').toLowerCase(),tag=(e.target?.tagName||'').toLowerCase();if(shown('mayaacc-cost-centre-config')){if(e.key==='Escape'||e.key==='F12'){e.preventDefault();e.stopImmediatePropagation();configClose();return}if((e.ctrlKey&&!e.altKey&&!e.metaKey&&k==='s')||(!e.ctrlKey&&!e.altKey&&!e.metaKey&&k==='s'&&!['input','textarea','select'].includes(tag))){e.preventDefault();e.stopImmediatePropagation();saveConfig();return}if(e.key==='ArrowDown'||e.key==='ArrowUp'){const rs=configRows();if(!rs.length)return;e.preventDefault();e.stopImmediatePropagation();cfgIndex=(cfgIndex<0?(e.key==='ArrowDown'?0:rs.length-1):(cfgIndex+(e.key==='ArrowDown'?1:-1)+rs.length)%rs.length);paintConfig();return}if(e.key==='Enter'){const rs=configRows();if(!rs.length)return;e.preventDefault();e.stopImmediatePropagation();if(cfgIndex<0)cfgIndex=0;const el=rs[cfgIndex],cb=el.querySelector('input[type="checkbox"]');if(cb){cb.checked=!cb.checked;cb.dispatchEvent(new Event('change',{bubbles:true}))}else el.click();paintConfig();return}return}
-    const conf=$('mccConfirm');if(conf&&getComputedStyle(conf).display!=='none'){if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();conf.style.display='none';return}if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();commit();return}return}
-    const tree=$('mccTree');if(tree&&getComputedStyle(tree).display!=='none'){const bs=tree.querySelectorAll('button');if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();tree.style.display='none';treeFocus=-1;return}if((e.key==='ArrowDown'||e.key==='ArrowUp')&&bs.length){e.preventDefault();e.stopImmediatePropagation();treeFocus=(treeFocus+(e.key==='ArrowDown'?1:-1)+bs.length)%bs.length;paintTree();return}if(e.key==='Enter'&&treeFocus>=0){e.preventDefault();e.stopImmediatePropagation();selectTree(treeFocus);return}return}
-    if(e.key==='F12'){e.preventDefault();e.stopImmediatePropagation();configOpen();return}if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();window.mayaCloseCostCentre();return}if(e.ctrlKey&&!e.altKey&&!e.metaKey&&k==='s'){e.preventDefault();e.stopImmediatePropagation();ask('save');return}if(!e.ctrlKey&&!e.altKey&&!e.metaKey&&k==='s'&&!['input','textarea','select','button'].includes(tag)){e.preventDefault();e.stopImmediatePropagation();ask('save');return}if(e.key==='Enter'){const next={mccName:'mccAlias',mccAlias:'mccUnder',mccUnder:'mccCategory',mccCategory:'mccNotes'}[document.activeElement?.id];if(next&&$(next)){e.preventDefault();e.stopImmediatePropagation();$(next).focus();return}}
+  function key(e){
+    if(!shown('mayaacc-cost-centre-overlay'))return;
+    const k=String(e.key||'').toLowerCase();
+    if(shown('mayaacc-cost-centre-config')){
+      if(e.key==='Escape'||e.key==='F12'){e.preventDefault();e.stopImmediatePropagation();configClose();return;}
+      if(e.ctrlKey&&!e.altKey&&!e.metaKey&&k==='a'){e.preventDefault();e.stopImmediatePropagation();saveCfg(true);return;}
+      if(e.ctrlKey&&!e.altKey&&!e.metaKey&&k==='s'){e.preventDefault();e.stopImmediatePropagation();saveCfg(false);return;}
+      return;
+    }
+    const conf=$('mccConfirm');
+    if(conf&&getComputedStyle(conf).display!=='none'){if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();conf.style.display='none';return;}if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();commit();return;}return;}
+    const om=$('mlgOtherMasters');
+    if(om&&om.style.display==='flex')return;
+    const f3m=$('maya-f3-menu');
+    if(f3m&&f3m.style.display==='block')return;
+    const tree=$('mccTree');
+    if(tree&&getComputedStyle(tree).display!=='none'){const bs=tree.querySelectorAll('button');if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();tree.style.display='none';treeFocus=-1;return;}if((e.key==='ArrowDown'||e.key==='ArrowUp')&&bs.length){e.preventDefault();e.stopImmediatePropagation();treeFocus=(treeFocus+(e.key==='ArrowDown'?1:-1)+bs.length)%bs.length;paintTree();return;}if(e.key==='Enter'&&treeFocus>=0){e.preventDefault();e.stopImmediatePropagation();selectTree(treeFocus);return;}return;}
+    if(e.key==='F12'){e.preventDefault();e.stopImmediatePropagation();configOpen();return;}
+    if(e.key==='F10'){e.preventDefault();e.stopImmediatePropagation();$('mccTree').style.display='none';treeFocus=-1;if(window.mayaOpenOtherMasters)window.mayaOpenOtherMasters('Cost Centre');return;}
+    if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();window.mayaCloseCostCentre();return;}
+    if(e.ctrlKey&&!e.altKey&&!e.metaKey&&k==='s'){e.preventDefault();e.stopImmediatePropagation();ask('new');return;}
+    /* Ctrl+A / bare A / bare D / Ctrl+Q are owned by the global creation-form
+       handler (form.save / delete toast / form.close) — do not double-handle.
+       Ctrl+I is owned by the global __mayaModalKey list — do not double-handle. */
   }
-  document.addEventListener('input',e=>{if(e.target?.id?.startsWith('mcc')){dirty=true;updateSummary();if(e.target.id==='mccUnder')renderTree()}});document.addEventListener('change',e=>{if(e.target?.id?.startsWith('mcc')){dirty=true;updateSummary()}});document.addEventListener('focusin',e=>{if(e.target===$('mccUnder'))renderTree()});document.addEventListener('mousedown',e=>{if(e.target===$('mayaacc-cost-centre-overlay'))close()});document.addEventListener('click',e=>{const row=e.target.closest('#mayaacc-cost-centre-config .mccc-option,#mayaacc-cost-centre-config .mccc-footer button');if(row&&shown('mayaacc-cost-centre-config')){const rs=configRows(),i=rs.indexOf(row);if(i>=0){cfgIndex=i;paintConfig()}}});document.addEventListener('keydown',key,true);
-  window.mayaOpenCostCentre=open;window.mayaCloseCostCentre=function(after){var _done=function(){close(true);if(typeof after==='function')after();};if(window.__mayaFormDirty&&window.__mayaFormDirty('Cost Centre')){if(window.__mayaAskQuit)window.__mayaAskQuit('Cost Centre',_done);else _done();}else _done();};window.mayaCloseCostCentreRaw=close;window.mayaSaveCostCentre=ask;window.mayaConfirmCostCentreSave=commit;window.mayaCloseCostCentreConfirm=()=>{$('mccConfirm').style.display='none'};window.mayaOpenCostCentreConfig=configOpen;window.mayaCloseCostCentreConfig=configClose;window.mayaSaveCostCentreConfig=saveConfig;window.mayaResetCostCentreConfig=resetConfig;window.mayaCostCentreChangeCompany=changeCompany;window.mayaPrintCostCentre=printCostCentre;
+  document.addEventListener('input',e=>{if(e.target?.closest&&e.target.closest('#mayaacc-cost-centre-config'))return;if(e.target?.id?.startsWith('mcc')){dirty=true;if(e.target.id==='mccUnder')renderTree()}});
+  document.addEventListener('change',e=>{if(e.target?.closest&&e.target.closest('#mayaacc-cost-centre-config'))return;if(e.target?.id?.startsWith('mcc')){dirty=true}});
+  document.addEventListener('change',e=>{if(e.target&&e.target.id&&e.target.id.startsWith('mccc'))syncCfgValues();});
+  document.addEventListener('focusin',e=>{if(e.target===$('mccUnder'))renderTree()});
+  document.addEventListener('mousedown',e=>{if(e.target===$('mayaacc-cost-centre-overlay'))close()});
+  document.addEventListener('click',e=>{const row=e.target.closest?e.target.closest('#mayaacc-cost-centre-config .mlgc-option,#mayaacc-cost-centre-config .mlgc-footer button'):null;if(row&&shown('mayaacc-cost-centre-config')){const rs=configRows(),i=rs.indexOf(row);if(i>=0){cfgIndex=i;paintConfig()}}});
+  (function(){const b=document.querySelector('#mayaacc-cost-centre-config .mlgc-body');if(b)b.addEventListener('scroll',syncCfgIndicators);})();
+  document.addEventListener('keydown',key,true);
+  window.mayaOpenCostCentre=open;window.mayaCloseCostCentre=function(after){var _done=function(){close(true);if(typeof after==='function')after();};if(window.__mayaFormDirty&&window.__mayaFormDirty('Cost Centre')){if(window.__mayaAskQuit)window.__mayaAskQuit('Cost Centre',_done);else _done();}else _done();};window.mayaCloseCostCentreRaw=close;window.mayaSaveCostCentre=function(andNew){ask(andNew?'new':'close')};window.mayaConfirmCostCentreSave=commit;window.mayaCloseCostCentreConfirm=()=>{$('mccConfirm').style.display='none'};window.mayaOpenCostCentreConfig=configOpen;window.mayaCloseCostCentreConfig=configClose;window.mayaSaveCostCentreConfig=function(closeAfter){saveCfg(closeAfter!==false)};window.mayaResetCostCentreConfig=resetCfg;window.mayaToggleCostCentreMore=toggleMore;
   const old=window.createMasterAction;window.createMasterAction=function(name){if(name==='Cost Centre'){open();return}return typeof old==='function'?old.apply(this,arguments):undefined};
 })();
 </script>
@@ -4620,7 +4712,6 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   window.addEventListener('keydown',function(e){if(!shown('mayaacc-cost-centre-overlay'))return;if(shown('mayaacc-cost-centre-config')||shown('mccConfirm')||shown('mccTree'))return;if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();window.mayaCloseCostCentre();}},true);
 })();
 </script>
-
 
 <!-- MAYAACC VOUCHER TYPE MODULE -->
 <style id="mayaacc-voucher-type-style">
@@ -29915,6 +30006,7 @@ document.addEventListener('keydown',function(e){
           if(form.name==='Ledger'&&window.mayaToggleLedgerMore){e.preventDefault();e.stopImmediatePropagation();window.mayaToggleLedgerMore();return 2;}
           if(form.name==='Currency'&&window.mayaToggleCurrencyMore){e.preventDefault();e.stopImmediatePropagation();window.mayaToggleCurrencyMore();return 2;}
           if(form.name==='Voucher Type'&&window.mayaToggleVoucherTypeMore){e.preventDefault();e.stopImmediatePropagation();window.mayaToggleVoucherTypeMore();return 2;}
+          if(form.name==='Cost Centre'&&window.mayaToggleCostCentreMore){e.preventDefault();e.stopImmediatePropagation();window.mayaToggleCostCentreMore();return 2;}
         }
         if(e.altKey&&!e.ctrlKey&&!e.metaKey&&(k==='b'||k==='B')&&form&&form.name==='Stock Item'){
           if(window.mayaOpenHsnFinder){e.preventDefault();e.stopImmediatePropagation();window.mayaOpenHsnFinder();return 2;}
@@ -30339,6 +30431,8 @@ document.addEventListener('focusin',function(e){
     var side=null,i;
     var cu=document.getElementById('mayaacc-currency-overlay');
     if(cu&&getComputedStyle(cu).display!=='none'){var cs=cu.querySelector('.mcur-side');if(cs&&cs.offsetParent!==null)side=cs;}
+    var co=document.getElementById('mayaacc-cost-centre-overlay');
+    if(co&&getComputedStyle(co).display!=='none'){var cs2=co.querySelector('.mcc-side');if(cs2&&cs2.offsetParent!==null)side=cs2;}
     var rail=document.getElementById('maya-gateway-rail');
     if(!side&&rail&&rail.offsetParent!==null)side=rail;
     if(!side){var go=document.getElementById('mayaacc-group-overlay');if(go&&getComputedStyle(go).display!=='none'){var gs=go.querySelector('.mlg-side');if(gs&&gs.offsetParent!==null)side=gs;}}
