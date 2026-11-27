@@ -835,7 +835,7 @@ window.addEventListener('DOMContentLoaded',()=>{populate();updateGSTFields()}) }
       'mayaacc-unit-overlay','mayaacc-unit-config','muConfirm',
       'mayaacc-godown-overlay','mayaacc-godown-config','mgdConfirm','mgdTree',
       'mayaacc-cost-centre-overlay','mayaacc-cost-centre-config','mccConfirm','mccTree',
-      'mayaacc-voucher-type-overlay','mayaacc-voucher-type-config','mvtConfirm','mayaacc-tax-gst-overlay','mayaacc-tax-gst-config','mtgConfirm','mayaacc-stock-group-overlay','mayaacc-stock-group-config','msgConfirm','msgTree','mayaacc-stock-cat-overlay','mscConfirm','mscTree','mayaacc-voucher-entry-overlay','mayaacc-reports-overlay','mayaacc-alter-other','mayaacc-sound-settings','mayaacc-backup','mdt-ov','mxc-ov','miox-ov','mhp-ov','mdb-ov','mayaacc-voucher-entry-config','mveOtherDialog','mveMasterPicker','alterMasterDialog','alterGroupPickerDialog','mayaacc-alter-group-form','alterLedgerPickerDialog','mayaacc-alter-ledger-form','mtlp-ov','mtlu-ov','mtl-type-ov'
+      'mayaacc-voucher-type-overlay','mayaacc-voucher-type-config','mvtConfirm','mayaacc-tax-gst-overlay','mayaacc-tax-gst-config','mtgConfirm','mayaacc-stock-group-overlay','mayaacc-stock-group-config','msgConfirm','msgTree','mayaacc-stock-cat-overlay','mayaacc-stock-cat-config','mscConfirm','mscTree','mayaacc-voucher-entry-overlay','mayaacc-reports-overlay','mayaacc-alter-other','mayaacc-sound-settings','mayaacc-backup','mdt-ov','mxc-ov','miox-ov','mhp-ov','mdb-ov','mayaacc-voucher-entry-config','mveOtherDialog','mveMasterPicker','alterMasterDialog','alterGroupPickerDialog','mayaacc-alter-group-form','alterLedgerPickerDialog','mayaacc-alter-ledger-form','mtlp-ov','mtlu-ov','mtl-type-ov'
     ];
     const busy=busyIds.some(id=>{const el=document.getElementById(id);if(!el)return false;const st=getComputedStyle(el);return st.display!=='none'&&st.visibility!=='hidden'&&el.getAttribute('aria-hidden')!=='true';});
     if(busy)return;
@@ -3214,6 +3214,7 @@ $('msiHSN').value=row.code; $('msiHSNDescription').value=row.description||''; co
     'mayaacc-voucher-entry-config':{overlay:'mayaacc-voucher-entry-overlay',row:'.mvec-option',body:'.mve-config-body',open:'mayaOpenVoucherEntryConfig',close:'mayaCloseVoucherEntryConfig'},
     'mayaacc-tax-gst-config':{overlay:'mayaacc-tax-gst-overlay',row:'.mtg-config-option',body:'.mtg-config-body',open:'mayaOpenTaxGstConfig',close:'mayaCloseTaxGstConfig'},
     'mayaacc-stock-group-config':{overlay:'mayaacc-stock-group-overlay',row:'.msgc-option',body:'.msgc-body',open:'mayaOpenStockGroupConfig',close:'mayaCloseStockGroupConfig'},
+    'mayaacc-stock-cat-config':{overlay:'mayaacc-stock-cat-overlay',row:'.mscc-option',body:'.mscc-body',open:'mayaOpenStockCategoryConfig',close:'mayaCloseStockCategoryConfig'},
     'mayaacc-currency-config':{overlay:'mayaacc-currency-overlay',row:'.mlgc-option',body:'.mlgc-body',open:'mayaOpenCurrencyConfig',close:'mayaCloseCurrencyConfig'}
   };
   const state=Object.create(null);
@@ -3241,7 +3242,7 @@ $('msiHSN').value=row.code; $('msiHSNDescription').value=row.description||''; co
     const rs=rows(info); if(!rs.length)return;
     let i=Number.isInteger(state[info.id])?state[info.id]:0;
     i=Math.max(0,Math.min(i,rs.length-1)); state[info.id]=i;
-    rs.forEach(r=>r.classList.remove('mayaacc-f12-final-active','mayaacc-f12-active-row','mayaacc-keyboard-top','mgc-focus','mlgc-focus','msic-focus','mugc-focus','msgc-focus'));
+    rs.forEach(r=>r.classList.remove('mayaacc-f12-final-active','mayaacc-f12-active-row','mayaacc-keyboard-top','mgc-focus','mlgc-focus','msic-focus','mugc-focus','msgc-focus','mscc-focus'));
     const row=rs[i]; row.classList.add('mayaacc-f12-final-active');
     scrollRow(info,row);
   }
@@ -3258,6 +3259,7 @@ $('msiHSN').value=row.code; $('msiHSNDescription').value=row.description||''; co
       ['mayaacc-voucher-entry-overlay','mayaacc-voucher-entry-config'],
       ['mayaacc-tax-gst-overlay','mayaacc-tax-gst-config'],
       ['mayaacc-stock-group-overlay','mayaacc-stock-group-config'],
+      ['mayaacc-stock-cat-overlay','mayaacc-stock-cat-config'],
       ['mayaacc-currency-overlay','mayaacc-currency-config']
     ];
     for(const [overlay,id] of order){
@@ -3365,9 +3367,9 @@ $('msiHSN').value=row.code; $('msiHSNDescription').value=row.description||''; co
   },true);
 
   document.addEventListener('click',function(e){
-    const row=e.target.closest('.mgc-option,.mlgc-option,.msic-option,.mugc-option,.mugd-config-option,.msgc-option');
+    const row=e.target.closest('.mgc-option,.mlgc-option,.msic-option,.mugc-option,.mugd-config-option,.msgc-option,.mscc-option');
     if(!row)return;
-    const host=row.closest('#mayaacc-group-config,#mayaacc-ledger-config,#mayaacc-stock-config,#mayaacc-unit-config,#mayaacc-godown-config,#mayaacc-cost-centre-config,#mayaacc-stock-group-config,#mayaacc-currency-config,#mayaacc-voucher-type-config');
+    const host=row.closest('#mayaacc-group-config,#mayaacc-ledger-config,#mayaacc-stock-config,#mayaacc-unit-config,#mayaacc-godown-config,#mayaacc-cost-centre-config,#mayaacc-stock-group-config,#mayaacc-stock-cat-config,#mayaacc-currency-config,#mayaacc-voucher-type-config');
     if(!host)return;
     const info={id:host.id,el:host,cfg:CFG[host.id]};
     const rs=rows(info),i=rs.indexOf(row);
@@ -9989,7 +9991,7 @@ header nav a.active{color:#2f57b8;font-weight:700}
   /* v12b #3: local "any blocking screen open" check — the app's
      blockingModalOpen()/anyScreenOpen() are scoped inside their own script
      and are NOT on window, so this must not call them. Mirrors isOpenEl. */
-  var __mayaToastBlockIds=['createMasterDialog','mayaacc-group-overlay','mayaacc-group-config','mgConfirm','mgTree','mayaacc-ledger-overlay','mayaacc-ledger-config','mlgConfirm','mlgTree','mayaacc-stock-overlay','mayaacc-stock-config','msiConfirm','msiTree','mayaacc-hsn-finder','mayaacc-unit-overlay','mayaacc-unit-config','muConfirm','mayaacc-godown-overlay','mayaacc-godown-config','mgdConfirm','mgdTree','mayaacc-cost-centre-overlay','mayaacc-cost-centre-config','mccConfirm','mccTree','mayaacc-voucher-type-overlay','mayaacc-voucher-type-config','mvtConfirm','mayaacc-alter-other','mayaacc-sound-settings','mayaacc-backup','mayaacc-tax-gst-overlay','mayaacc-stock-group-overlay','mayaacc-stock-group-config','msgConfirm','msgTree','mayaacc-stock-cat-overlay','mscConfirm','mscTree','mayaacc-currency-overlay','mayaacc-currency-config','mcurConfirm','mayaacc-voucher-entry-config','mveOtherDialog','mveMasterPicker','alterMasterDialog','alterGroupPickerDialog','mayaacc-alter-group-form','alterLedgerPickerDialog','mayaacc-alter-ledger-form','mcf-ov','maya-security-dialog','maya-setup-screen','maya-unlock-screen','mayaacc-reports-overlay','mayaacc-voucher-entry-overlay','mayaInvDesigner','mdb-ov','mdt-ov','mxc-ov','mhp-ov','mpy-ov','mbm-ov','miox-ov'];
+  var __mayaToastBlockIds=['createMasterDialog','mayaacc-group-overlay','mayaacc-group-config','mgConfirm','mgTree','mayaacc-ledger-overlay','mayaacc-ledger-config','mlgConfirm','mlgTree','mayaacc-stock-overlay','mayaacc-stock-config','msiConfirm','msiTree','mayaacc-hsn-finder','mayaacc-unit-overlay','mayaacc-unit-config','muConfirm','mayaacc-godown-overlay','mayaacc-godown-config','mgdConfirm','mgdTree','mayaacc-cost-centre-overlay','mayaacc-cost-centre-config','mccConfirm','mccTree','mayaacc-voucher-type-overlay','mayaacc-voucher-type-config','mvtConfirm','mayaacc-alter-other','mayaacc-sound-settings','mayaacc-backup','mayaacc-tax-gst-overlay','mayaacc-stock-group-overlay','mayaacc-stock-group-config','msgConfirm','msgTree','mayaacc-stock-cat-overlay','mayaacc-stock-cat-config','mscConfirm','mscTree','mayaacc-currency-overlay','mayaacc-currency-config','mcurConfirm','mayaacc-voucher-entry-config','mveOtherDialog','mveMasterPicker','alterMasterDialog','alterGroupPickerDialog','mayaacc-alter-group-form','alterLedgerPickerDialog','mayaacc-alter-ledger-form','mcf-ov','maya-security-dialog','maya-setup-screen','maya-unlock-screen','mayaacc-reports-overlay','mayaacc-voucher-entry-overlay','mayaInvDesigner','mdb-ov','mdt-ov','mxc-ov','mhp-ov','mpy-ov','mbm-ov','miox-ov'];
   function __mayaToastElOpen(el){
     if(!el)return false;
     if(el.classList.contains('on')||el.classList.contains('is-open'))return true;
@@ -19179,7 +19181,7 @@ var anyScreenOpen=function(){
 };
 /* modals that block the top-bar nav buttons (the app's BUSY list minus
    the full-screen screens, plus the features form + security/setup/unlock) */
-var BLOCKING=['createMasterDialog','mayaacc-group-overlay','mayaacc-group-config','mgConfirm','mgTree','mayaacc-ledger-overlay','mayaacc-ledger-config','mlgConfirm','mlgTree','mayaacc-stock-overlay','mayaacc-stock-config','msiConfirm','msiTree','mayaacc-hsn-finder','mayaacc-unit-overlay','mayaacc-unit-config','muConfirm','mayaacc-godown-overlay','mayaacc-godown-config','mgdConfirm','mgdTree','mayaacc-cost-centre-overlay','mayaacc-cost-centre-config','mccConfirm','mccTree','mayaacc-voucher-type-overlay','mayaacc-voucher-type-config','mvtConfirm','mayaacc-alter-other','mayaacc-sound-settings','mayaacc-backup','mayaacc-tax-gst-overlay','mayaacc-stock-group-overlay','mayaacc-stock-group-config','msgConfirm','msgTree','mayaacc-stock-cat-overlay','mscConfirm','mscTree','mayaacc-currency-overlay','mayaacc-currency-config','mcurConfirm','mayaacc-voucher-entry-config','mveOtherDialog','mveMasterPicker','alterMasterDialog','alterGroupPickerDialog','mayaacc-alter-group-form','alterLedgerPickerDialog','mayaacc-alter-ledger-form','mcf-ov','maya-security-dialog','maya-setup-screen','maya-unlock-screen'];
+var BLOCKING=['createMasterDialog','mayaacc-group-overlay','mayaacc-group-config','mgConfirm','mgTree','mayaacc-ledger-overlay','mayaacc-ledger-config','mlgConfirm','mlgTree','mayaacc-stock-overlay','mayaacc-stock-config','msiConfirm','msiTree','mayaacc-hsn-finder','mayaacc-unit-overlay','mayaacc-unit-config','muConfirm','mayaacc-godown-overlay','mayaacc-godown-config','mgdConfirm','mgdTree','mayaacc-cost-centre-overlay','mayaacc-cost-centre-config','mccConfirm','mccTree','mayaacc-voucher-type-overlay','mayaacc-voucher-type-config','mvtConfirm','mayaacc-alter-other','mayaacc-sound-settings','mayaacc-backup','mayaacc-tax-gst-overlay','mayaacc-stock-group-overlay','mayaacc-stock-group-config','msgConfirm','msgTree','mayaacc-stock-cat-overlay','mayaacc-stock-cat-config','mscConfirm','mscTree','mayaacc-currency-overlay','mayaacc-currency-config','mcurConfirm','mayaacc-voucher-entry-config','mveOtherDialog','mveMasterPicker','alterMasterDialog','alterGroupPickerDialog','mayaacc-alter-group-form','alterLedgerPickerDialog','mayaacc-alter-ledger-form','mcf-ov','maya-security-dialog','maya-setup-screen','maya-unlock-screen'];
 var blockingModalOpen=function(){
   if(isPrintDialogOpen())return true;
   for(var i=0;i<BLOCKING.length;i++){var el=$(BLOCKING[i]);if(el&&isOpenEl(el))return true;}
@@ -28905,7 +28907,7 @@ else window.MayaLang.init();
 /* CREATE SCREENS + TOP BAR (Tally layout, MAYAACC theme) — 2026-11-18.
    Shared Tally-style footer line for master creation screens, the
    top-bar underline convention, and the two NEW masters (Stock Group
-   full-width, Stock Category small popup). */
+   full-width, Stock Category full-screen — run #37 rebuild). */
 /* --- footer line: Q Quit · A Accept · D Delete · F12 Configure --- */
 .maya-create-foot{display:flex;align-items:center;flex-wrap:wrap;gap:0;padding:8px 0;font-size:12.5px;color:#1d2b40}
 .maya-create-foot .mcf-seg{padding:2px 10px;cursor:pointer;border-right:1px solid #dbe2ee;white-space:nowrap}
@@ -29006,26 +29008,52 @@ else window.MayaLang.init();
 .msgc-footer button{border:1px solid #d7dee8;background:#fff;border-radius:8px;padding:9px 12px;font-size:11px;font-weight:700;cursor:pointer}
 .msgc-footer .primary{background:#1d2d42;color:#fff;border-color:#1d2d42}
 @media(max-width:760px){.msg-rows2{grid-template-columns:1fr}.msg-w-name{width:100%}}
-/* --- Stock Category: small centred popup (Tally) --- */
+/* --- Stock Category: full-screen form (Tally) — run #37 rebuild, approved preview --- */
 #mayaacc-stock-cat-overlay{display:none;position:fixed;inset:0;z-index:10045;background:rgba(10,15,26,.30);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
-#mayaacc-stock-cat-panel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(520px,92vw);max-height:calc(100vh - 60px);background:#fff;border:1px solid #dfe4ec;border-radius:14px;box-shadow:0 24px 70px rgba(15,23,42,.24);display:flex;flex-direction:column;overflow:hidden}
-.msc-main{padding:26px 26px 20px;overflow:auto}
-.msc-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.msc-title h2{margin:0;font-size:20px;color:#18273c}
-.msc-close{border:0;background:transparent;font-size:22px;color:#7b8797;cursor:pointer}
-.msc-field{margin-bottom:16px}
-.msc-field label{display:block;font-size:12px;font-weight:800;color:#45546a;margin-bottom:7px}
-.msc-field input,.msc-field select{width:100%;box-sizing:border-box;padding:10px 11px;border:1px solid #d8e0ea;border-radius:8px;background:#fff;font-size:13px;outline:none}
-.msc-field input:focus,.msc-field select:focus{border-color:#8d9bb0;box-shadow:0 0 0 3px rgba(94,108,134,.08)}
-.msc-tree{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);max-height:220px;overflow:auto;background:#fff;border:1px solid #d7dfe8;border-radius:8px;box-shadow:0 14px 30px rgba(16,24,40,.14);z-index:40;padding:5px 0}
+#mayaacc-stock-cat-panel{position:absolute;left:0;top:0;width:660px;max-width:calc(100vw - 220px);max-height:100%;background:#fff;border-right:1px solid #dfe4ec;box-shadow:18px 0 45px rgba(16,24,40,.16);display:flex;flex-direction:column;overflow:hidden}
+.msc-content{display:flex;min-height:0;flex:1 1 auto}
+.msc-main{padding:0 16px 40px;overflow:auto;flex:1}
+#mayaacc-stock-cat-overlay>.msc-side{position:absolute;right:0;top:0;bottom:0;width:160px;background:#fff;border-left:1px solid #e3e8ef;padding:0;display:flex;flex-direction:column;z-index:5}
+#mayaacc-stock-cat-overlay>.msc-side .mlg-f12{margin-top:auto;border-top:1px solid #e3e8ef}
+@media(max-width:900px){#mayaacc-stock-cat-overlay>.msc-side{display:none}}
+.msc-title{display:flex;align-items:center;height:38px;border-bottom:1px solid #e5e7eb;position:sticky;top:0;background:#fff;z-index:2;margin-bottom:12px}
+.msc-title h2{margin:0;font-size:15px;font-weight:600;color:#374151}
+.msc-title .mug-chip{margin-left:10px}
+.msc-close{margin-left:auto;border:0;background:transparent;font-size:16px;color:#6b7280;cursor:pointer}
+.msc-row{display:flex;align-items:center;min-height:33px;gap:8px}
+.msc-row label{width:180px;font-size:13px;color:#111827;flex-shrink:0}
+.msc-row input,.msc-row select{height:27px;border:1px solid #9aa3ad;border-radius:2px;padding:0 6px;font-size:13px;color:#111827;background:#fff;flex-shrink:0}
+.msc-row input:focus,.msc-row select:focus{border-color:#2f6fd0;outline:none;box-shadow:0 0 0 3px rgba(47,111,208,.15)}
+.msc-w-name{width:420px}
+.msc-w-alias{width:200px}
+.msc-w-lang{width:120px}
+@media(max-width:760px){.msc-w-name{width:100%}}
+.msc-under-wrap{position:relative;display:inline-flex}
+.msc-tree{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);max-height:260px;overflow:auto;background:#fff;border:1px solid #d7dfe8;border-radius:8px;box-shadow:0 14px 30px rgba(16,24,40,.14);z-index:40;padding:5px 0}
 .msc-tree button{display:block;width:100%;border:0;background:#fff;text-align:left;padding:8px 12px;font-size:12px;color:#33445c;cursor:pointer}
 .msc-tree button:hover,.msc-tree button.msc-focus{background:#edf1fb;color:#395ba8}
-.msc-under-wrap{position:relative}
-.msc-footer{border-top:1px solid #e3e8ef;padding:12px 0 0;margin-top:6px}
-.msc-footer .maya-create-foot{margin:-12px 0 10px}
-.msc-actions{display:flex;gap:8px;justify-content:flex-end}
-.msc-actions button{border:1px solid #d7dee8;background:#fff;border-radius:8px;padding:9px 12px;font-size:11px;font-weight:700;cursor:pointer}
-.msc-actions .primary{background:#1d2d42;color:#fff;border-color:#1d2d42}
+.msc-more{border-top:1px dashed #d7dce3;margin-top:4px;padding-top:2px}
+.msc-footer{position:static;flex:0 0 auto;display:block;margin:0;padding:10px 0 0;background:#fff;border-top:1px solid #e3e8ef}
+.msc-footer .maya-create-foot{margin:0;padding:8px 20px 6px}
+/* F12 Configuration BOX — Tally style (Stock Group pattern): 1020px, 2 columns, plain Yes/No rows. */
+#mayaacc-stock-cat-config{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);right:auto;height:auto;max-height:calc(100vh - 60px);width:min(1020px,94vw);background:#fff;border:1px solid #dbe4ec;border-radius:10px;box-shadow:0 24px 70px rgba(15,25,50,.35);z-index:10090;overflow:hidden;flex-direction:column}
+#mayaacc-stock-cat-config .mscc-head{position:sticky;top:0;background:#fff;border-bottom:1px solid #e4e8ef;padding:14px 20px 10px;z-index:2}
+#mayaacc-stock-cat-config .mscc-head h3{margin:0;color:#1d2d42;font-size:15px}
+.mscc-close{position:absolute;right:14px;top:12px;border:0;background:transparent;color:#768396;font-size:22px;cursor:pointer}
+.mscc-ind{position:absolute;right:10px;font-size:11px;color:#7a8798;font-weight:700;z-index:3;pointer-events:none}
+.mscc-ind.top{top:60px}
+.mscc-ind.bot{bottom:64px}
+.mscc-body{padding:12px 24px 14px;max-height:calc(100vh - 260px);overflow-y:auto}
+.mscc-cols{display:flex;gap:36px;padding-right:22px}
+.mscc-col{flex:1;min-width:0}
+.mscc-option{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 8px;font-size:13px;border:0;border-bottom:1px solid #f0f2f6;border-radius:6px;background:transparent;margin:0;cursor:pointer}
+.mscc-option .v{font-weight:700;color:#172033;flex:none}
+.mscc-option input{display:none}
+.mscc-option:hover{background:#f4f7fd}
+.mscc-option.mscc-focus{background:#e8effc;outline:none;box-shadow:none}
+.mscc-footer{position:sticky;bottom:0;background:#fff;border-top:1px solid #e3e8ef;padding:11px 18px;display:flex;justify-content:space-between;gap:8px}
+.mscc-footer button{border:1px solid #d7dee8;background:#fff;border-radius:8px;padding:9px 12px;font-size:11px;font-weight:700;cursor:pointer}
+.mscc-footer .primary{background:#1d2d42;color:#fff;border-color:#1d2d42}
 
 /* --- Currency: full-width form (Tally) --- */
 #mayaacc-currency-overlay{display:none;position:fixed;inset:0;z-index:10045;background:rgba(10,15,26,.30);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
@@ -29177,20 +29205,58 @@ else window.MayaLang.init();
   </aside>
 </div>
 
+<div id="mayaacc-stock-cat-config" aria-hidden="true">
+  <div class="mscc-head"><button class="mscc-close" type="button" onclick="mayaCloseStockCategoryConfig()">×</button><h3>Stock Category Configuration</h3></div>
+  <span class="mscc-ind top" style="display:none">▲</span>
+  <div class="mscc-body">
+    <div class="mscc-cols">
+      <div class="mscc-col">
+        <label class="mscc-option"><span>Provide aliases for Name</span><span class="v">: Yes</span><input id="msccAlias" type="checkbox" checked></label>
+        <label class="mscc-option"><span>Confirm Before Save</span><span class="v">: Yes</span><input id="msccConfirm" type="checkbox" checked></label>
+      </div>
+      <div class="mscc-col">
+        <label class="mscc-option"><span>Provide language aliases for Name</span><span class="v">: No</span><input id="msccLangAlias" type="checkbox"></label>
+      </div>
+    </div>
+  </div>
+  <span class="mscc-ind bot" style="display:none">▼</span>
+  <div class="mscc-footer"><button type="button" onclick="mayaResetStockCategoryConfig()">Reset Defaults</button><button type="button" class="primary" onclick="mayaSaveStockCategoryConfig(true)">Save Configuration</button></div>
+</div>
+
 <div id="mayaacc-stock-cat-overlay" aria-hidden="true">
   <div id="mayaacc-stock-cat-panel" role="dialog" aria-modal="true" aria-labelledby="mscTitle">
-    <div class="msc-main">
-      <div class="msc-title"><div><h2 id="mscTitle">Create Stock Category</h2><div class="mug-chip" id="mscCompanyChip">Current Company</div></div><button class="msc-close" type="button" onclick="mayaCloseStockCategory()">×</button></div>
-      <div class="msc-field"><label for="mscName">Stock Category Name*</label><input id="mscName" autocomplete="off" placeholder="e.g. Electronics"></div>
-      <div class="msc-field"><label for="mscAlias">Alias / Nickname</label><input id="mscAlias" autocomplete="off" placeholder="Optional"></div>
-      <div class="msc-field"><label for="mscUnder">Under</label><div class="msc-under-wrap"><input id="mscUnder" autocomplete="off" placeholder="Primary"><div id="mscTree" class="msc-tree"></div></div><div class="msg-note">Arrow Up/Down to move, Enter to select. Leave blank for a primary category.</div></div>
-      <div class="msc-footer">
-        <div class="maya-create-foot"><span class="mcf-seg" onclick="mayaCloseStockCategory()"><u class="maya-u-dbl">Q</u> Quit</span><span class="mcf-seg" onclick="mayaSaveStockCategory(false)"><u>A</u> Accept</span><span class="mcf-seg off" onclick="window.__mayaCreateDeleteToast&&window.__mayaCreateDeleteToast('Stock Category')"><u>D</u> Delete</span></div>
-        <div class="msc-actions"><button type="button" class="primary" onclick="mayaSaveStockCategory(true)">Save &amp; New</button></div>
+    <div class="msc-content">
+      <div class="msc-main">
+        <div class="msc-title"><h2 id="mscTitle">Create Stock Category</h2><div class="mug-chip" id="mscCompanyChip">Current Company</div><button class="msc-close" type="button" onclick="mayaCloseStockCategory()">×</button></div>
+        <div class="msc-row"><label for="mscName">Stock Category Name*</label><input id="mscName" class="msc-w-name" autocomplete="off" placeholder="e.g. Electronics"></div>
+        <div class="msc-row" data-msg-config="alias"><label for="mscAlias">Alias / Nickname</label><input id="mscAlias" class="msc-w-alias" autocomplete="off" placeholder="Optional"></div>
+        <div class="msc-row" data-msg-config="langAlias" style="display:none"><label for="mscLang">Name in another language</label><select id="mscLang" class="msc-w-lang"><option value="hindi">Hindi</option><option value="gujarati">Gujarati</option><option value="marathi">Marathi</option><option value="punjabi">Punjabi</option><option value="bengali">Bengali</option><option value="tamil">Tamil</option><option value="telugu">Telugu</option></select><input id="mscLangAlias" class="msc-w-alias" autocomplete="off" placeholder="Name in the selected language"></div>
+        <div class="msc-row"><label for="mscUnder">Under</label><span class="msc-under-wrap"><input id="mscUnder" class="msc-w-name" autocomplete="off"><span class="msg-arr">▾</span><div id="mscTree" class="msc-tree"></div></span></div>
+        <div class="msc-more" id="mscMore" style="display:none">
+          <div class="more-head">More Details — Ctrl+I</div>
+          <div class="info-row"><span>Category Type</span><strong id="miType">Primary Category</strong></div>
+          <div class="info-row"><span>Parent</span><strong id="miParent">Primary</strong></div>
+        </div>
       </div>
+    </div>
+    <div class="msc-footer">
+      <div class="maya-create-foot"><span class="mcf-seg" onclick="mayaCloseStockCategory()"><u class="maya-u-dbl">Q</u> Quit</span><span class="mcf-seg" onclick="mayaSaveStockCategory(false)"><u>A</u> Accept</span><span class="mcf-seg off" onclick="window.__mayaCreateDeleteToast&&window.__mayaCreateDeleteToast('Stock Category')"><u>D</u> Delete</span></div>
     </div>
     <div id="mscConfirm" class="mg-confirm"><div class="mg-confirm-card"><h3>Save Stock Category?</h3><p id="mscConfirmText">Save this Stock Category in the current company?</p><div class="mg-confirm-actions"><button type="button" onclick="mayaCloseStockCategoryConfirm()">Cancel</button><button type="button" class="primary" onclick="mayaConfirmStockCategorySave()">Save</button></div></div></div>
   </div>
+  <aside class="msc-side">
+    <div class="mlg-side-row off"><b>F2</b><span>Period</span></div>
+    <div class="mlg-side-row" onclick="window.mayaF3Dropdown?window.mayaF3Dropdown():window.mayaCompanyMenu()"><b>F3</b><span>Company</span></div>
+    <div class="mlg-side-row off mlg-blue"><b>F4</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F5</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F6</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F7</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F8</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F9</b></div>
+    <div class="mlg-side-row" onclick="window.mayaOpenOtherMasters&&window.mayaOpenOtherMasters('Stock Category')"><b>F10</b><span>Other Masters</span></div>
+    <div class="mlg-side-row" onclick="window.mayaToggleStockCategoryMore&&window.mayaToggleStockCategoryMore()"><b><u class="maya-u-dbl">I</u></b><span>More Details</span></div>
+    <div class="mlg-side-row mlg-f12" tabindex="-1" onclick="mayaOpenStockCategoryConfig()"><b>F12</b><span>Configure</span></div>
+  </aside>
 </div>
 
 <div id="mayaacc-currency-config" aria-hidden="true">
@@ -29263,12 +29329,12 @@ else window.MayaLang.init();
    used to cap the sticky footer 110px above the viewport bottom, leaving the
    screen behind visible below the strip). MAYAACC navy theme kept — only
    placement/layout follows Tally. */
-#mayaacc-group-panel>.mg-footer,#mayaacc-ledger-panel>.mlg-footer,#mayaacc-stock-panel>.msi-footer,#mayaacc-godown-panel>.mugd-footer,#mayaacc-cost-centre-panel>.mcc-footer,#mayaacc-voucher-type-panel>.mvt-footer,#mayaacc-stock-group-panel>.msg-footer,#mayaacc-currency-panel>.mcur-footer{position:static;flex:0 0 auto;display:block;margin:0;padding:10px 0 0;background:#fff;border-top:1px solid #e3e8ef}
-#mayaacc-group-panel .mg-content,#mayaacc-ledger-panel .mlg-content,#mayaacc-stock-panel .msi-content,#mayaacc-godown-panel .mugd-content,#mayaacc-cost-centre-panel .mcc-content,#mayaacc-voucher-type-panel .mvt-content,#mayaacc-stock-group-panel .msg-content,#mayaacc-currency-panel .mcur-content{flex:1 1 auto;min-height:0}
-#mayaacc-group-overlay .mg-main,#mayaacc-ledger-overlay .mlg-main,#mayaacc-stock-overlay .msi-main,#mayaacc-godown-overlay .mugd-main,#mayaacc-cost-centre-overlay .mcc-main,#mayaacc-voucher-type-overlay .mvt-main,#mayaacc-stock-group-overlay .msg-main,#mayaacc-currency-overlay .mcur-main{padding-bottom:20px}
+#mayaacc-group-panel>.mg-footer,#mayaacc-ledger-panel>.mlg-footer,#mayaacc-stock-panel>.msi-footer,#mayaacc-godown-panel>.mugd-footer,#mayaacc-cost-centre-panel>.mcc-footer,#mayaacc-voucher-type-panel>.mvt-footer,#mayaacc-stock-group-panel>.msg-footer,#mayaacc-stock-cat-panel>.msc-footer,#mayaacc-currency-panel>.mcur-footer{position:static;flex:0 0 auto;display:block;margin:0;padding:10px 0 0;background:#fff;border-top:1px solid #e3e8ef}
+#mayaacc-group-panel .mg-content,#mayaacc-ledger-panel .mlg-content,#mayaacc-stock-panel .msi-content,#mayaacc-godown-panel .mugd-content,#mayaacc-cost-centre-panel .mcc-content,#mayaacc-voucher-type-panel .mvt-content,#mayaacc-stock-group-panel .msg-content,#mayaacc-stock-cat-panel .msc-content,#mayaacc-currency-panel .mcur-content{flex:1 1 auto;min-height:0}
+#mayaacc-group-overlay .mg-main,#mayaacc-ledger-overlay .mlg-main,#mayaacc-stock-overlay .msi-main,#mayaacc-godown-overlay .mugd-main,#mayaacc-cost-centre-overlay .mcc-main,#mayaacc-voucher-type-overlay .mvt-main,#mayaacc-stock-group-overlay .msg-main,#mayaacc-stock-cat-overlay .msc-main,#mayaacc-currency-overlay .mcur-main{padding-bottom:20px}
 #mayaacc-group-panel>.mg-footer .mg-actions,#mayaacc-ledger-panel>.mlg-footer .mlg-actions,#mayaacc-stock-panel>.msi-footer .msi-actions,#mayaacc-godown-panel>.mugd-footer .mugd-actions,#mayaacc-cost-centre-panel>.mcc-footer .mcc-actions,#mayaacc-voucher-type-panel>.mvt-footer .mvt-actions,#mayaacc-stock-group-panel>.msg-footer .msg-actions,#mayaacc-currency-panel>.mcur-footer .mcur-actions{padding:0 20px 8px}
-#mayaacc-group-panel>.mg-footer .maya-create-foot,#mayaacc-ledger-panel>.mlg-footer .maya-create-foot,#mayaacc-stock-panel>.msi-footer .maya-create-foot,#mayaacc-godown-panel>.mugd-footer .maya-create-foot,#mayaacc-cost-centre-panel>.mcc-footer .maya-create-foot,#mayaacc-voucher-type-panel>.mvt-footer .maya-create-foot,#mayaacc-stock-group-panel>.msg-footer .maya-create-foot,#mayaacc-currency-panel>.mcur-footer .maya-create-foot,#mayaacc-tax-gst-overlay .mtg-footer .maya-create-foot{margin:0;padding:8px 20px 6px;}
-#mayaacc-group-panel>.mg-footer .maya-create-foot .mcf-seg:last-child,#mayaacc-ledger-panel>.mlg-footer .maya-create-foot .mcf-seg:last-child,#mayaacc-stock-panel>.msi-footer .maya-create-foot .mcf-seg:last-child,#mayaacc-godown-panel>.mugd-footer .maya-create-foot .mcf-seg:last-child,#mayaacc-cost-centre-panel>.mcc-footer .maya-create-foot .mcf-seg:last-child,#mayaacc-voucher-type-panel>.mvt-footer .maya-create-foot .mcf-seg:last-child,#mayaacc-stock-group-panel>.msg-footer .maya-create-foot .mcf-seg:last-child,#mayaacc-currency-panel>.mcur-footer .maya-create-foot .mcf-seg:last-child,#mayaacc-tax-gst-overlay .mtg-footer .maya-create-foot .mcf-seg:last-child{margin-left:auto;border-left:1px solid #dbe2ee}
+#mayaacc-group-panel>.mg-footer .maya-create-foot,#mayaacc-ledger-panel>.mlg-footer .maya-create-foot,#mayaacc-stock-panel>.msi-footer .maya-create-foot,#mayaacc-godown-panel>.mugd-footer .maya-create-foot,#mayaacc-cost-centre-panel>.mcc-footer .maya-create-foot,#mayaacc-voucher-type-panel>.mvt-footer .maya-create-foot,#mayaacc-stock-group-panel>.msg-footer .maya-create-foot,#mayaacc-stock-cat-panel>.msc-footer .maya-create-foot,#mayaacc-currency-panel>.mcur-footer .maya-create-foot,#mayaacc-tax-gst-overlay .mtg-footer .maya-create-foot{margin:0;padding:8px 20px 6px;}
+#mayaacc-group-panel>.mg-footer .maya-create-foot .mcf-seg:last-child,#mayaacc-ledger-panel>.mlg-footer .maya-create-foot .mcf-seg:last-child,#mayaacc-stock-panel>.msi-footer .maya-create-foot .mcf-seg:last-child,#mayaacc-godown-panel>.mugd-footer .maya-create-foot .mcf-seg:last-child,#mayaacc-cost-centre-panel>.mcc-footer .maya-create-foot .mcf-seg:last-child,#mayaacc-voucher-type-panel>.mvt-footer .maya-create-foot .mcf-seg:last-child,#mayaacc-stock-group-panel>.msg-footer .maya-create-foot .mcf-seg:last-child,#mayaacc-stock-cat-panel>.msc-footer .maya-create-foot .mcf-seg:last-child,#mayaacc-currency-panel>.mcur-footer .maya-create-foot .mcf-seg:last-child,#mayaacc-tax-gst-overlay .mtg-footer .maya-create-foot .mcf-seg:last-child{margin-left:auto;border-left:1px solid #dbe2ee}
 #mayaacc-tax-gst-overlay .mtg-footer{display:block;margin:0;padding:10px 0 0;background:#fafbfe;border-top:1px solid #e9edf3}
 #mayaacc-tax-gst-overlay .mtg-footer .mtg-actions-row{padding:0 20px 8px}
 /* Tally strip underlines (2026-11-18 convention): Q green + DOUBLE underline, A/D single, F12 blue + none. */
@@ -29430,6 +29496,14 @@ function sgPaintSummary(){
   if($('msgCompanyChip'))$('msgCompanyChip').textContent=companyName();
 }
 function sgOpen(){
+  /* run #37 fix: close the Create menu when the form opens — every other
+     master open (Group/Ledger/Stock Item/Unit) does this. Without it the
+     menu stays display:flex behind the panel after a save-close-return
+     (sgClose -> __mayaReturnToMenu re-opens it) and __ctDeepBusy() stays
+     true, which silently kills the shared Ctrl+A/Ctrl+Q handler and lets
+     the modal-key chain swallow Enter/Escape before the SG branch runs
+     (same defect as SC H9/H12/I1 in pv37). */
+  if(typeof closeCreateMaster==='function')closeCreateMaster();
   if($('mayaacc-stock-group-overlay')){$('mayaacc-stock-group-overlay').style.display='block';$('mayaacc-stock-group-overlay').setAttribute('aria-hidden','false');}
   if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-stock-group-overlay .msg-main');
   ['msgName','msgAlias','msgUnder','msgHsn','msgHsnDesc','msgLangAlias'].forEach(function(id){var el=$(id);if(el)el.value='';});
@@ -29538,8 +29612,17 @@ window.mayaStockGroupChangeCompany=sgChangeCompany;
 window.mayaOpenStockGroupConfig=sgConfigOpen;window.mayaCloseStockGroupConfig=sgConfigClose;window.mayaToggleStockGroupMore=sgToggleMore;
 window.mayaSaveStockGroupConfig=sgConfigSave;window.mayaResetStockGroupConfig=sgConfigReset;
 
-/* ---------------- Stock Category (small popup, Tally) ---------------- */
+/* ---------------- Stock Category (full screen, Tally) — run #37 rebuild ---------------- */
 var scState={pending:null,treeIndex:-1,treeList:[]};
+function scConfigKey(c){return 'mayaacc_stock_category_config_'+(c||'');}
+var SC_CFG_DEFAULTS={alias:true,confirm:true,langAlias:false};
+function scGetConfig(){try{var r=localStorage.getItem(scConfigKey(cid()));if(r)return Object.assign({},SC_CFG_DEFAULTS,JSON.parse(r));}catch(e){}return Object.assign({},SC_CFG_DEFAULTS);}
+function scSaveConfig(c){try{localStorage.setItem(scConfigKey(cid()),JSON.stringify(c));}catch(e){}}
+function scApplyConfig(){
+  var c=scGetConfig();
+  document.querySelectorAll('#mayaacc-stock-cat-panel [data-msg-config="alias"]').forEach(function(el){el.style.display=c.alias?'':'none';});
+  document.querySelectorAll('#mayaacc-stock-cat-panel [data-msg-config="langAlias"]').forEach(function(el){el.style.display=c.langAlias?'':'none';});
+}
 function scTreeCandidates(){
   var q=($('mscUnder')?$('mscUnder').value:'').trim().toLowerCase();
   var list=['Primary'].concat(window.__mayaStockCategories(cid()));
@@ -29549,31 +29632,68 @@ function scTreeCandidates(){
 }
 function scPaintTree(){
   var t=$('mscTree');if(!t)return;
-  var list=scTreeCandidates();scState.treeList=list;scState.treeIndex=-1;
-  if(!list.length){t.style.display='none';return;}
+  var list=scTreeCandidates();scState.treeList=list;
+  if(!list.length){t.style.display='none';scState.treeIndex=-1;return;}
   t.innerHTML=list.map(function(n,i){return '<button type="button" data-i="'+i+'">'+String(n).replace(/</g,'&lt;')+'</button>';}).join('');
   t.style.display='block';
-  t.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){var n=b.textContent;$('mscUnder').value=n;scHideTree();$('mscName').focus();});});
+  /* run #37: Enter picks the FIRST item without arrow nav (Stock Group
+     run #36 FIX #1 pattern) — the first row is focused from the start. */
+  scState.treeIndex=0;
+  var first=t.querySelector('button');if(first)first.classList.add('msc-focus');
+  t.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){var n=b.textContent;$('mscUnder').value=n;scHideTree();scUpdateMoreInfo();$('mscUnder').focus();});});
 }
 function scHideTree(){var t=$('mscTree');if(t)t.style.display='none';scState.treeIndex=-1;}
+function scUpdateMoreInfo(){
+  var under=$('mscUnder')?$('mscUnder').value.trim():'';
+  var isPrimary=(under===''||under==='Primary');
+  if($('miType'))$('miType').textContent=isPrimary?'Primary Category':'Sub-category of '+(under||'Primary');
+  if($('miParent'))$('miParent').textContent=under||'Primary';
+}
+function scToggleMore(){
+  var m=$('mscMore');if(!m)return;
+  var opening=(m.style.display==='none');
+  m.style.display=opening?'':'none';
+  if(opening)scUpdateMoreInfo();
+}
 function scOpen(){
+  /* run #37 fix: close the Create menu when the form opens — every other
+     master open (Group/Ledger/Stock Item/Unit) does this. Without it the
+     menu stays display:flex behind the panel after a save-close-return
+     (scClose -> __mayaReturnToMenu re-opens it) and __ctDeepBusy() stays
+     true, which silently kills the shared Ctrl+A/Ctrl+Q handler and lets
+     the modal-key chain swallow Enter/Escape before the SC branch runs
+     (H9/H12/I1 in pv37: Ctrl+A dead, Enter on confirm dead, Esc dead). */
+  if(typeof closeCreateMaster==='function')closeCreateMaster();
   if($('mayaacc-stock-cat-overlay')){$('mayaacc-stock-cat-overlay').style.display='block';$('mayaacc-stock-cat-overlay').setAttribute('aria-hidden','false');}
-  ['mscName','mscAlias'].forEach(function(id){var el=$(id);if(el)el.value='';});
+  if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-stock-cat-overlay .msc-main');
+  ['mscName','mscAlias','mscLangAlias'].forEach(function(id){var el=$(id);if(el)el.value='';});
+  if($('mscLang'))$('mscLang').value='hindi';
   if($('mscUnder'))$('mscUnder').value='Primary';
   if($('mscCompanyChip'))$('mscCompanyChip').textContent=companyName();
-  scHideTree();
+  if($('mscMore'))$('mscMore').style.display='none';
+  scApplyConfig();scHideTree();scUpdateMoreInfo();
   setTimeout(function(){var el=$('mscName');if(el)el.focus();},0);
 }
 function scClose(returnToMenu){var ov=$('mayaacc-stock-cat-overlay');if(!ov)return;ov.style.display='none';ov.setAttribute('aria-hidden','true');scHideTree();if(returnToMenu!==false&&window.__mayaReturnToMenu)window.__mayaReturnToMenu();}
-function scDoSave(mode){
+/* run #37: full validation BEFORE the save confirm is shown (Stock Group
+   run #36 FIX #3 pattern) — a failed check toasts + focuses and the
+   dialog never opens. */
+function scValidate(){
   var name=$('mscName').value.trim();
-  if(!name){toast('Stock Category Name is required.');if($('mscName'))$('mscName').focus();return;}
+  if(!name){toast('Stock Category Name is required.');if($('mscName'))$('mscName').focus();return false;}
   var c=cid();
   var dup=window.__mayaStockCategories(c).some(function(n){return n.toLowerCase()===name.toLowerCase();});
-  if(dup){toast('Stock Category "'+name+'" already exists.');if($('mscName'))$('mscName').focus();return;}
+  if(dup){toast('Stock Category "'+name+'" already exists.');if($('mscName'))$('mscName').focus();return false;}
   var under=$('mscUnder').value.trim()||'Primary';
-  if(under!=='Primary'&&!window.__mayaStockCategories(c).some(function(n){return n.toLowerCase()===under.toLowerCase();})){toast('Under category "'+under+'" not found. Choose from the list.');if($('mscUnder'))$('mscUnder').focus();return;}
-  var rec={id:'STC-'+Date.now().toString(36),name:name,alias:$('mscAlias').value.trim(),under:under,createdAt:new Date().toISOString()};
+  if(under!=='Primary'&&!window.__mayaStockCategories(c).some(function(n){return n.toLowerCase()===under.toLowerCase();})){toast('Under category "'+under+'" not found. Choose from the list.');if($('mscUnder'))$('mscUnder').focus();return false;}
+  return true;
+}
+function scDoSave(mode){
+  if(!scValidate())return;
+  var name=$('mscName').value.trim();
+  var c=cid();
+  var under=$('mscUnder').value.trim()||'Primary';
+  var rec={id:'STC-'+Date.now().toString(36),name:name,alias:$('mscAlias').value.trim(),under:under,langAlias:{lang:$('mscLang').value,name:$('mscLangAlias').value.trim()},createdAt:new Date().toISOString()};
   var arr=readLS(catKey(c));arr.push(rec);writeLS(catKey(c),arr);
   toast('Stock Category "'+name+'" created.');
   var cf=$('mscConfirm');if(cf)cf.style.display='none';
@@ -29581,21 +29701,44 @@ function scDoSave(mode){
 }
 function scAskSave(andNew){
   if(!($('mayaacc-stock-cat-overlay')&&$('mayaacc-stock-cat-overlay').style.display!=='none'))return;
-  if(!$('mscName').value.trim()){toast('Stock Category Name is required.');if($('mscName'))$('mscName').focus();return;}
-  scState.pending=!!andNew;
-  var cf=$('mscConfirm');if(cf){cf.style.display='flex';if($('mscConfirmText'))$('mscConfirmText').textContent='Save Stock Category "'+$('mscName').value.trim()+'" in '+companyName()+'?';}
+  if(!scValidate())return;
+  if(scGetConfig().confirm){
+    scState.pending=!!andNew;
+    var cf=$('mscConfirm');if(cf){cf.style.display='flex';if($('mscConfirmText'))$('mscConfirmText').textContent='Save Stock Category "'+$('mscName').value.trim()+'" in '+companyName()+'?';}
+  }else scDoSave(!!andNew);
 }
 function scConfirmSave(){scDoSave(!!scState.pending);scState.pending=null;}
 function scCloseConfirm(){var cf=$('mscConfirm');if(cf)cf.style.display='none';scState.pending=null;}
+var SC_CFG_MAP=[['msccAlias','alias'],['msccConfirm','confirm'],['msccLangAlias','langAlias']];
+function scSyncCfgValues(){SC_CFG_MAP.forEach(function(pair){var el=$(pair[0]);if(!el)return;var row=el.closest('.mscc-option');var v=row?row.querySelector('.v'):null;if(v)v.textContent=': '+(el.checked?'Yes':'No');});}
+function scSyncCfgIndicators(){var p=$('mayaacc-stock-cat-config');if(!p)return;var b=p.querySelector('.mscc-body');if(!b)return;var t=p.querySelector('.mscc-ind.top'),d=p.querySelector('.mscc-ind.bot');if(t)t.style.display=b.scrollTop>0?'block':'none';if(d)d.style.display=(b.scrollTop+b.clientHeight<b.scrollHeight-4)?'block':'none';}
+function scConfigOpen(){
+  var c=scGetConfig();
+  SC_CFG_MAP.forEach(function(pair){var el=$(pair[0]);if(el)el.checked=!!c[pair[1]];});
+  scSyncCfgValues();scSyncCfgIndicators();
+  var p=$('mayaacc-stock-cat-config');if(p){p.style.display='flex';p.setAttribute('aria-hidden','false');if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-stock-cat-config');}
+  setTimeout(function(){scSyncCfgIndicators();},0);
+}
+function scConfigClose(){var p=$('mayaacc-stock-cat-config');if(p){p.style.display='none';p.setAttribute('aria-hidden','true');p.querySelectorAll('.mscc-focus').forEach(function(x){x.classList.remove('mscc-focus');});}}
+function scConfigSave(closeAfter){
+  var c={};SC_CFG_MAP.forEach(function(pair){var el=$(pair[0]);c[pair[1]]=!!(el&&el.checked);});
+  scSaveConfig(c);scApplyConfig();if(closeAfter!==false)scConfigClose();toast('Stock Category configuration saved.');
+}
+function scConfigReset(){scSaveConfig(Object.assign({},SC_CFG_DEFAULTS));scApplyConfig();scConfigOpen();}
+(function(){var b=document.querySelector('#mayaacc-stock-cat-config .mscc-body');if(b)b.addEventListener('scroll',scSyncCfgIndicators);})();
+document.addEventListener('change',function(e){if(!e.target||!e.target.id)return;if(e.target.id.indexOf('mscc')===0)scSyncCfgValues();if(e.target.id.indexOf('msc')===0)scUpdateMoreInfo();});
+document.addEventListener('input',function(e){if(e.target&&e.target.id&&e.target.id.indexOf('msc')===0)scUpdateMoreInfo();});
 window.mayaOpenStockCategory=scOpen;
 window.mayaCloseStockCategoryRaw=scClose;
 window.mayaCloseStockCategory=function(after){
-  var _done=function(){scClose(true);if(typeof after==='function')after();};
+  var _done=function(){scConfigClose();scClose(true);if(typeof after==='function')after();};
   if(window.__mayaFormDirty&&window.__mayaFormDirty('Stock Category')){if(window.__mayaAskQuit)window.__mayaAskQuit('Stock Category',_done);else _done();}
   else _done();
 };
 window.mayaSaveStockCategory=scAskSave;
 window.mayaConfirmStockCategorySave=scConfirmSave;window.mayaCloseStockCategoryConfirm=scCloseConfirm;
+window.mayaOpenStockCategoryConfig=scConfigOpen;window.mayaCloseStockCategoryConfig=scConfigClose;window.mayaToggleStockCategoryMore=scToggleMore;
+window.mayaSaveStockCategoryConfig=scConfigSave;window.mayaResetStockCategoryConfig=scConfigReset;
 
 /* ---------------- Currency (full-width form, Tally) ---------------- */
 var mcurState={pending:null};
@@ -29840,20 +29983,43 @@ document.addEventListener('keydown',function(e){
     else if((e.ctrlKey||e.metaKey)&&!e.altKey&&(k==='s'||k==='S')){e.preventDefault();sgAskSave(true);}
   }
   if(scOpen){
+    var scCfg=__ctShownEl($('mayaacc-stock-cat-config'));
     var scConf=__ctShownEl($('mscConfirm'));
     var scTree=__ctShownEl($('mscTree'));
+    if(scCfg){
+      if(k==='Escape'){e.preventDefault();scConfigClose();}
+      else if((e.ctrlKey||e.metaKey)&&!e.altKey&&(k==='a'||k==='A')){e.preventDefault();e.stopImmediatePropagation();scConfigSave(true);}
+      else if((e.ctrlKey||e.metaKey)&&!e.altKey&&(k==='s'||k==='S')){e.preventDefault();e.stopImmediatePropagation();scConfigSave(false);}
+      else if(k==='ArrowDown'||k==='ArrowUp'){e.preventDefault();var opts=Array.prototype.slice.call(document.querySelectorAll('#mayaacc-stock-cat-config .mscc-option'));if(!opts.length)return;var i=opts.indexOf(document.querySelector('#mayaacc-stock-cat-config .mscc-option.mscc-focus'));i=i<0?0:i+(k==='ArrowDown'?1:-1);if(i<0)i=opts.length-1;if(i>=opts.length)i=0;opts.forEach(function(o){o.classList.remove('mscc-focus');});opts[i].classList.add('mscc-focus');opts[i].scrollIntoView({block:'nearest'});}
+      else if(k==='Enter'||k===' '){var f=document.querySelector('#mayaacc-stock-cat-config .mscc-option.mscc-focus');if(f){e.preventDefault();var inp=f.querySelector('input');if(inp){inp.checked=!inp.checked;inp.dispatchEvent(new Event('change',{bubbles:true}));}}}
+      return;
+    }
     if(scConf){
       if(k==='Escape'){e.preventDefault();scCloseConfirm();}
       else if(k==='Enter'){e.preventDefault();scConfirmSave();}
       return;
     }
     if(scTree){
-      if(k==='Escape'){e.preventDefault();scHideTree();}
-      else if(k==='ArrowDown'||k==='ArrowUp'){e.preventDefault();var bs=Array.prototype.slice.call(document.querySelectorAll('#mscTree button'));if(!bs.length)return;var si=scState.treeIndex+(k==='ArrowDown'?1:-1);if(si<0)si=bs.length-1;if(si>=bs.length)si=0;scState.treeIndex=si;bs.forEach(function(b){b.classList.remove('msc-focus');});bs[si].classList.add('msc-focus');bs[si].scrollIntoView({block:'nearest'});}
-      else if(k==='Enter'){var s2=document.querySelector('#mscTree button.msc-focus');if(s2){e.preventDefault();$('mscUnder').value=s2.textContent;scHideTree();$('mscName').focus();}}
-      return;
+      if(k==='Escape'){e.preventDefault();scHideTree();return;}
+      if(k==='ArrowDown'||k==='ArrowUp'){e.preventDefault();var bs=Array.prototype.slice.call(document.querySelectorAll('#mscTree button'));if(!bs.length)return;var si=scState.treeIndex+(k==='ArrowDown'?1:-1);if(si<0)si=bs.length-1;if(si>=bs.length)si=0;scState.treeIndex=si;bs.forEach(function(b){b.classList.remove('msc-focus');});bs[si].classList.add('msc-focus');bs[si].scrollIntoView({block:'nearest'});return;}
+      if(k==='Enter'){var s2=document.querySelector('#mscTree button.msc-focus');if(!s2){var _tb=document.querySelectorAll('#mscTree button');if(_tb.length)s2=_tb[0];}if(s2){e.preventDefault();$('mscUnder').value=s2.textContent;scHideTree();scUpdateMoreInfo();$('mscUnder').focus();}return;}
+      /* Any other key: dismiss the transient list, then handle the key
+         normally (F12 / Ctrl+I / F10 must not be swallowed by an open list). */
+      scHideTree();
     }
+    var scPicker=$('mlgOtherMasters');
+    if(scPicker&&scPicker.style.display==='flex'){
+      if(k==='ArrowDown'||k==='ArrowUp'){e.preventDefault();e.stopImmediatePropagation();var _items=[...document.querySelectorAll('#mlgOtherMasters .mlg-other-item')];if(_items.length){var _i=_items.findIndex(function(el){return el.classList.contains('sel');});_i=(_i+(k==='ArrowDown'?1:-1)+_items.length)%_items.length;_items.forEach(function(el,j){el.classList.toggle('sel',j===_i);});_items[_i].scrollIntoView({block:'nearest'});}return;}
+      if(k==='Enter'){e.preventDefault();e.stopImmediatePropagation();var _items2=[...document.querySelectorAll('#mlgOtherMasters .mlg-other-item')];var _j=_items2.findIndex(function(el){return el.classList.contains('sel');});if(_j<0)_j=0;if(window.mayaPickOtherMaster)window.mayaPickOtherMaster(_j);return;}
+      if(k==='Escape'){e.preventDefault();e.stopImmediatePropagation();if(window.mayaCloseOtherMasters)window.mayaCloseOtherMasters();return;}
+      e.preventDefault();e.stopImmediatePropagation();return;
+    }
+    var scF3m=$('maya-f3-menu');
+    if(scF3m&&scF3m.style.display==='block')return;
     if(k==='Escape'){e.preventDefault();if(window.mayaCloseStockCategory)window.mayaCloseStockCategory();}
+    else if(k==='F12'){e.preventDefault();scConfigOpen();}
+    else if(k==='F10'){e.preventDefault();e.stopImmediatePropagation();scHideTree();if(window.mayaOpenOtherMasters)window.mayaOpenOtherMasters('Stock Category');}
+    else if((e.ctrlKey||e.metaKey)&&!e.altKey&&(k==='i'||k==='I')){e.preventDefault();e.stopImmediatePropagation();scToggleMore();}
     else if((e.ctrlKey||e.metaKey)&&!e.altKey&&(k==='s'||k==='S')){e.preventDefault();scAskSave(true);}
   }
   if(curOpen){
@@ -29905,7 +30071,7 @@ document.addEventListener('click',function(e){
 document.addEventListener('keydown',function(e){
   if(e.key!=='Enter')return;
   var t=e.target;if(!t||(t.tagName!=='INPUT'&&t.tagName!=='SELECT'))return;
-  var map={msgName:'msgAlias',msgAlias:'msgLang',msgLang:'msgLangAlias',msgLangAlias:'msgUnder',msgUnder:'msgQtyAdd',msgQtyAdd:'msgHsnDetails',msgHsnDetails:'msgHsnSource',msgHsnSource:'msgHsn',msgHsn:'msgHsnDesc',msgHsnDesc:'msgGstDetails',msgGstDetails:'msgGstSource',msgGstSource:'msgTaxability',msgTaxability:'msgGstRate',msgGstRate:'msgGstMrp',msgGstMrp:'msgReverseCharge',msgReverseCharge:'msgItc',mscName:'mscAlias',mscAlias:'mscUnder',mcurSymbol:'mcurFormal',mcurFormal:'mcurCode',mcurCode:'mcurDecimals',mcurDecimals:'mcurMillions',mcurMillions:'mcurSuffix',mcurSuffix:'mcurSpace',mcurSpace:'mcurWord',mcurWord:'mcurWordDec',mcurWordDec:'mcurRate',mcurRate:'mcurRateDate'};
+  var map={msgName:'msgAlias',msgAlias:'msgLang',msgLang:'msgLangAlias',msgLangAlias:'msgUnder',msgUnder:'msgQtyAdd',msgQtyAdd:'msgHsnDetails',msgHsnDetails:'msgHsnSource',msgHsnSource:'msgHsn',msgHsn:'msgHsnDesc',msgHsnDesc:'msgGstDetails',msgGstDetails:'msgGstSource',msgGstSource:'msgTaxability',msgTaxability:'msgGstRate',msgGstRate:'msgGstMrp',msgGstMrp:'msgReverseCharge',msgReverseCharge:'msgItc',mscName:'mscAlias',mscAlias:'mscLang',mscLang:'mscLangAlias',mscLangAlias:'mscUnder',mcurSymbol:'mcurFormal',mcurFormal:'mcurCode',mcurCode:'mcurDecimals',mcurDecimals:'mcurMillions',mcurMillions:'mcurSuffix',mcurSuffix:'mcurSpace',mcurSpace:'mcurWord',mcurWord:'mcurWordDec',mcurWordDec:'mcurRate',mcurRate:'mcurRateDate'};
   var next=map[t.id];if(!next)return;
   if(t.id==='msgUnder'&&__ctShownEl($('msgTree')))return;
   if(t.id==='mscUnder'&&__ctShownEl($('mscTree')))return;
@@ -29963,7 +30129,7 @@ var __ctFormMap=[
  {overlay:'mayaacc-voucher-type-overlay',name:'Voucher Type',save:function(){if(window.mayaSaveVoucherType)window.mayaSaveVoucherType('save');},close:function(a){if(window.mayaCloseVoucherType)window.mayaCloseVoucherType(a);},config:function(){if(window.mayaOpenVoucherTypeConfig)window.mayaOpenVoucherTypeConfig();}},
  {overlay:'mayaacc-tax-gst-overlay',name:'Tax / GST Ledger',save:function(){if(window.mayaTaxGstSave)window.mayaTaxGstSave(false);},close:function(a){if(window.mayaCloseTaxGstLedger)window.mayaCloseTaxGstLedger(a);},config:function(){if(window.mayaOpenTaxGstConfig)window.mayaOpenTaxGstConfig();}},
  {overlay:'mayaacc-stock-group-overlay',name:'Stock Group',save:function(){if(window.mayaSaveStockGroup)window.mayaSaveStockGroup(false);},close:function(a){if(window.mayaCloseStockGroup)window.mayaCloseStockGroup(a);},config:function(){if(window.mayaOpenStockGroupConfig)window.mayaOpenStockGroupConfig();}},
- {overlay:'mayaacc-stock-cat-overlay',name:'Stock Category',save:function(){if(window.mayaSaveStockCategory)window.mayaSaveStockCategory(false);},close:function(a){if(window.mayaCloseStockCategory)window.mayaCloseStockCategory(a);},config:null},
+ {overlay:'mayaacc-stock-cat-overlay',name:'Stock Category',save:function(){if(window.mayaSaveStockCategory)window.mayaSaveStockCategory(false);},close:function(a){if(window.mayaCloseStockCategory)window.mayaCloseStockCategory(a);},config:function(){if(window.mayaOpenStockCategoryConfig)window.mayaOpenStockCategoryConfig();}},
  {overlay:'mayaacc-currency-overlay',name:'Currency',save:function(){if(window.mayaSaveCurrency)window.mayaSaveCurrency(false);},close:function(a){if(window.mayaCloseCurrency)window.mayaCloseCurrency(a);},config:function(){if(window.mayaOpenCurrencyConfig)window.mayaOpenCurrencyConfig();}}
 ];
 function __ctOpenForm(){
@@ -29977,7 +30143,7 @@ function __ctOpenForm(){
    stayed floating over the Select Company screen. */
 window.__ctOpenForm=__ctOpenForm;
 function __ctDeepBusy(){
-  var ids=['mayaacc-group-config','mayaacc-ledger-config','mayaacc-stock-config','mayaacc-unit-config','mayaacc-godown-config','mayaacc-cost-centre-config','mayaacc-voucher-type-config','mayaacc-tax-gst-config','mayaacc-stock-group-config','mayaacc-currency-config','mgConfirm','mlgConfirm','msiConfirm','muConfirm','mgdConfirm','mccConfirm','mvtConfirm','mtgConfirm','msgConfirm','mscConfirm','mcurConfirm','mgTree','mlgTree','msiTree','muTree','mgdTree','mccTree','mvtTree','mtgTree','msgTree','mscTree','mlgStateList','mlgDistrictList','mlgCountryList','mlgGSTTypeList','mlgGstRateList','mlgOtherMasters','mayaacc-hsn-finder','maya-print-dialog','mcf-ov','mcm','createMasterDialog'];
+  var ids=['mayaacc-group-config','mayaacc-ledger-config','mayaacc-stock-config','mayaacc-unit-config','mayaacc-godown-config','mayaacc-cost-centre-config','mayaacc-voucher-type-config','mayaacc-tax-gst-config','mayaacc-stock-group-config','mayaacc-stock-cat-config','mayaacc-currency-config','mgConfirm','mlgConfirm','msiConfirm','muConfirm','mgdConfirm','mccConfirm','mvtConfirm','mtgConfirm','msgConfirm','mscConfirm','mcurConfirm','mgTree','mlgTree','msiTree','muTree','mgdTree','mccTree','mvtTree','mtgTree','msgTree','mscTree','mlgStateList','mlgDistrictList','mlgCountryList','mlgGSTTypeList','mlgGstRateList','mlgOtherMasters','mayaacc-hsn-finder','maya-print-dialog','mcf-ov','mcm','createMasterDialog'];
   for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);if(__ctShownEl(el))return true;}
   var mod=document.querySelector('.maya-mod-ov.on');if(mod)return true;
   return false;
@@ -30383,7 +30549,7 @@ function __mayaTopLayer(){
      config dialogs, then save-confirms, then creation forms, then the
      pickers / print dialog / reports / voucher entry. */
   var mod=document.querySelector('.maya-mod-ov.on');if(mod)return mod;
-  var cfgIds=['mayaacc-group-config','mayaacc-ledger-config','mayaacc-stock-config','mayaacc-unit-config','mayaacc-godown-config','mayaacc-cost-centre-config','mayaacc-voucher-type-config','mayaacc-tax-gst-config','mayaacc-stock-group-config','mayaacc-currency-config'];
+  var cfgIds=['mayaacc-group-config','mayaacc-ledger-config','mayaacc-stock-config','mayaacc-unit-config','mayaacc-godown-config','mayaacc-cost-centre-config','mayaacc-voucher-type-config','mayaacc-tax-gst-config','mayaacc-stock-group-config','mayaacc-stock-cat-config','mayaacc-currency-config'];
   for(var i=0;i<cfgIds.length;i++){var c=$(cfgIds[i]);if(__ctShownEl(c))return c;}
   var confIds=['mgConfirm','mlgConfirm','msiConfirm','muConfirm','mgdConfirm','mccConfirm','mvtConfirm','mtgConfirm','msgConfirm','mscConfirm','mcurConfirm'];
   for(var j=0;j<confIds.length;j++){var cf=$(confIds[j]);if(__ctShownEl(cf))return cf;}
@@ -30415,7 +30581,7 @@ function __mayaTopLayerBlocksShortcuts(){
      shortcuts are meant to work from the form. */
   if(document.querySelector('.maya-mod-ov.on'))return true;
   var pd=$('maya-print-dialog');if(__ctShownEl(pd))return true;
-  var ids=['mayaacc-group-config','mayaacc-ledger-config','mayaacc-stock-config','mayaacc-unit-config','mayaacc-godown-config','mayaacc-cost-centre-config','mayaacc-voucher-type-config','mayaacc-tax-gst-config','mayaacc-stock-group-config','mayaacc-currency-config','mgConfirm','mlgConfirm','msiConfirm','muConfirm','mgdConfirm','mccConfirm','mvtConfirm','mtgConfirm','msgConfirm','mscConfirm','mcurConfirm','createMasterDialog','alterMasterDialog','mayaacc-hsn-finder'];
+  var ids=['mayaacc-group-config','mayaacc-ledger-config','mayaacc-stock-config','mayaacc-unit-config','mayaacc-godown-config','mayaacc-cost-centre-config','mayaacc-voucher-type-config','mayaacc-tax-gst-config','mayaacc-stock-group-config','mayaacc-stock-cat-config','mayaacc-currency-config','mgConfirm','mlgConfirm','msiConfirm','muConfirm','mgdConfirm','mccConfirm','mvtConfirm','mtgConfirm','msgConfirm','mscConfirm','mcurConfirm','createMasterDialog','alterMasterDialog','mayaacc-hsn-finder'];
   for(var i=0;i<ids.length;i++){if(__ctShownEl($(ids[i])))return true;}
   return false;
 }
