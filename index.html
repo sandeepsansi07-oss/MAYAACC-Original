@@ -2209,7 +2209,11 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
   function open(){if(window.__mayaRecordReturn)window.__mayaRecordReturn('Stock Item');if(typeof closeCreateMaster==='function')closeCreateMaster();populateLists();$('mayaacc-stock-overlay').style.display='block';$('mayaacc-stock-overlay').setAttribute('aria-hidden','false');$('msiConfirm').style.display='none';if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-stock-overlay .msi-main');$('msiCompanyChip').textContent=companyName();clearForm();setTimeout(()=>$('msiName').focus(),20);if(!loadBundled()&&!loadCache())syncMaster();}
   function close(returnToMenu){closeConfig();$('mayaacc-stock-overlay').style.display='none';$('mayaacc-stock-overlay').setAttribute('aria-hidden','true');$('msiTree').style.display='none';$('msiConfirm').style.display='none';closeHsnFinder();treeFocus=-1;if(returnToMenu!==false&&window.__mayaReturnToMenu)window.__mayaReturnToMenu();}
   function changeCompany(){if(dirty&&!confirm('This Stock Item has unsaved changes. Change company and discard the current entry?'))return;close(false);if(typeof showCompanySelect==='function')showCompanySelect();}
-  function applyHsnToForm(row){if(!row)return;selectedCode=row;if(window.__mayaHsnTarget==='ledger'){window.__mayaHsnTarget=null;const lov=$('mayaacc-ledger-overlay');if(lov&&getComputedStyle(lov).display!=='none'){const kind=(typeof window.mayaGroupKind==='function')?window.mayaGroupKind((($('mlgUnder')||{}).value||'')):'';if(kind==='gst'){if($('mlgHsn'))$('mlgHsn').value=row.code||'';const rr=rateFor(row.code);if(rr&&$('mlgGstRate'))$('mlgGstRate').value=['0','5','12','18','28'].includes(String(rr.rate))?String(rr.rate):'';if($('mlgGstApplicable'))$('mlgGstApplicable').value='yes';const g=document.querySelector('[data-kind-section="gst"]');if(g)g.querySelectorAll('.mlg-gst-detail').forEach(e=>e.style.display='');if($('mlgHsn'))$('mlgHsn').dispatchEvent(new Event('input',{bubbles:true}));closeHsnFinder();return;}else{$('msihStatus').textContent='HSN / SAC applies to GST ledgers (e.g. Duties & Taxes, Purchase Accounts). Pick such a group under "Under" first.';return;}}}const alterForm=$('mayaacc-alter-stock-form');if(alterForm&&getComputedStyle(alterForm).display!=='none'){ $('astHSN').value=row.code||''; $('astHSNDescription').value=row.description||''; const rr=rateFor(row.code); if(rr){ $('astTax').value=['0','5','12','18','28','40'].includes(String(rr.rate))?String(rr.rate):'other'; if($('astTax').value==='other')$('astTaxCustom').value=rr.rate; $('astCess').value=rr.cess||''; } closeHsnFinder(); return;} $('msiHSN').value=row.code; $('msiHSNDescription').value=row.description||''; const rr=rateFor(row.code);if(rr){$('msiTax').value=['0','5','12','18','28','40'].includes(String(rr.rate))?String(rr.rate):'other';if($('msiTax').value==='other')$('msiTaxCustom').value=rr.rate;$('msiCess').value=rr.cess||'';} $('msiHsnStatus').textContent='Selected '+row.type+' '+row.code+' — description and matching GST rate applied where available.';updateSummary();dirty=true;closeHsnFinder();}
+  function applyHsnToForm(row){if(!row)return;selectedCode=row;if(window.__mayaHsnTarget==='ledger'){window.__mayaHsnTarget=null;const lov=$('mayaacc-ledger-overlay');if(lov&&getComputedStyle(lov).display!=='none'){const kind=(typeof window.mayaGroupKind==='function')?window.mayaGroupKind((($('mlgUnder')||{}).value||'')):'';if(kind==='gst'){if($('mlgHsn'))$('mlgHsn').value=row.code||'';const rr=rateFor(row.code);if(rr&&$('mlgGstRate'))$('mlgGstRate').value=['0','5','12','18','28'].includes(String(rr.rate))?String(rr.rate):'';if($('mlgGstApplicable'))$('mlgGstApplicable').value='yes';const g=document.querySelector('[data-kind-section="gst"]');if(g)g.querySelectorAll('.mlg-gst-detail').forEach(e=>e.style.display='');if($('mlgHsn'))$('mlgHsn').dispatchEvent(new Event('input',{bubbles:true}));closeHsnFinder();return;}else{$('msihStatus').textContent='HSN / SAC applies to GST ledgers (e.g. Duties & Taxes, Purchase Accounts). Pick such a group under "Under" first.';return;}}}const alterForm=$('mayaacc-alter-stock-form');if(alterForm&&getComputedStyle(alterForm).display!=='none'){ $('astHSN').value=row.code||''; $('astHSNDescription').value=row.description||''; const rr=rateFor(row.code); if(rr){ $('astTax').value=['0','5','12','18','28','40'].includes(String(rr.rate))?String(rr.rate):'other'; if($('astTax').value==='other')$('astTaxCustom').value=rr.rate; $('astCess').value=rr.cess||''; } closeHsnFinder(); return;}
+/* run #36: Stock Group (Alt+B / sidebar B) — fill HSN + Description + GST Rate. */
+const sgOv=$('mayaacc-stock-group-overlay');
+if(sgOv&&getComputedStyle(sgOv).display!=='none'){ $('msgHsn').value=row.code||''; $('msgHsnDesc').value=row.description||''; const rr2=rateFor(row.code); if(rr2&&$('msgGstRate')){const _r=String(rr2.rate);if(['0','5','12','18','28'].includes(_r))$('msgGstRate').value=_r;} if($('msgHsn'))$('msgHsn').dispatchEvent(new Event('input',{bubbles:true})); closeHsnFinder(); return;}
+$('msiHSN').value=row.code; $('msiHSNDescription').value=row.description||''; const rr=rateFor(row.code);if(rr){$('msiTax').value=['0','5','12','18','28','40'].includes(String(rr.rate))?String(rr.rate):'other';if($('msiTax').value==='other')$('msiTaxCustom').value=rr.rate;$('msiCess').value=rr.cess||'';} $('msiHsnStatus').textContent='Selected '+row.type+' '+row.code+' — description and matching GST rate applied where available.';updateSummary();dirty=true;closeHsnFinder();}
   function renderFinder(){
     const root=$('msihResults');if(!root)return;
     const q=($('msihSearch').value||'').trim().toLowerCase(), exact=normalizeCode($('msihQuickCode').value||''); const type=$('msihType').value;
@@ -2220,7 +2224,7 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
     root.querySelectorAll('.msih-row').forEach((tr,i)=>tr.addEventListener('click',()=>{const x=rows[i];selectedCode=x;paintFinderDetail(x);renderFinder();}));
   }
   function paintFinderDetail(row){const d=$('msihDetail');if(!row){d.innerHTML='<div class="msih-drow"><span>Code</span><strong>—</strong></div><div class="msih-drow"><span>Description</span><strong>Select a result</strong></div>';return;}const rr=rateFor(row.code);d.innerHTML='<div class="msih-drow"><span>Code</span><strong>'+esc(row.code)+'</strong></div><div class="msih-drow"><span>Type</span><strong>'+esc(row.type)+'</strong></div><div class="msih-drow"><span>Description</span><strong>'+esc(row.description)+'</strong></div><div class="msih-drow"><span>GST Rate</span><strong>'+(rr?esc(rr.rate+'%'):'Not available in loaded rate map')+'</strong></div><div class="msih-drow"><span>Cess</span><strong>'+(rr?esc((rr.cess||0)+'%'):'—')+'</strong></div>'}
-  function openHsnFinder(){const d=$('mayaacc-hsn-finder');d.style.display='flex';d.setAttribute('aria-hidden','false');$('msihSearch').focus();var _hp=document.querySelector('#mayaacc-hsn-finder .msih-head p');if(_hp)_hp.textContent='Search by code or product/service description. Select a row to bring the classification back to Stock Item.';renderFinder();if(!loadBundled()&&!loadCache())syncMaster();}
+  function openHsnFinder(){const d=$('mayaacc-hsn-finder');d.style.display='flex';d.setAttribute('aria-hidden','false');$('msihSearch').focus();var _hp=document.querySelector('#mayaacc-hsn-finder .msih-head p');if(_hp){var _sg=document.getElementById('mayaacc-stock-group-overlay');_hp.textContent=(_sg&&getComputedStyle(_sg).display!=='none')?'Search by code or product/service description. Select a row to bring the classification back to this Stock Group.':(window.__mayaHsnTarget==='ledger'?'Search by code or product/service description. Select a row to bring the HSN / SAC back to this Ledger.':'Search by code or product/service description. Select a row to bring the classification back to Stock Item.');}renderFinder();if(!loadBundled()&&!loadCache())syncMaster();}
   function closeHsnFinder(){const d=$('mayaacc-hsn-finder');if(d){d.style.display='none';d.setAttribute('aria-hidden','true');}}
   function selectHsnResult(){if(selectedCode)applyHsnToForm(selectedCode);else{$('msihStatus').textContent='Select an HSN / SAC row first.';}}
   function openOfficialHsnSearch(){window.open('https://services.gst.gov.in/services/searchhsnsac','_blank','noopener');}
@@ -3339,8 +3343,14 @@ window.mayaDistrictsFor=function(state){return (window.MAYA_DISTRICTS&&window.MA
           openForOverlay();
           return;
         }
-        const focusedInside=activeOverlay.contains(document.activeElement);
-        if(focusedInside){
+        const ae=document.activeElement;
+        const focusedInside=activeOverlay.contains(ae);
+        /* run #36: focus on <body> (e.g. after clicking a sidebar row, which
+           is a plain div and moves focus to body) still means "on this
+           screen" — open the config. A focus inside some OTHER shown layer
+           keeps the old consume-without-open behaviour, so a stale overlay
+           still cannot hijack F12 from the workspace. */
+        if(focusedInside||ae===document.body||!ae){
           e.preventDefault();e.stopImmediatePropagation();
           openForOverlay();
         }else{
@@ -18886,6 +18896,9 @@ body.maya-topbar-on #mayaacc-sound-settings,
 body.maya-topbar-on #mayaacc-backup,
 body.maya-topbar-on #mayaacc-tax-gst-overlay,
 body.maya-topbar-on #mayaacc-alter-group-form,
+body.maya-topbar-on #mayaacc-stock-group-overlay,
+body.maya-topbar-on #mayaacc-stock-cat-overlay,
+body.maya-topbar-on #mayaacc-currency-overlay,
 body.maya-topbar-on #mcf-ov{top:var(--maya-topbar-h,48px)!important}
 @media print{#maya-topbar{display:none!important}body.maya-topbar-on #dashboard{padding-top:0!important}}
 /* --- per-screen Print buttons (fix 3) --- */
@@ -19253,13 +19266,10 @@ var topbarShouldShow=function(){
   if(!document.body.classList.contains('workspace-mode'))return false;
   if(isOpenEl($('maya-setup-screen')))return false;
   if(isOpenEl($('maya-unlock-screen')))return false;
-  /* v9 #4: creation screens cover the full screen opaquely — the top bar
-     must not show above them (it also frees 48px so the form fits).
-     EXCEPTION (preview match, 2026-11-21): the Ledger Creation screen shows
-     the top bar above the form, exactly like the approved preview. The
-     body.maya-topbar-on CSS already offsets #mayaacc-ledger-overlay below it. */
-  var co=['mayaacc-stock-overlay','mayaacc-unit-overlay','mayaacc-godown-overlay','mayaacc-cost-centre-overlay','mayaacc-voucher-type-overlay','mayaacc-tax-gst-overlay','mayaacc-stock-group-overlay','mayaacc-stock-cat-overlay','mayaacc-currency-overlay'];
-  for(var i=0;i<co.length;i++){if(isOpenEl($(co[i])))return false;}
+  /* run #36 (2026-11-27, Sandeep: top main menu must SHOW on EVERY screen,
+     never hide): the old hide list for creation screens is removed — the
+     top bar shows above every screen, Ledger-style. The
+     body.maya-topbar-on CSS offsets each overlay below the bar. */
   return true;
 };
 /* v9 #10: the top-bar Print button shows ONLY on report/ledger/sales/register
@@ -28939,63 +28949,63 @@ else window.MayaLang.init();
 #mayaacc-unit-panel .mug-side{display:none}
 #mayaacc-unit-panel .mug-content{display:block}
 .create-sec{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#78869a;padding:12px 12px 5px;font-weight:800}
-/* --- Stock Group: full-width form (Tally) --- */
+/* --- Stock Group: full-width form (Tally) — run #36 rebuild, approved preview --- */
 #mayaacc-stock-group-overlay{display:none;position:fixed;inset:0;z-index:10045;background:rgba(10,15,26,.30);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
-#mayaacc-stock-group-panel{position:absolute;left:0;top:0;height:100%;width:100%;background:rgba(255,255,255,.99);display:flex;flex-direction:column;overflow:hidden}
+#mayaacc-stock-group-panel{position:absolute;left:0;right:160px;top:0;bottom:0;height:auto;width:auto;background:rgba(255,255,255,.99);display:flex;flex-direction:column;overflow:hidden}
 .msg-content{display:flex;min-height:100%}
-.msg-main{padding:30px 28px 110px;overflow:auto;flex:1}
-.msg-side{width:148px;background:#f7f9fc;border-left:1px solid #e3e8ef;padding:24px 12px;flex:0 0 148px}
-.msg-side h3{font-size:11px;letter-spacing:.08em;color:#7b8797;margin:3px 6px 12px}
-.msg-side button{width:100%;padding:10px 9px;margin:0 0 8px;border:1px solid #dce3eb;border-radius:8px;background:#fff;color:#34465d;text-align:left;cursor:pointer;font-size:12px}
-.msg-side button:hover{background:#eef3fb}
-.msg-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-.msg-title h2{margin:0;font-size:22px;color:#18273c}
-.msg-close{border:0;background:transparent;font-size:22px;color:#7b8797;cursor:pointer}
-.msg-section{margin-bottom:18px}
-.msg-section h4{margin:0 0 10px;font-size:10px;letter-spacing:.08em;color:#78869a;text-transform:uppercase}
-.msg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.msg-field{margin-bottom:0}
-.msg-field.full{grid-column:1/-1}
-.msg-field label{display:block;font-size:12px;font-weight:800;color:#45546a;margin-bottom:7px}
-.msg-field input,.msg-field select{width:100%;box-sizing:border-box;padding:10px 11px;border:1px solid #d8e0ea;border-radius:8px;background:#fff;font-size:13px;outline:none}
-.msg-field input:focus,.msg-field select:focus{border-color:#8d9bb0;box-shadow:0 0 0 3px rgba(94,108,134,.08)}
-.msg-note{font-size:10px;color:#8a96a6;margin-top:5px}
+.msg-main{padding:0 16px 40px;overflow:auto;flex:1}
+#mayaacc-stock-group-overlay>.msg-side{position:absolute;right:0;top:0;bottom:0;width:160px;background:#fff;border-left:1px solid #e3e8ef;padding:0;display:flex;flex-direction:column;z-index:5}
+#mayaacc-stock-group-overlay>.msg-side .mlg-f12{margin-top:auto;border-top:1px solid #e3e8ef}
+@media(max-width:900px){#mayaacc-stock-group-overlay>.msg-side{display:none}}
+.msg-title{display:flex;align-items:center;height:38px;border-bottom:1px solid #e5e7eb;position:sticky;top:0;background:#fff;z-index:2;margin-bottom:12px}
+.msg-title h2{margin:0;font-size:15px;font-weight:600;color:#374151}
+.msg-title .mug-chip{margin-left:10px}
+.msg-close{margin-left:auto;border:0;background:transparent;font-size:16px;color:#6b7280;cursor:pointer}
+.msg-sec{border:1px solid #d7dee8;border-radius:6px;background:#fff;margin-top:12px;padding:0 16px 10px}
+.msg-sec h2{font-size:12.5px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px;text-align:center;background:#eef2f7;border-bottom:1px solid #d7dee8;padding:7px 0;margin:0 -16px 4px}
+.msg-row{display:flex;align-items:center;min-height:33px;gap:8px}
+.msg-row label{width:180px;font-size:13px;color:#111827;flex-shrink:0}
+.msg-row input,.msg-row select{height:27px;border:1px solid #9aa3ad;border-radius:2px;padding:0 6px;font-size:13px;color:#111827;background:#fff;flex-shrink:0}
+.msg-row input:focus,.msg-row select:focus{border-color:#2f6fd0;outline:none;box-shadow:0 0 0 3px rgba(47,111,208,.15)}
+.msg-w-name{width:420px}
+.msg-w-alias{width:200px}
+.msg-w-yn{width:100px}
+.msg-w-mid{width:170px}
+.msg-w-txt{width:130px}
+.msg-w-lang{width:120px}
+.msg-rows2{display:grid;grid-template-columns:1fr 1fr;gap:0 32px}
+.msg-under-wrap{position:relative;display:inline-flex}
+.msg-arr{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:#6b7280;pointer-events:none;font-size:11px}
 .msg-tree{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);max-height:260px;overflow:auto;background:#fff;border:1px solid #d7dfe8;border-radius:8px;box-shadow:0 14px 30px rgba(16,24,40,.14);z-index:40;padding:5px 0}
 .msg-tree button{display:block;width:100%;border:0;background:#fff;text-align:left;padding:8px 12px;font-size:12px;color:#33445c;cursor:pointer}
 .msg-tree button:hover,.msg-tree button.msg-focus{background:#edf1fb;color:#395ba8}
-.msg-under-wrap{position:relative}
-.msg-summary{padding:12px 14px;border:1px solid #e1e6ee;border-radius:9px;background:#fafbfe;font-size:12px;line-height:1.7}
-.msg-summary-row{display:flex;justify-content:space-between;gap:12px}
-.msg-footer{position:sticky;bottom:0;background:#fff;border-top:1px solid #e3e8ef;padding:10px 0 0;margin-top:20px}
-.msg-footer .maya-create-foot{margin:-10px 0 10px}
-.msg-actions{display:flex;gap:8px;justify-content:flex-end}
-.msg-actions button{border:1px solid #d7dee8;background:#fff;border-radius:8px;padding:9px 12px;font-size:11px;font-weight:700;cursor:pointer}
-.msg-actions .primary{background:#1d2d42;color:#fff;border-color:#1d2d42}
-#mayaacc-stock-group-config{display:none;position:fixed;right:0;top:0;height:100%;width:min(390px,92vw);background:#fff;border-left:1px solid #dfe4ec;box-shadow:-18px 0 45px rgba(16,24,40,.14);z-index:10070;overflow-y:auto}
-/* v9 #1: F12 Configuration is a CENTRED dialog (like Tally + the F11 dialog), not a right drawer */
-#mayaacc-stock-group-config{left:50%;top:50%;transform:translate(-50%,-50%);right:auto;height:auto;max-height:calc(100vh - 60px);width:min(640px,94vw);border:1px solid #dbe4ec;border-radius:14px;box-shadow:0 24px 70px rgba(15,25,50,.35)}
-.msgc-head{position:sticky;top:0;background:#fff;border-bottom:1px solid #e4e8ef;padding:18px 20px 14px;z-index:2}
-.msgc-head h3{margin:0;color:#1d2d42;font-size:16px}
-.msgc-head p{margin:5px 0 0;color:#7a8798;font-size:11px;line-height:1.45}
+.msg-more{border-top:1px dashed #d7dce3;margin-top:4px;padding-top:2px}
+.more-head{font-size:11px;letter-spacing:1px;color:#78869a;text-transform:uppercase;padding:6px 0 2px}
+.info-row{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid #f0f2f6;font-size:13px;max-width:560px}
+.info-row span{color:#7a8798}
+.info-row strong{color:#22324a}
+.msg-footer{position:static;flex:0 0 auto;display:block;margin:0;padding:10px 0 0;background:#fff;border-top:1px solid #e3e8ef}
+.msg-footer .maya-create-foot{margin:0;padding:8px 20px 6px}
+/* F12 Configuration BOX — Tally style (Cost Centre pattern): 1020px, 2 columns, plain Yes/No rows. */
+#mayaacc-stock-group-config{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);right:auto;height:auto;max-height:calc(100vh - 60px);width:min(1020px,94vw);background:#fff;border:1px solid #dbe4ec;border-radius:10px;box-shadow:0 24px 70px rgba(15,25,50,.35);z-index:10090;overflow:hidden;flex-direction:column}
+#mayaacc-stock-group-config .msgc-head{position:sticky;top:0;background:#fff;border-bottom:1px solid #e4e8ef;padding:14px 20px 10px;z-index:2}
+#mayaacc-stock-group-config .msgc-head h3{margin:0;color:#1d2d42;font-size:15px}
 .msgc-close{position:absolute;right:14px;top:12px;border:0;background:transparent;color:#768396;font-size:22px;cursor:pointer}
-.msgc-body{padding:15px 18px 90px}
-.msgc-section{margin-bottom:18px}
-.msgc-section h4{margin:0 0 9px;font-size:10px;letter-spacing:.08em;color:#78869a;text-transform:uppercase}
-.msgc-option{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 11px;border:1px solid #e2e7ee;border-radius:9px;background:#fbfcfe;margin:7px 0;cursor:pointer}
-.msgc-option.msgc-focus{background:#edf1fb;border-color:#8ba5df;box-shadow:0 0 0 2px rgba(87,126,214,.10);outline:2px solid #7b9ae0;outline-offset:-2px}
-.msgc-option strong{font-size:12px;color:#34445c;font-weight:700}
-.msgc-option small{display:block;color:#8894a6;font-size:10px;line-height:1.35;margin-top:3px}
-.msgc-check{position:relative;width:40px;height:22px;flex:0 0 auto}
-.msgc-check input{display:none}
-.msgc-check span{position:absolute;inset:0;border-radius:20px;background:#d7dde6;cursor:pointer;transition:.18s}
-.msgc-check span:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.12);transition:.18s}
-.msgc-check input:checked+span{background:#577ed6}
-.msgc-check input:checked+span:before{transform:translateX(18px)}
+.msgc-ind{position:absolute;right:10px;font-size:11px;color:#7a8798;font-weight:700;z-index:3;pointer-events:none}
+.msgc-ind.top{top:60px}
+.msgc-ind.bot{bottom:64px}
+.msgc-body{padding:12px 24px 14px;max-height:calc(100vh - 260px);overflow-y:auto}
+.msgc-cols{display:flex;gap:36px;padding-right:22px}
+.msgc-col{flex:1;min-width:0}
+.msgc-option{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 8px;font-size:13px;border:0;border-bottom:1px solid #f0f2f6;border-radius:6px;background:transparent;margin:0;cursor:pointer}
+.msgc-option .v{font-weight:700;color:#172033;flex:none}
+.msgc-option input{display:none}
+.msgc-option:hover{background:#f4f7fd}
+.msgc-option.msgc-focus{background:#e8effc;outline:none;box-shadow:none}
 .msgc-footer{position:sticky;bottom:0;background:#fff;border-top:1px solid #e3e8ef;padding:11px 18px;display:flex;justify-content:space-between;gap:8px}
 .msgc-footer button{border:1px solid #d7dee8;background:#fff;border-radius:8px;padding:9px 12px;font-size:11px;font-weight:700;cursor:pointer}
 .msgc-footer .primary{background:#1d2d42;color:#fff;border-color:#1d2d42}
-@media(max-width:760px){.msg-side{width:132px;flex-basis:132px}.msg-grid{grid-template-columns:1fr}.msg-field.full{grid-column:auto}}
-@media(max-width:560px){.msg-content{display:block}.msg-side{display:flex;gap:8px;width:auto;flex:none;border-left:0;border-top:1px solid #e3e8ef;padding:10px 12px}.msg-side h3{display:none}.msg-side button{flex:1;margin:0}}
+@media(max-width:760px){.msg-rows2{grid-template-columns:1fr}.msg-w-name{width:100%}}
 /* --- Stock Category: small centred popup (Tally) --- */
 #mayaacc-stock-cat-overlay{display:none;position:fixed;inset:0;z-index:10045;background:rgba(10,15,26,.30);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
 #mayaacc-stock-cat-panel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(520px,92vw);max-height:calc(100vh - 60px);background:#fff;border:1px solid #dfe4ec;border-radius:14px;box-shadow:0 24px 70px rgba(15,23,42,.24);display:flex;flex-direction:column;overflow:hidden}
@@ -29079,54 +29089,92 @@ else window.MayaLang.init();
 </style>
 
 <div id="mayaacc-stock-group-config" aria-hidden="true">
-  <div class="msgc-head"><button class="msgc-close" type="button" onclick="mayaCloseStockGroupConfig()">×</button><h3>Stock Group Configuration</h3><p>F12 settings apply directly to the Stock Group screen for the current company.</p></div>
+  <div class="msgc-head"><button class="msgc-close" type="button" onclick="mayaCloseStockGroupConfig()">×</button><h3>Stock Group Configuration</h3></div>
+  <span class="msgc-ind top" style="display:none">▲</span>
   <div class="msgc-body">
-    <p id="msgcStatus" class="mgc-status">Changes apply to the active Stock Group screen.</p>
-    <div class="msgc-section"><h4>Stock Group Screen</h4>
-      <label class="msgc-option"><span><strong>Show HSN / SAC Details</strong><small>Show the HSN/SAC &amp; Related Details section.</small></span><span class="msgc-check"><input id="msgcHsn" type="checkbox" checked><span></span></span></label>
-      <label class="msgc-option"><span><strong>Show GST Rate Details</strong><small>Show the GST Rate &amp; Related Details section.</small></span><span class="msgc-check"><input id="msgcGst" type="checkbox" checked><span></span></span></label>
-      <label class="msgc-option"><span><strong>Show Alias / Nickname</strong><small>Show the optional short name field.</small></span><span class="msgc-check"><input id="msgcAlias" type="checkbox" checked><span></span></span></label>
-    </div>
-    <div class="msgc-section"><h4>Validation</h4>
-      <label class="msgc-option"><span><strong>Confirm Before Save</strong><small>Show the Save confirmation before committing.</small></span><span class="msgc-check"><input id="msgcConfirm" type="checkbox" checked><span></span></span></label>
+    <div class="msgc-cols">
+      <div class="msgc-col">
+        <label class="msgc-option"><span>Provide aliases for Name</span><span class="v">: Yes</span><input id="msgcAlias" type="checkbox" checked></label>
+        <label class="msgc-option"><span>Enable option to add quantities</span><span class="v">: Yes</span><input id="msgcQtyAdd" type="checkbox" checked></label>
+        <label class="msgc-option"><span>Provide GST Details</span><span class="v">: Yes</span><input id="msgcGst" type="checkbox" checked></label>
+        <label class="msgc-option"><span>Provide HSN/SAC details</span><span class="v">: Yes</span><input id="msgcHsn" type="checkbox" checked></label>
+        <label class="msgc-option"><span>Provide HSN/SAC description</span><span class="v">: Yes</span><input id="msgcHsnDesc" type="checkbox" checked></label>
+      </div>
+      <div class="msgc-col">
+        <label class="msgc-option"><span>Confirm Before Save</span><span class="v">: Yes</span><input id="msgcConfirm" type="checkbox" checked></label>
+        <label class="msgc-option"><span>Enable Reverse Charge calculation</span><span class="v">: No</span><input id="msgcReverseCharge" type="checkbox"></label>
+        <label class="msgc-option"><span>Eligible for Input Tax Credit</span><span class="v">: No</span><input id="msgcItc" type="checkbox"></label>
+        <label class="msgc-option"><span>Enable GST calculation on MRP (Incl. Tax)</span><span class="v">: No</span><input id="msgcGstMrp" type="checkbox"></label>
+        <label class="msgc-option"><span>Provide language aliases for Name</span><span class="v">: No</span><input id="msgcLangAlias" type="checkbox"></label>
+      </div>
     </div>
   </div>
-  <div class="msgc-footer"><button type="button" onclick="mayaResetStockGroupConfig()">Reset Defaults</button><button type="button" class="primary" onclick="mayaSaveStockGroupConfig()">Save Configuration</button></div>
+  <span class="msgc-ind bot" style="display:none">▼</span>
+  <div class="msgc-footer"><button type="button" onclick="mayaResetStockGroupConfig()">Reset Defaults</button><button type="button" class="primary" onclick="mayaSaveStockGroupConfig(true)">Save Configuration</button></div>
 </div>
 
 <div id="mayaacc-stock-group-overlay" aria-hidden="true">
   <div id="mayaacc-stock-group-panel" role="dialog" aria-modal="true" aria-labelledby="msgTitle">
     <div class="msg-content">
       <div class="msg-main">
-        <div class="msg-title"><div><h2 id="msgTitle">Create Stock Group</h2><div class="mug-chip" id="msgCompanyChip">Current Company</div></div><button class="msg-close" type="button" onclick="mayaCloseStockGroup()">×</button></div>
-        <div class="msg-section"><h4>Basic Details</h4><div class="msg-grid">
-          <div class="msg-field full"><label for="msgName">Stock Group Name*</label><input id="msgName" autocomplete="off" placeholder="e.g. Finished Goods"></div>
-          <div class="msg-field" data-msg-config="alias"><label for="msgAlias">Alias / Nickname</label><input id="msgAlias" autocomplete="off" placeholder="Optional"></div>
-          <div class="msg-field full"><label for="msgUnder">Under</label><div class="msg-under-wrap"><input id="msgUnder" autocomplete="off" placeholder="Primary / another Stock Group"><div id="msgTree" class="msg-tree"></div></div><div class="msg-note">Arrow Up/Down to move, Enter to select. Leave blank for a primary group.</div></div>
-          <div class="msg-field"><label for="msgQtyAdd">Should quantities of items be added</label><select id="msgQtyAdd"><option value="no">No</option><option value="yes">Yes</option></select></div>
-        </div></div>
-        <div class="msg-section" data-msg-section="hsn"><h4>HSN / SAC &amp; Related Details</h4><div class="msg-grid">
-          <div class="msg-field"><label for="msgHsnDetails">HSN / SAC Details</label><select id="msgHsnDetails"><option>As per Company/Stock Group</option><option>Specify Details Here</option></select></div>
-          <div class="msg-field"><label for="msgHsnSource">Source of details</label><select id="msgHsnSource"><option>Not Available</option><option>As per Company/Stock Group</option></select></div>
-          <div class="msg-field"><label for="msgHsn">HSN / SAC</label><input id="msgHsn" autocomplete="off" placeholder="Optional"></div>
-          <div class="msg-field"><label for="msgHsnDesc">Description</label><input id="msgHsnDesc" autocomplete="off" placeholder="Optional"></div>
-        </div></div>
-        <div class="msg-section" data-msg-section="gst"><h4>GST Rate &amp; Related Details</h4><div class="msg-grid">
-          <div class="msg-field"><label for="msgGstDetails">GST Rate Details</label><select id="msgGstDetails"><option>As per Company/Stock Group</option><option>Specify Details Here</option></select></div>
-          <div class="msg-field"><label for="msgGstSource">Source of details</label><select id="msgGstSource"><option>Not Available</option><option>As per Company/Stock Group</option></select></div>
-          <div class="msg-field"><label for="msgTaxability">Taxability Type</label><select id="msgTaxability"><option value="taxable">Taxable</option><option value="nil">Nil Rated</option><option value="exempt">Exempt</option><option value="non_gst">Non-GST</option></select></div>
-          <div class="msg-field"><label for="msgGstRate">GST Rate</label><select id="msgGstRate"><option value="0">0%</option><option value="5">5%</option><option value="12">12%</option><option value="18">18%</option><option value="28">28%</option></select></div>
-        </div></div>
-        <div class="msg-summary"><div class="msg-summary-row"><span>Parent</span><strong id="msgParent">Primary</strong></div><div class="msg-summary-row"><span>Company</span><strong id="msgSummaryCompany">—</strong></div></div>
-              </div>
-      <aside class="msg-side"><h3>OPTIONS</h3><button type="button" onclick="mayaStockGroupChangeCompany()">Change Company</button></aside>
+        <div class="msg-title"><h2 id="msgTitle">Create Stock Group</h2><div class="mug-chip" id="msgCompanyChip">Current Company</div><button class="msg-close" type="button" onclick="mayaCloseStockGroup()">×</button></div>
+        <div class="msg-sec">
+          <h2>Basic Details</h2>
+          <div class="msg-row"><label for="msgName">Stock Group Name*</label><input id="msgName" class="msg-w-name" autocomplete="off" placeholder="e.g. Finished Goods"></div>
+          <div class="msg-row" data-msg-config="alias"><label for="msgAlias">Alias / Nickname</label><input id="msgAlias" class="msg-w-alias" autocomplete="off" placeholder="Optional"></div>
+          <div class="msg-row" data-msg-config="langAlias" style="display:none"><label for="msgLang">Name in another language</label><select id="msgLang" class="msg-w-lang"><option value="hindi">Hindi</option><option value="gujarati">Gujarati</option><option value="marathi">Marathi</option><option value="punjabi">Punjabi</option><option value="bengali">Bengali</option><option value="tamil">Tamil</option><option value="telugu">Telugu</option></select><input id="msgLangAlias" class="msg-w-alias" autocomplete="off" placeholder="Name in the selected language"></div>
+          <div class="msg-row"><label for="msgUnder">Under</label><span class="msg-under-wrap"><input id="msgUnder" class="msg-w-name" autocomplete="off"><span class="msg-arr">▾</span><div id="msgTree" class="msg-tree"></div></span></div>
+          <div class="msg-row" data-msg-config="qtyAdd"><label for="msgQtyAdd">Should quantities of items be added</label><select id="msgQtyAdd" class="msg-w-yn"><option value="no">No</option><option value="yes">Yes</option></select></div>
+          <div class="msg-more" id="msgMore" style="display:none">
+            <div class="more-head">More Details — Ctrl+I</div>
+            <div class="info-row"><span>Group Type</span><strong id="miType">Primary Group</strong></div>
+            <div class="info-row"><span>Parent</span><strong id="miParent">Primary</strong></div>
+            <div class="info-row"><span>HSN / SAC Details</span><strong id="miHsn">As per Company/Stock Group</strong></div>
+            <div class="info-row"><span>GST Rate</span><strong id="miGst">0%</strong></div>
+          </div>
+        </div>
+        <div class="msg-sec" data-msg-section="hsn">
+          <h2>HSN / SAC &amp; Related Details</h2>
+          <div class="msg-rows2">
+            <div class="msg-row"><label for="msgHsnDetails">HSN / SAC Details</label><select id="msgHsnDetails" class="msg-w-mid"><option>As per Company/Stock Group</option><option>Specify Details Here</option></select></div>
+            <div class="msg-row"><label for="msgHsnSource">Source of details</label><select id="msgHsnSource" class="msg-w-mid"><option>Not Available</option><option>As per Company/Stock Group</option></select></div>
+            <div class="msg-row"><label for="msgHsn">HSN / SAC</label><input id="msgHsn" class="msg-w-txt" autocomplete="off" placeholder="Optional"></div>
+            <div class="msg-row" data-msg-config="hsnDesc"><label for="msgHsnDesc">Description</label><input id="msgHsnDesc" class="msg-w-txt" autocomplete="off" placeholder="Optional"></div>
+          </div>
+        </div>
+        <div class="msg-sec" data-msg-section="gst">
+          <h2>GST Rate &amp; Related Details</h2>
+          <div class="msg-rows2">
+            <div class="msg-row"><label for="msgGstDetails">GST Rate Details</label><select id="msgGstDetails" class="msg-w-mid"><option>As per Company/Stock Group</option><option>Specify Details Here</option></select></div>
+            <div class="msg-row"><label for="msgGstSource">Source of details</label><select id="msgGstSource" class="msg-w-mid"><option>Not Available</option><option>As per Company/Stock Group</option></select></div>
+            <div class="msg-row"><label for="msgTaxability">Taxability Type</label><select id="msgTaxability" class="msg-w-mid"><option value="taxable">Taxable</option><option value="nil">Nil Rated</option><option value="exempt">Exempt</option><option value="non_gst">Non-GST</option></select></div>
+            <div class="msg-row"><label for="msgGstRate">GST Rate</label><select id="msgGstRate" class="msg-w-yn"><option value="0">0%</option><option value="5">5%</option><option value="12">12%</option><option value="18">18%</option><option value="28">28%</option></select></div>
+            <div class="msg-row" data-msg-config="reverseCharge" style="display:none"><label for="msgReverseCharge">Reverse Charge</label><select id="msgReverseCharge" class="msg-w-yn"><option value="no">No</option><option value="yes">Yes</option></select></div>
+            <div class="msg-row" data-msg-config="itc" style="display:none"><label for="msgItc">Eligible for Input Tax Credit</label><select id="msgItc" class="msg-w-yn"><option value="no">No</option><option value="yes">Yes</option></select></div>
+            <div class="msg-row" data-msg-config="gstMrp" style="display:none"><label for="msgGstMrp">Calculate GST on MRP (Incl. Tax)</label><select id="msgGstMrp" class="msg-w-yn"><option value="no">No</option><option value="yes">Yes</option></select></div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="msg-footer">
-      <div class="msg-actions"><button type="button" class="primary" onclick="mayaSaveStockGroup(true)">Save &amp; New</button></div>
-      <div class="maya-create-foot"><span class="mcf-seg" onclick="mayaCloseStockGroup()"><u class="maya-u-dbl">Q</u> Quit</span><span class="mcf-seg" onclick="mayaSaveStockGroup(false)"><u>A</u> Accept</span><span class="mcf-seg off" onclick="window.__mayaCreateDeleteToast&&window.__mayaCreateDeleteToast('Stock Group')"><u>D</u> Delete</span><span class="mcf-seg" onclick="mayaOpenStockGroupConfig()"><b>F12</b> Configure</span></div>
+      <div class="maya-create-foot"><span class="mcf-seg" onclick="mayaCloseStockGroup()"><u class="maya-u-dbl">Q</u> Quit</span><span class="mcf-seg" onclick="mayaSaveStockGroup(false)"><u>A</u> Accept</span><span class="mcf-seg off" onclick="window.__mayaCreateDeleteToast&&window.__mayaCreateDeleteToast('Stock Group')"><u>D</u> Delete</span></div>
     </div>
     <div id="msgConfirm" class="mg-confirm"><div class="mg-confirm-card"><h3>Save Stock Group?</h3><p id="msgConfirmText">Save this Stock Group in the current company?</p><div class="mg-confirm-actions"><button type="button" onclick="mayaCloseStockGroupConfirm()">Cancel</button><button type="button" class="primary" onclick="mayaConfirmStockGroupSave()">Save</button></div></div></div>
   </div>
+  <aside class="msg-side">
+    <div class="mlg-side-row off"><b>F2</b><span>Period</span></div>
+    <div class="mlg-side-row" onclick="window.mayaF3Dropdown?window.mayaF3Dropdown():window.mayaCompanyMenu()"><b>F3</b><span>Company</span></div>
+    <div class="mlg-side-row off mlg-blue"><b>F4</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F5</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F6</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F7</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F8</b></div>
+    <div class="mlg-side-row off mlg-blue"><b>F9</b></div>
+    <div class="mlg-side-row" onclick="window.mayaOpenOtherMasters&&window.mayaOpenOtherMasters('Stock Group')"><b>F10</b><span>Other Masters</span></div>
+    <div class="mlg-side-row" onclick="window.mayaToggleStockGroupMore&&window.mayaToggleStockGroupMore()"><b><u class="maya-u-dbl">I</u></b><span>More Details</span></div>
+    <div class="mlg-side-row" onclick="window.mayaOpenHsnFinder&&window.mayaOpenHsnFinder()"><b><u>B</u></b><span>Get HSN/SAC Info</span></div>
+    <div class="mlg-side-row mlg-f12" tabindex="-1" onclick="mayaOpenStockGroupConfig()"><b>F12</b><span>Configure</span></div>
+  </aside>
 </div>
 
 <div id="mayaacc-stock-cat-overlay" aria-hidden="true">
@@ -29340,13 +29388,20 @@ window.__mayaStockCategories=function(c){return readLS(catKey(c)).map(function(g
 /* ---------------- Stock Group (full-width, Tally) ---------------- */
 var sgState={pending:null,treeIndex:-1,treeList:[]};
 function sgConfigKey(c){return 'mayaacc_stock_group_config_'+(c||'');}
-function sgGetConfig(){try{var r=localStorage.getItem(sgConfigKey(cid()));if(r)return Object.assign({hsn:true,gst:true,alias:true,confirm:true},JSON.parse(r));}catch(e){}return {hsn:true,gst:true,alias:true,confirm:true};}
+var SG_CFG_DEFAULTS={alias:true,qtyAdd:true,gst:true,hsn:true,hsnDesc:true,confirm:true,reverseCharge:false,itc:false,gstMrp:false,langAlias:false};
+function sgGetConfig(){try{var r=localStorage.getItem(sgConfigKey(cid()));if(r)return Object.assign({},SG_CFG_DEFAULTS,JSON.parse(r));}catch(e){}return Object.assign({},SG_CFG_DEFAULTS);}
 function sgSaveConfig(c){try{localStorage.setItem(sgConfigKey(cid()),JSON.stringify(c));}catch(e){}}
 function sgApplyConfig(){
   var c=sgGetConfig();
   document.querySelectorAll('#mayaacc-stock-group-panel [data-msg-section="hsn"]').forEach(function(el){el.style.display=c.hsn?'':'none';});
   document.querySelectorAll('#mayaacc-stock-group-panel [data-msg-section="gst"]').forEach(function(el){el.style.display=c.gst?'':'none';});
   document.querySelectorAll('#mayaacc-stock-group-panel [data-msg-config="alias"]').forEach(function(el){el.style.display=c.alias?'':'none';});
+  document.querySelectorAll('#mayaacc-stock-group-panel [data-msg-config="qtyAdd"]').forEach(function(el){el.style.display=c.qtyAdd?'':'none';});
+  document.querySelectorAll('#mayaacc-stock-group-panel [data-msg-config="hsnDesc"]').forEach(function(el){el.style.display=c.hsnDesc?'':'none';});
+  document.querySelectorAll('#mayaacc-stock-group-panel [data-msg-config="langAlias"]').forEach(function(el){el.style.display=c.langAlias?'':'none';});
+  document.querySelectorAll('#mayaacc-stock-group-panel [data-msg-config="reverseCharge"]').forEach(function(el){el.style.display=c.reverseCharge?'':'none';});
+  document.querySelectorAll('#mayaacc-stock-group-panel [data-msg-config="itc"]').forEach(function(el){el.style.display=c.itc?'':'none';});
+  document.querySelectorAll('#mayaacc-stock-group-panel [data-msg-config="gstMrp"]').forEach(function(el){el.style.display=c.gstMrp?'':'none';});
 }
 function sgTreeCandidates(){
   var q=($('msgUnder')?$('msgUnder').value:'').trim().toLowerCase();
@@ -29357,10 +29412,14 @@ function sgTreeCandidates(){
 }
 function sgPaintTree(){
   var t=$('msgTree');if(!t)return;
-  var list=sgTreeCandidates();sgState.treeList=list;sgState.treeIndex=-1;
-  if(!list.length){t.style.display='none';return;}
+  var list=sgTreeCandidates();sgState.treeList=list;
+  if(!list.length){t.style.display='none';sgState.treeIndex=-1;return;}
   t.innerHTML=list.map(function(n,i){return '<button type="button" data-i="'+i+'">'+String(n).replace(/</g,'&lt;')+'</button>';}).join('');
   t.style.display='block';
+  /* run #36 FIX #1: Enter picks the FIRST item without arrow nav — the
+     first row is focused from the start (Cost Centre renderTree pattern). */
+  sgState.treeIndex=0;
+  var first=t.querySelector('button');if(first)first.classList.add('msg-focus');
   t.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){var n=b.textContent;$('msgUnder').value=n;sgHideTree();sgPaintSummary();$('msgQtyAdd').focus();});});
 }
 function sgHideTree(){var t=$('msgTree');if(t)t.style.display='none';sgState.treeIndex=-1;}
@@ -29373,7 +29432,7 @@ function sgPaintSummary(){
 function sgOpen(){
   if($('mayaacc-stock-group-overlay')){$('mayaacc-stock-group-overlay').style.display='block';$('mayaacc-stock-group-overlay').setAttribute('aria-hidden','false');}
   if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-stock-group-overlay .msg-main');
-  ['msgName','msgAlias','msgUnder','msgHsn','msgHsnDesc'].forEach(function(id){var el=$(id);if(el)el.value='';});
+  ['msgName','msgAlias','msgUnder','msgHsn','msgHsnDesc','msgLangAlias'].forEach(function(id){var el=$(id);if(el)el.value='';});
   if($('msgQtyAdd'))$('msgQtyAdd').value='no';
   if($('msgHsnDetails'))$('msgHsnDetails').selectedIndex=0;
   if($('msgHsnSource'))$('msgHsnSource').selectedIndex=0;
@@ -29381,8 +29440,13 @@ function sgOpen(){
   if($('msgGstSource'))$('msgGstSource').selectedIndex=0;
   if($('msgTaxability'))$('msgTaxability').value='taxable';
   if($('msgGstRate'))$('msgGstRate').value='0';
+  if($('msgLang'))$('msgLang').value='hindi';
+  if($('msgReverseCharge'))$('msgReverseCharge').value='no';
+  if($('msgItc'))$('msgItc').value='no';
+  if($('msgGstMrp'))$('msgGstMrp').value='no';
   if($('msgUnder'))$('msgUnder').value='Primary';
-  sgApplyConfig();sgPaintSummary();sgHideTree();
+  if($('msgMore'))$('msgMore').style.display='none';
+  sgApplyConfig();sgPaintSummary();sgHideTree();sgUpdateMoreInfo();
   setTimeout(function(){var el=$('msgName');if(el)el.focus();},0);
 }
 function sgClose(returnToMenu){
@@ -29391,15 +29455,25 @@ function sgClose(returnToMenu){
   sgHideTree();
   if(returnToMenu!==false&&window.__mayaReturnToMenu)window.__mayaReturnToMenu();
 }
-function sgDoSave(mode){
+/* run #36 FIX #3: full validation BEFORE the save confirm is shown — a
+   failed check toasts + focuses and the dialog never opens (before, the
+   confirm opened after a name-only check and stayed open on failure). */
+function sgValidate(){
   var name=$('msgName').value.trim();
-  if(!name){toast('Stock Group Name is required.');if($('msgName'))$('msgName').focus();return;}
+  if(!name){toast('Stock Group Name is required.');if($('msgName'))$('msgName').focus();return false;}
   var c=cid();
   var dup=STANDARD_GROUPS.concat(window.__mayaStockGroups(c)).some(function(n){return n.toLowerCase()===name.toLowerCase();});
-  if(dup){toast('Stock Group "'+name+'" already exists.');if($('msgName'))$('msgName').focus();return;}
+  if(dup){toast('Stock Group "'+name+'" already exists.');if($('msgName'))$('msgName').focus();return false;}
   var under=$('msgUnder').value.trim()||'Primary';
-  if(under!=='Primary'&&!STANDARD_GROUPS.concat(window.__mayaStockGroups(c)).some(function(n){return n.toLowerCase()===under.toLowerCase();})){toast('Under group "'+under+'" not found. Choose from the list.');if($('msgUnder'))$('msgUnder').focus();return;}
-  var rec={id:'STG-'+Date.now().toString(36),name:name,alias:$('msgAlias').value.trim(),under:under,qtyAdd:$('msgQtyAdd').value,hsnDetails:$('msgHsnDetails').value,hsnSource:$('msgHsnSource').value,hsn:$('msgHsn').value.trim(),hsnDesc:$('msgHsnDesc').value.trim(),gstDetails:$('msgGstDetails').value,gstSource:$('msgGstSource').value,taxability:$('msgTaxability').value,gstRate:$('msgGstRate').value,createdAt:new Date().toISOString()};
+  if(under!=='Primary'&&!STANDARD_GROUPS.concat(window.__mayaStockGroups(c)).some(function(n){return n.toLowerCase()===under.toLowerCase();})){toast('Under group "'+under+'" not found. Choose from the list.');if($('msgUnder'))$('msgUnder').focus();return false;}
+  return true;
+}
+function sgDoSave(mode){
+  if(!sgValidate())return;
+  var name=$('msgName').value.trim();
+  var c=cid();
+  var under=$('msgUnder').value.trim()||'Primary';
+  var rec={id:'STG-'+Date.now().toString(36),name:name,alias:$('msgAlias').value.trim(),under:under,qtyAdd:$('msgQtyAdd').value,hsnDetails:$('msgHsnDetails').value,hsnSource:$('msgHsnSource').value,hsn:$('msgHsn').value.trim(),hsnDesc:$('msgHsnDesc').value.trim(),gstDetails:$('msgGstDetails').value,gstSource:$('msgGstSource').value,taxability:$('msgTaxability').value,gstRate:$('msgGstRate').value,reverseCharge:$('msgReverseCharge').value,itc:$('msgItc').value,gstMrp:$('msgGstMrp').value,langAlias:{lang:$('msgLang').value,name:$('msgLangAlias').value.trim()},createdAt:new Date().toISOString()};
   var arr=readLS(groupKey(c));arr.push(rec);writeLS(groupKey(c),arr);
   toast('Stock Group "'+name+'" created.');
   var conf=$('msgConfirm');if(conf)conf.style.display='none';
@@ -29407,7 +29481,7 @@ function sgDoSave(mode){
 }
 function sgAskSave(andNew){
   if(!($('mayaacc-stock-group-overlay')&&$('mayaacc-stock-group-overlay').style.display!=='none'))return;
-  if(!$('msgName').value.trim()){toast('Stock Group Name is required.');if($('msgName'))$('msgName').focus();return;}
+  if(!sgValidate())return;
   if(sgGetConfig().confirm){
     sgState.pending=!!andNew;
     var cf=$('msgConfirm');if(cf){cf.style.display='flex';if($('msgConfirmText'))$('msgConfirmText').textContent='Save Stock Group "'+$('msgName').value.trim()+'" in '+companyName()+'?';}
@@ -29416,18 +29490,41 @@ function sgAskSave(andNew){
 function sgConfirmSave(){sgDoSave(!!sgState.pending);sgState.pending=null;}
 function sgCloseConfirm(){var cf=$('msgConfirm');if(cf)cf.style.display='none';sgState.pending=null;}
 function sgChangeCompany(){sgClose(false);if(window.mayaCompanyMenu)window.mayaCompanyMenu();}
+var SG_CFG_MAP=[['msgcAlias','alias'],['msgcQtyAdd','qtyAdd'],['msgcGst','gst'],['msgcHsn','hsn'],['msgcHsnDesc','hsnDesc'],['msgcConfirm','confirm'],['msgcReverseCharge','reverseCharge'],['msgcItc','itc'],['msgcGstMrp','gstMrp'],['msgcLangAlias','langAlias']];
+function sgSyncCfgValues(){SG_CFG_MAP.forEach(function(pair){var el=$(pair[0]);if(!el)return;var row=el.closest('.msgc-option');var v=row?row.querySelector('.v'):null;if(v)v.textContent=': '+(el.checked?'Yes':'No');});}
+function sgSyncCfgIndicators(){var p=$('mayaacc-stock-group-config');if(!p)return;var b=p.querySelector('.msgc-body');if(!b)return;var t=p.querySelector('.msgc-ind.top'),d=p.querySelector('.msgc-ind.bot');if(t)t.style.display=b.scrollTop>0?'block':'none';if(d)d.style.display=(b.scrollTop+b.clientHeight<b.scrollHeight-4)?'block':'none';}
 function sgConfigOpen(){
   var c=sgGetConfig();
-  ['msgcHsn','msgcGst','msgcAlias','msgcConfirm'].forEach(function(id){var el=$(id);if(el)el.checked=!!c[{msgcHsn:'hsn',msgcGst:'gst',msgcAlias:'alias',msgcConfirm:'confirm'}[id]];});
-  var p=$('mayaacc-stock-group-config');if(p){p.style.display='block';p.setAttribute('aria-hidden','false');if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-stock-group-config');}
-  if($('msgcStatus'))$('msgcStatus').textContent='Changes apply to the active Stock Group screen.';
+  SG_CFG_MAP.forEach(function(pair){var el=$(pair[0]);if(el)el.checked=!!c[pair[1]];});
+  sgSyncCfgValues();sgSyncCfgIndicators();
+  var p=$('mayaacc-stock-group-config');if(p){p.style.display='flex';p.setAttribute('aria-hidden','false');if(window.__mayaTopScroll)window.__mayaTopScroll('#mayaacc-stock-group-config');}
+  setTimeout(function(){sgSyncCfgIndicators();},0);
 }
-function sgConfigClose(){var p=$('mayaacc-stock-group-config');if(p){p.style.display='none';p.setAttribute('aria-hidden','true');}}
-function sgConfigSave(){
-  var c={hsn:!!($('msgcHsn')&&$('msgcHsn').checked),gst:!!($('msgcGst')&&$('msgcGst').checked),alias:!!($('msgcAlias')&&$('msgcAlias').checked),confirm:!!($('msgcConfirm')&&$('msgcConfirm').checked)};
-  sgSaveConfig(c);sgApplyConfig();sgConfigClose();toast('Stock Group configuration saved.');
+function sgConfigClose(){var p=$('mayaacc-stock-group-config');if(p){p.style.display='none';p.setAttribute('aria-hidden','true');p.querySelectorAll('.msgc-focus').forEach(function(x){x.classList.remove('msgc-focus');});}}
+function sgConfigSave(closeAfter){
+  var c={};SG_CFG_MAP.forEach(function(pair){var el=$(pair[0]);c[pair[1]]=!!(el&&el.checked);});
+  sgSaveConfig(c);sgApplyConfig();if(closeAfter!==false)sgConfigClose();toast('Stock Group configuration saved.');
 }
-function sgConfigReset(){sgSaveConfig({hsn:true,gst:true,alias:true,confirm:true});sgApplyConfig();sgConfigOpen();if($('msgcStatus'))$('msgcStatus').textContent='Stock Group configuration reset to defaults.';}
+function sgConfigReset(){sgSaveConfig(Object.assign({},SG_CFG_DEFAULTS));sgApplyConfig();sgConfigOpen();}
+/* More Details (Ctrl+I) — live info panel, Group #mgMore pattern: values
+   only, no inputs. */
+function sgUpdateMoreInfo(){
+  var under=$('msgUnder')?$('msgUnder').value.trim():'';
+  var isPrimary=(under===''||under==='Primary');
+  if($('miType'))$('miType').textContent=isPrimary?'Primary Group':'Sub-group of '+(under||'Primary');
+  if($('miParent'))$('miParent').textContent=under||'Primary';
+  if($('miHsn'))$('miHsn').textContent=$('msgHsnDetails')?$('msgHsnDetails').value:'';
+  if($('miGst'))$('miGst').textContent=(($('msgGstRate')?$('msgGstRate').value:'0')+'%');
+}
+function sgToggleMore(){
+  var m=$('msgMore');if(!m)return;
+  var opening=(m.style.display==='none');
+  m.style.display=opening?'':'none';
+  if(opening)sgUpdateMoreInfo();
+}
+(function(){var b=document.querySelector('#mayaacc-stock-group-config .msgc-body');if(b)b.addEventListener('scroll',sgSyncCfgIndicators);})();
+document.addEventListener('change',function(e){if(!e.target||!e.target.id)return;if(e.target.id.indexOf('msgc')===0)sgSyncCfgValues();if(e.target.id.indexOf('msg')===0)sgUpdateMoreInfo();});
+document.addEventListener('input',function(e){if(e.target&&e.target.id&&e.target.id.indexOf('msg')===0)sgUpdateMoreInfo();});
 window.mayaOpenStockGroup=sgOpen;
 window.mayaCloseStockGroupRaw=sgClose;
 window.mayaCloseStockGroup=function(after){
@@ -29438,7 +29535,7 @@ window.mayaCloseStockGroup=function(after){
 window.mayaSaveStockGroup=sgAskSave;
 window.mayaConfirmStockGroupSave=sgConfirmSave;window.mayaCloseStockGroupConfirm=sgCloseConfirm;
 window.mayaStockGroupChangeCompany=sgChangeCompany;
-window.mayaOpenStockGroupConfig=sgConfigOpen;window.mayaCloseStockGroupConfig=sgConfigClose;
+window.mayaOpenStockGroupConfig=sgConfigOpen;window.mayaCloseStockGroupConfig=sgConfigClose;window.mayaToggleStockGroupMore=sgToggleMore;
 window.mayaSaveStockGroupConfig=sgConfigSave;window.mayaResetStockGroupConfig=sgConfigReset;
 
 /* ---------------- Stock Category (small popup, Tally) ---------------- */
@@ -29702,8 +29799,10 @@ document.addEventListener('keydown',function(e){
     var tree=__ctShownEl($('msgTree'));
     if(cfg){
       if(k==='Escape'){e.preventDefault();sgConfigClose();}
+      else if((e.ctrlKey||e.metaKey)&&!e.altKey&&(k==='a'||k==='A')){e.preventDefault();e.stopImmediatePropagation();sgConfigSave(true);}
+      else if((e.ctrlKey||e.metaKey)&&!e.altKey&&(k==='s'||k==='S')){e.preventDefault();e.stopImmediatePropagation();sgConfigSave(false);}
       else if(k==='ArrowDown'||k==='ArrowUp'){e.preventDefault();var opts=Array.prototype.slice.call(document.querySelectorAll('#mayaacc-stock-group-config .msgc-option'));if(!opts.length)return;var i=opts.indexOf(document.querySelector('#mayaacc-stock-group-config .msgc-option.msgc-focus'));i=i<0?0:i+(k==='ArrowDown'?1:-1);if(i<0)i=opts.length-1;if(i>=opts.length)i=0;opts.forEach(function(o){o.classList.remove('msgc-focus');});opts[i].classList.add('msgc-focus');opts[i].scrollIntoView({block:'nearest'});}
-      else if(k==='Enter'||k===' '){var f=document.querySelector('#mayaacc-stock-group-config .msgc-option.msgc-focus');if(f){e.preventDefault();var inp=f.querySelector('input');if(inp){inp.checked=!inp.checked;}}}
+      else if(k==='Enter'||k===' '){var f=document.querySelector('#mayaacc-stock-group-config .msgc-option.msgc-focus');if(f){e.preventDefault();var inp=f.querySelector('input');if(inp){inp.checked=!inp.checked;inp.dispatchEvent(new Event('change',{bubbles:true}));}}}
       return;
     }
     if(conf){
@@ -29711,14 +29810,33 @@ document.addEventListener('keydown',function(e){
       else if(k==='Enter'){e.preventDefault();sgConfirmSave();}
       return;
     }
+    var finder=$('mayaacc-hsn-finder');
+    if(finder&&finder.getAttribute('aria-hidden')!=='true'&&getComputedStyle(finder).display!=='none'){
+      if(k==='Escape'){e.preventDefault();e.stopImmediatePropagation();if(window.mayaCloseHsnFinder)window.mayaCloseHsnFinder();}
+      else if(k==='ArrowDown'||k==='ArrowUp'){e.preventDefault();e.stopImmediatePropagation();var frows=[...document.querySelectorAll('#msihResults .msih-row')];if(frows.length){var fi=Math.max(0,frows.indexOf(document.querySelector('#msihResults .msih-row.active')));var fn=(fi+(k==='ArrowDown'?1:-1)+frows.length)%frows.length;frows[fn].click();frows[fn].scrollIntoView({block:'nearest'});}}
+      else if(k==='Enter'){e.preventDefault();e.stopImmediatePropagation();if(window.mayaSelectHsnResult)window.mayaSelectHsnResult();}
+      return;
+    }
     if(tree){
       if(k==='Escape'){e.preventDefault();sgHideTree();}
       else if(k==='ArrowDown'||k==='ArrowUp'){e.preventDefault();var btns=Array.prototype.slice.call(document.querySelectorAll('#msgTree button'));if(!btns.length)return;var ti=sgState.treeIndex+(k==='ArrowDown'?1:-1);if(ti<0)ti=btns.length-1;if(ti>=btns.length)ti=0;sgState.treeIndex=ti;btns.forEach(function(b){b.classList.remove('msg-focus');});btns[ti].classList.add('msg-focus');btns[ti].scrollIntoView({block:'nearest'});}
-      else if(k==='Enter'){var sel=document.querySelector('#msgTree button.msg-focus');if(sel){e.preventDefault();$('msgUnder').value=sel.textContent;sgHideTree();sgPaintSummary();$('msgQtyAdd').focus();}}
+      else if(k==='Enter'){var sel=document.querySelector('#msgTree button.msg-focus');if(!sel){var _tb=document.querySelectorAll('#msgTree button');if(_tb.length)sel=_tb[0];}if(sel){e.preventDefault();$('msgUnder').value=sel.textContent;sgHideTree();sgPaintSummary();$('msgQtyAdd').focus();}}
       return;
     }
+    var picker=$('mlgOtherMasters');
+    if(picker&&picker.style.display==='flex'){
+      if(k==='ArrowDown'||k==='ArrowUp'){e.preventDefault();e.stopImmediatePropagation();var _items=[...document.querySelectorAll('#mlgOtherMasters .mlg-other-item')];if(_items.length){var _i=_items.findIndex(function(el){return el.classList.contains('sel');});_i=(_i+(k==='ArrowDown'?1:-1)+_items.length)%_items.length;_items.forEach(function(el,j){el.classList.toggle('sel',j===_i);});_items[_i].scrollIntoView({block:'nearest'});}return;}
+      if(k==='Enter'){e.preventDefault();e.stopImmediatePropagation();var _items2=[...document.querySelectorAll('#mlgOtherMasters .mlg-other-item')];var _j=_items2.findIndex(function(el){return el.classList.contains('sel');});if(_j<0)_j=0;if(window.mayaPickOtherMaster)window.mayaPickOtherMaster(_j);return;}
+      if(k==='Escape'){e.preventDefault();e.stopImmediatePropagation();if(window.mayaCloseOtherMasters)window.mayaCloseOtherMasters();return;}
+      e.preventDefault();e.stopImmediatePropagation();return;
+    }
+    var f3m=$('maya-f3-menu');
+    if(f3m&&f3m.style.display==='block')return;
     if(k==='Escape'){e.preventDefault();if(window.mayaCloseStockGroup)window.mayaCloseStockGroup();}
     else if(k==='F12'){e.preventDefault();sgConfigOpen();}
+    else if(k==='F10'){e.preventDefault();e.stopImmediatePropagation();sgHideTree();if(window.mayaOpenOtherMasters)window.mayaOpenOtherMasters('Stock Group');}
+    else if((e.ctrlKey||e.metaKey)&&!e.altKey&&(k==='i'||k==='I')){e.preventDefault();e.stopImmediatePropagation();sgToggleMore();}
+    else if(e.altKey&&!e.ctrlKey&&!e.metaKey&&(k==='b'||k==='B')){e.preventDefault();e.stopImmediatePropagation();if(window.mayaOpenHsnFinder)window.mayaOpenHsnFinder();}
     else if((e.ctrlKey||e.metaKey)&&!e.altKey&&(k==='s'||k==='S')){e.preventDefault();sgAskSave(true);}
   }
   if(scOpen){
@@ -29787,7 +29905,7 @@ document.addEventListener('click',function(e){
 document.addEventListener('keydown',function(e){
   if(e.key!=='Enter')return;
   var t=e.target;if(!t||(t.tagName!=='INPUT'&&t.tagName!=='SELECT'))return;
-  var map={msgName:'msgAlias',msgAlias:'msgUnder',msgUnder:'msgQtyAdd',msgHsn:'msgHsnDesc',mscName:'mscAlias',mscAlias:'mscUnder',mcurSymbol:'mcurFormal',mcurFormal:'mcurCode',mcurCode:'mcurDecimals',mcurDecimals:'mcurMillions',mcurMillions:'mcurSuffix',mcurSuffix:'mcurSpace',mcurSpace:'mcurWord',mcurWord:'mcurWordDec',mcurWordDec:'mcurRate',mcurRate:'mcurRateDate'};
+  var map={msgName:'msgAlias',msgAlias:'msgLang',msgLang:'msgLangAlias',msgLangAlias:'msgUnder',msgUnder:'msgQtyAdd',msgQtyAdd:'msgHsnDetails',msgHsnDetails:'msgHsnSource',msgHsnSource:'msgHsn',msgHsn:'msgHsnDesc',msgHsnDesc:'msgGstDetails',msgGstDetails:'msgGstSource',msgGstSource:'msgTaxability',msgTaxability:'msgGstRate',msgGstRate:'msgGstMrp',msgGstMrp:'msgReverseCharge',msgReverseCharge:'msgItc',mscName:'mscAlias',mscAlias:'mscUnder',mcurSymbol:'mcurFormal',mcurFormal:'mcurCode',mcurCode:'mcurDecimals',mcurDecimals:'mcurMillions',mcurMillions:'mcurSuffix',mcurSuffix:'mcurSpace',mcurSpace:'mcurWord',mcurWord:'mcurWordDec',mcurWordDec:'mcurRate',mcurRate:'mcurRateDate'};
   var next=map[t.id];if(!next)return;
   if(t.id==='msgUnder'&&__ctShownEl($('msgTree')))return;
   if(t.id==='mscUnder'&&__ctShownEl($('mscTree')))return;
@@ -29799,6 +29917,9 @@ document.addEventListener('keydown',function(e){
     var _row=_el.closest?_el.closest('.mcur-trow'):null;
     if(_row&&getComputedStyle(_row).display==='none'){next=map[next];continue;}
     if(_el.closest&&_el.closest('#mcurMore')&&$('mcurMore').style.display==='none'){next=map[next];continue;}
+    /* Stock Group: skip rows/rows in sections hidden by the F12 config. */
+    if(_el.closest&&_el.closest('[data-msg-config]')){var _cr=_el.closest('[data-msg-config]');if(getComputedStyle(_cr).display==='none'){next=map[next];continue;}}
+    if(_el.closest&&_el.closest('[data-msg-section]')){var _cs=_el.closest('[data-msg-section]');if(getComputedStyle(_cs).display==='none'){next=map[next];continue;}}
     break;
   }
   if(!next)return;
